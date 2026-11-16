@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="128" height="128" role="img" aria-label="Georu">
+  <title>Georu</title>
+  <g transform="translate(0 0) scale(1.0)">
+    <path d="M36 26 L16 102" stroke="#e6edf3" stroke-width="4" stroke-linecap="round"/>
+    <path d="M18 94 l-5 15" stroke="#e6edf3" stroke-width="8" stroke-linecap="round"/>
+    <rect x="42" y="48" width="17" height="17" rx="2.5" fill="#4493f8"/>
+    <rect x="62" y="48" width="17" height="17" rx="2.5" fill="#1f6feb"/>
+    <rect x="82" y="48" width="17" height="17" rx="2.5" fill="#0d419d"/>
+    <path d="M4 44 Q12 62 30 66 L100 66 Q116 62 124 40 Q122 70 102 80 L28 80 Q8 72 4 44 Z" fill="#e6edf3"/>
+    <path d="M18 72 L110 72" stroke="#9198a1" stroke-width="2" stroke-linecap="round"/>
+    <path d="M6 94 q10 -6 20 0 t20 0 t20 0 t20 0 t20 0 t20 0" fill="none" stroke="#4493f8" stroke-width="4" stroke-linecap="round"/>
+  </g>
+</svg>

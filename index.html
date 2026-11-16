@@ -1,0 +1,586 @@
+<!doctype html>
+<html lang="ko" data-lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>RM Studio · 알엠스튜디오</title>
+<meta name="description" content="RM Studio — 클라우드 이관 · 데이터 마이그레이션 · 웹 플랫폼 구축. 오픈소스 DB 이관 프레임워크 Georu.">
+<meta property="og:title" content="RM Studio · 알엠스튜디오">
+<meta property="og:description" content="Legacy to cloud · Data moved safely · Ideas into products">
+<meta property="og:image" content="https://rm-studio-org.github.io/assets/banner.png">
+<meta property="og:type" content="website">
+<link rel="icon" href="assets/logo.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+KR:wght@400;500;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f7f6f4; --bg-2:#efeeea; --ink:#141412; --ink-2:#55544f; --ink-3:#8a8983;
+  --line:#dcdad4; --card:#ffffff; --accent:#0969da; --accent-2:#54aeff;
+  --code-bg:#141412; --code-ink:#e9e8e4;
+  --sans:"Inter","Noto Sans KR",-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo",sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#121211; --bg-2:#1a1a18; --ink:#eeede9; --ink-2:#b4b3ad; --ink-3:#7f7e78;
+    --line:#2e2d2a; --card:#1a1a18; --accent:#4c9fff; --accent-2:#79b8ff;
+    --code-bg:#0b0b0a; color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#121211; --bg-2:#1a1a18; --ink:#eeede9; --ink-2:#b4b3ad; --ink-3:#7f7e78;
+  --line:#2e2d2a; --card:#1a1a18; --accent:#4c9fff; --accent-2:#79b8ff;
+  --code-bg:#0b0b0a; color-scheme:dark;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);line-height:1.65;font-size:16px;word-break:keep-all;overflow-wrap:break-word}
+a{color:inherit}
+img{max-width:100%;display:block}
+
+/* language switching */
+html[data-lang="ko"] [lang="en"]:not(html){display:none!important}
+html[data-lang="en"] [lang="ko"]:not(html){display:none!important}
+
+.wrap{max-width:1120px;margin:0 auto;padding:0 24px}
+@media (max-width:640px){.wrap{padding:0 16px}}
+
+/* header */
+header.top{position:sticky;top:0;z-index:20;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+.top .wrap{display:flex;align-items:center;gap:24px;height:64px}
+.brand{display:flex;align-items:center;gap:12px;text-decoration:none;font-weight:800;letter-spacing:-.02em;font-size:20px}
+.brand .bar{width:1px;height:20px;background:var(--ink)}
+.brand .studio{font-weight:500;letter-spacing:.32em;font-size:12px}
+nav.links{display:flex;gap:22px;margin-left:auto;font-size:14px;font-weight:500}
+nav.links a{text-decoration:none;color:var(--ink-2)}
+nav.links a:hover{color:var(--ink)}
+.toggles{display:flex;gap:8px}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:999px;overflow:hidden;font-size:12px;font-weight:600}
+.seg button{background:none;border:0;padding:6px 11px;color:var(--ink-3);cursor:pointer;font:inherit}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
+.icon-btn{width:32px;height:32px;border:1px solid var(--line);border-radius:999px;background:none;color:var(--ink-2);cursor:pointer;display:grid;place-items:center}
+.icon-btn svg{width:16px;height:16px}
+@media (max-width:860px){nav.links{display:none}.toggles{margin-left:auto}}
+
+/* hero */
+.hero{position:relative;overflow:hidden;border-bottom:1px solid var(--line)}
+.hero .ghost{position:absolute;left:-2vw;bottom:-6vw;font-size:clamp(220px,38vw,520px);font-weight:800;letter-spacing:-.06em;line-height:.8;color:var(--bg-2);user-select:none;pointer-events:none;z-index:0}
+.hero .wrap{position:relative;z-index:1;padding-top:120px;padding-bottom:120px}
+.eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-3)}
+h1{font-size:clamp(36px,6vw,68px);line-height:1.12;letter-spacing:-.035em;font-weight:800;margin:18px 0 22px;max-width:16ch}
+html[data-lang="en"] h1{max-width:18ch}
+.hero p.lead{font-size:clamp(17px,2vw,20px);color:var(--ink-2);max-width:56ch;margin:0 0 36px}
+.btns{display:flex;flex-wrap:wrap;gap:12px}
+.btn{display:inline-flex;align-items:center;gap:8px;padding:12px 20px;border-radius:999px;font-weight:600;font-size:15px;text-decoration:none;border:1px solid var(--ink)}
+.btn.primary{background:var(--ink);color:var(--bg)}
+.btn.ghost{background:transparent}
+.btn:hover{opacity:.85}
+
+/* sections */
+section{padding:104px 0;border-bottom:1px solid var(--line)}
+@media (max-width:640px){section{padding:72px 0}.hero .wrap{padding-top:80px;padding-bottom:88px}}
+.sec-head{display:grid;grid-template-columns:200px 1fr;gap:32px;margin-bottom:48px}
+.sec-num{font-family:var(--mono);font-size:13px;color:var(--ink-3);padding-top:10px}
+h2{font-size:clamp(28px,4vw,42px);line-height:1.2;letter-spacing:-.03em;margin:0;font-weight:800}
+.sec-head p{color:var(--ink-2);margin:14px 0 0;max-width:62ch;font-size:17px}
+@media (max-width:760px){.sec-head{grid-template-columns:1fr;gap:8px}}
+
+.indent{margin-left:232px}
+@media (max-width:760px){.indent{margin-left:0}}
+
+/* about */
+.about-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line);border:1px solid var(--line)}
+.about-grid div{background:var(--bg);padding:28px}
+.about-grid b{display:block;font-size:15px;margin-bottom:6px}
+.about-grid span{color:var(--ink-2);font-size:14px}
+@media (max-width:760px){.about-grid{grid-template-columns:1fr}}
+
+/* services */
+.services{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line);border:1px solid var(--line)}
+.svc{background:var(--bg);padding:32px 28px 36px;min-height:200px}
+.svc .n{font-family:var(--mono);font-size:12px;color:var(--ink-3)}
+.svc h3{margin:28px 0 10px;font-size:19px;letter-spacing:-.02em}
+.svc p{margin:0;color:var(--ink-2);font-size:14.5px}
+@media (max-width:900px){.services{grid-template-columns:repeat(2,1fr)}}
+@media (max-width:560px){.services{grid-template-columns:1fr}.svc{min-height:0}}
+
+/* projects */
+.projects{border-top:1px solid var(--ink)}
+.proj{border-bottom:1px solid var(--line)}
+.proj summary,.proj .summary{list-style:none;display:grid;grid-template-columns:120px 1fr auto 24px;gap:24px;align-items:center;padding:24px 0;cursor:pointer}
+.proj summary::-webkit-details-marker{display:none}
+.proj .yr{font-family:var(--mono);font-size:13px;color:var(--ink-3)}
+.proj .ttl b{display:block;font-size:18px;letter-spacing:-.01em}
+.proj .ttl small{color:var(--ink-3);font-size:13px}
+.proj .scope{font-size:13px;color:var(--ink-2);border:1px solid var(--line);border-radius:999px;padding:4px 12px;white-space:nowrap}
+.proj .chev{transition:transform .2s;color:var(--ink-3)}
+.proj[open] .chev{transform:rotate(45deg)}
+.proj .body{padding:0 0 28px 144px;color:var(--ink-2);max-width:900px}
+.proj .body ul{margin:12px 0 0;padding-left:18px}
+.proj .body li{margin:4px 0}
+.proj .body li b{color:var(--ink)}
+
+@media (max-width:760px){
+  .proj summary,.proj .summary{grid-template-columns:1fr auto;gap:6px 16px}
+  .proj .yr{grid-column:1/-1}
+  .proj .scope{grid-row:3;justify-self:start}
+  .proj .chev{grid-row:2;grid-column:2}
+  .proj .body{padding-left:0}
+}
+
+/* georu */
+#georu{background:var(--bg-2)}
+.georu-top{display:grid;grid-template-columns:1.1fr 1fr;gap:56px;align-items:center}
+.georu-top .logo{width:min(380px,100%);margin-bottom:24px}
+.georu-top .tag{font-size:clamp(22px,2.6vw,28px);font-weight:700;letter-spacing:-.02em;line-height:1.35;margin:0 0 18px}
+.georu-top p{color:var(--ink-2);margin:0 0 14px}
+.badges{display:flex;flex-wrap:wrap;gap:8px;margin:22px 0 28px}
+.badges span{font-family:var(--mono);font-size:12px;border:1px solid var(--line);background:var(--card);padding:4px 10px;border-radius:6px;color:var(--ink-2)}
+.name-card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:32px}
+.name-card .k{font-family:var(--mono);font-size:12px;color:var(--ink-3);letter-spacing:.1em;text-transform:uppercase}
+.name-card h3{font-size:24px;margin:10px 0 12px;letter-spacing:-.02em}
+.name-card p{color:var(--ink-2);margin:0 0 12px;font-size:15px}
+.chunks{display:flex;gap:6px;margin-top:20px}
+.chunks i{flex:1;height:14px;border-radius:3px;background:var(--accent);opacity:.25;animation:pulse 2.4s infinite}
+.chunks i:nth-child(2){animation-delay:.2s}.chunks i:nth-child(3){animation-delay:.4s}.chunks i:nth-child(4){animation-delay:.6s}
+.chunks i:nth-child(5){animation-delay:.8s}.chunks i:nth-child(6){animation-delay:1s}.chunks i:nth-child(7){animation-delay:1.2s}.chunks i:nth-child(8){animation-delay:1.4s}
+@keyframes pulse{0%,100%{opacity:.18}40%{opacity:1}}
+@media (prefers-reduced-motion:reduce){.chunks i{animation:none;opacity:.6}}
+@media (max-width:900px){.georu-top{grid-template-columns:1fr;gap:36px}}
+
+.diagram{margin:72px 0 0;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:24px}
+.diagram figcaption{font-size:13px;color:var(--ink-3);margin-top:12px;text-align:center}
+.diagram .dk{display:none}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .diagram .lt{display:none}:root:not([data-theme="light"]) .diagram .dk{display:block}}
+:root[data-theme="dark"] .diagram .lt{display:none}
+:root[data-theme="dark"] .diagram .dk{display:block}
+
+.feat{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-top:56px}
+.feat article{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:26px 24px}
+.feat h3{font-size:17px;margin:0 0 14px;display:flex;align-items:center;gap:10px}
+.feat h3 em{font-style:normal;font-family:var(--mono);font-size:11px;color:var(--accent);border:1px solid currentColor;border-radius:4px;padding:1px 6px}
+.feat ul{margin:0;padding:0;list-style:none}
+.feat li{font-size:14px;color:var(--ink-2);padding:8px 0;border-top:1px dashed var(--line)}
+.feat li:first-child{border-top:0;padding-top:0}
+.feat li b{color:var(--ink);font-weight:600}
+@media (max-width:1000px){.feat{grid-template-columns:repeat(2,1fr)}}
+@media (max-width:560px){.feat{grid-template-columns:1fr}}
+
+.modes{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-top:56px;font-family:var(--mono);font-size:13px}
+.modes span{padding:8px 14px;border-radius:8px;border:1px solid var(--line);background:var(--card)}
+.modes span.last{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.modes i{font-style:normal;color:var(--ink-3)}
+.modes-cap{font-size:14px;color:var(--ink-2);margin-top:12px}
+
+.quick{display:grid;grid-template-columns:1fr 1.3fr;gap:40px;margin-top:80px;align-items:start}
+.quick h3{font-size:24px;letter-spacing:-.02em;margin:0 0 12px}
+.quick p{color:var(--ink-2);margin:0 0 12px}
+pre{margin:0;background:var(--code-bg);color:var(--code-ink);border-radius:14px;padding:22px 24px;overflow-x:auto;font-family:var(--mono);font-size:13px;line-height:1.75}
+pre .c{color:#8a8983}
+pre .p{color:#79b8ff;user-select:none}
+@media (max-width:900px){.quick{grid-template-columns:1fr;gap:20px}}
+.status{margin-top:20px;font-size:13px;color:var(--ink-3)}
+
+/* stack */
+.stack{display:grid;grid-template-columns:200px 1fr;border-top:1px solid var(--ink)}
+.stack dt,.stack dd{margin:0;padding:18px 0;border-bottom:1px solid var(--line)}
+.stack dt{font-weight:600;font-size:14px}
+.stack dd{display:flex;flex-wrap:wrap;gap:6px}
+.stack dd span{font-size:13px;padding:3px 10px;border-radius:999px;background:var(--bg-2);color:var(--ink-2)}
+@media (max-width:640px){.stack{grid-template-columns:1fr}.stack dt{border-bottom:0;padding-bottom:4px}.stack dd{padding-top:6px}}
+.expertise{margin-top:28px;font-size:13px;color:var(--ink-3);font-family:var(--mono);line-height:1.9}
+
+/* contact */
+#contact{border-bottom:0}
+.contact{display:grid;grid-template-columns:1fr auto;gap:40px;align-items:end}
+.contact h2{font-size:clamp(32px,5vw,56px)}
+.contact a.mail{font-size:clamp(18px,2.4vw,24px);font-weight:600;text-decoration:none;border-bottom:2px solid var(--ink);padding-bottom:2px}
+@media (max-width:760px){.contact{grid-template-columns:1fr}}
+
+footer{border-top:1px solid var(--line);padding:28px 0;font-size:13px;color:var(--ink-3)}
+footer .wrap{display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px}
+footer a{color:var(--ink-2)}
+</style>
+<script>
+(function(){
+  var d=document.documentElement,lang=null,theme=null;
+  try{var q=new URLSearchParams(location.search).get('lang');if(q==='ko'||q==='en')lang=q;}catch(e){}
+  try{lang=lang||localStorage.getItem('rm-lang');theme=localStorage.getItem('rm-theme');}catch(e){}
+  if(!lang)lang=(navigator.language||'ko').toLowerCase().indexOf('ko')===0?'ko':'en';
+  d.setAttribute('data-lang',lang);d.lang=lang;
+  if(theme==='light'||theme==='dark')d.setAttribute('data-theme',theme);
+})();
+</script>
+</head>
+<body>
+
+<header class="top">
+  <div class="wrap">
+    <a class="brand" href="#top" aria-label="RM Studio"><span>RM</span><span class="bar"></span><span class="studio">STUDIO</span></a>
+    <nav class="links" aria-label="Sections">
+      <a href="#about"><span lang="ko">회사소개</span><span lang="en">About</span></a>
+      <a href="#services"><span lang="ko">서비스</span><span lang="en">Services</span></a>
+      <a href="#projects"><span lang="ko">프로젝트</span><span lang="en">Projects</span></a>
+      <a href="#georu">Georu</a>
+      <a href="#contact"><span lang="ko">문의</span><span lang="en">Contact</span></a>
+    </nav>
+    <div class="toggles">
+      <div class="seg" role="group" aria-label="Language">
+        <button type="button" data-set-lang="ko">KO</button>
+        <button type="button" data-set-lang="en">EN</button>
+      </div>
+      <button type="button" class="icon-btn" id="themeBtn" aria-label="Toggle theme">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+      </button>
+    </div>
+  </div>
+</header>
+
+<main id="top">
+
+<!-- HERO -->
+<div class="hero">
+  <div class="ghost" aria-hidden="true">RM</div>
+  <div class="wrap">
+    <div class="eyebrow">Legacy to Cloud · Data Moved Safely · Ideas into Products</div>
+    <h1>
+      <span lang="ko">레거시를 클라우드로,<br>데이터를 안전하게,<br>아이디어를 제품으로.</span>
+      <span lang="en">Legacy to cloud.<br>Data moved safely.<br>Ideas into products.</span>
+    </h1>
+    <p class="lead">
+      <span lang="ko">알엠스튜디오는 엔터프라이즈 시스템의 클라우드 이관 · 아키텍처, 대규모 데이터 마이그레이션, 웹 서비스 구축을 수행하는 IT 서비스 기업입니다.</span>
+      <span lang="en">RM Studio is an IT services company specializing in cloud migration &amp; platform architecture, large-scale data migration, and web platform development.</span>
+    </p>
+    <div class="btns">
+      <a class="btn primary" href="#georu"><span lang="ko">오픈소스 Georu 보기</span><span lang="en">Explore Georu</span> →</a>
+      <a class="btn ghost" href="#contact"><span lang="ko">프로젝트 문의</span><span lang="en">Get in touch</span></a>
+    </div>
+  </div>
+</div>
+
+<!-- ABOUT -->
+<section id="about">
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="sec-num">01 — About</div>
+      <div>
+        <h2><span lang="ko">분석부터 운영 안정화까지,<br>끝까지 책임집니다.</span><span lang="en">From analysis to stabilization,<br>we own the whole delivery.</span></h2>
+        <p>
+          <span lang="ko">ERP · 그룹웨어 · 커머스 · 공공/협회 시스템까지 여러 산업의 현장 경험을 바탕으로 분석, 설계, 개발, 이행, 운영 안정화까지 수행합니다. 프로젝트에서 검증한 기술은 오픈소스와 자체 서비스로 만들어 공개합니다.</span>
+          <span lang="en">With field experience across ERP, groupware, commerce, and public-sector / association systems, we take ownership from analysis and design through development, cut-over, and stabilization. Technology proven in our projects is released as open source and in-house products.</span>
+        </p>
+      </div>
+    </div>
+    <div class="about-grid indent">
+      <div><b><span lang="ko">현장 검증</span><span lang="en">Field-proven</span></b><span lang="ko">실제 엔터프라이즈 이관 · 구축 프로젝트에서 쌓은 방법론</span><span lang="en">Methods built on real enterprise migration and delivery projects</span></div>
+      <div><b><span lang="ko">끝까지 책임</span><span lang="en">End-to-end</span></b><span lang="ko">AA/SA 설계, 개발, 이행, 운영 안정화까지 한 팀으로</span><span lang="en">AA/SA design, build, cut-over and stabilization by one team</span></div>
+      <div><b><span lang="ko">오픈소스로 공개</span><span lang="en">Open by default</span></b><span lang="ko">검증된 엔진을 고객사 코드와 분리해 누구나 쓰도록</span><span lang="en">Proven engines separated from client code and shared openly</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- SERVICES -->
+<section id="services">
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="sec-num">02 — What We Do</div>
+      <div>
+        <h2><span lang="ko">하는 일</span><span lang="en">What we do</span></h2>
+      </div>
+    </div>
+    <div class="services">
+      <div class="svc"><div class="n">01</div><h3>Cloud &amp; Architecture</h3><p><span lang="ko">레거시 IDC → 클라우드 이관, AA/SA 아키텍처 컨설팅</span><span lang="en">Legacy IDC → cloud migration, AA/SA architecture consulting</span></p></div>
+      <div class="svc"><div class="n">02</div><h3>Middleware Modernization</h3><p><span lang="ko">WebLogic/OHS → Tomcat/Nginx 런타임 전환</span><span lang="en">Runtime transition from WebLogic/OHS to Tomcat/Nginx</span></p></div>
+      <div class="svc"><div class="n">03</div><h3>Data Migration</h3><p><span lang="ko">Oracle · MSSQL → MySQL 이기종 이관, 쿼리 튜닝</span><span lang="en">Heterogeneous Oracle · MSSQL → MySQL migration, query tuning</span></p></div>
+      <div class="svc"><div class="n">04</div><h3>ERP &amp; Groupware</h3><p><span lang="ko">ERP · 그룹웨어 · 전자결재 구축 및 고도화</span><span lang="en">Building and enhancing ERP, groupware and e-approval systems</span></p></div>
+      <div class="svc"><div class="n">05</div><h3>Web Platform</h3><p><span lang="ko">웹 서비스 기획 · 개발 · 퍼블리싱, 반응형 웹 · SEO</span><span lang="en">Web service planning, development and publishing, responsive web · SEO</span></p></div>
+      <div class="svc"><div class="n">06</div><h3>Project Management</h3><p><span lang="ko">PM · PL · 기술 컨설팅, Agile 수행</span><span lang="en">PM · PL · technical consulting, Agile delivery</span></p></div>
+    </div>
+  </div>
+</section>
+
+<!-- PROJECTS -->
+<section id="projects">
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="sec-num">03 — Projects</div>
+      <div><h2><span lang="ko">주요 프로젝트</span><span lang="en">Selected projects</span></h2></div>
+    </div>
+    <div class="projects">
+      <details class="proj">
+        <summary>
+          <span class="yr">2026</span>
+          <span class="ttl"><b><span lang="ko">삼성웰스토리 E-커머스 플랫폼 통합</span><span lang="en">Samsung Welstory E-Commerce Platform Integration</span></b><small>Legacy IDC → Samsung Cloud Platform</small></span>
+          <span class="scope">AA / SA · PL</span>
+          <span class="chev" aria-hidden="true">＋</span>
+        </summary>
+        <div class="body">
+          <span lang="ko">Legacy IDC 서비스를 Samsung Cloud Platform 으로 이관하고, WebLogic/OHS 기반 구조를 Tomcat/Nginx 로 전환하고 있습니다.</span>
+          <span lang="en">Migrating legacy IDC services to Samsung Cloud Platform and transitioning the WebLogic/OHS stack to Tomcat/Nginx.</span>
+          <ul lang="ko">
+            <li><b>아키텍처</b> — Legacy IDC 애플리케이션/시스템 구조 분석, 클라우드 이관 구조 검토</li>
+            <li><b>산출물</b> — 구조도, 상세분석서, 개발가이드</li>
+            <li><b>인프라</b> — 방화벽 정책 분석, 네트워크 변경 협의</li>
+            <li><b>개발 · 배포</b> — 변경된 런타임에 맞춘 소스 수정, Bamboo · Bitbucket 기반 배포 · 릴리즈 관리</li>
+            <li><b>PL</b> — 10명 규모 수행 조직의 업무 조율과 개발 지원</li>
+          </ul>
+          <ul lang="en">
+            <li><b>Architecture</b> — Analysis of legacy IDC application/system structure, cloud migration design review</li>
+            <li><b>Deliverables</b> — Architecture diagrams, detailed analysis, development guide</li>
+            <li><b>Infra</b> — Firewall policy analysis, network change coordination</li>
+            <li><b>Build &amp; release</b> — Source changes for the new runtime, Bamboo · Bitbucket release management</li>
+            <li><b>PL</b> — Coordinating and supporting a 10-person delivery team</li>
+          </ul>
+        </div>
+      </details>
+      <div class="proj static">
+        <div class="summary">
+          <span class="yr">2026</span>
+          <span class="ttl"><b><span lang="ko">한국무역협회 프로젝트</span><span lang="en">Korea International Trade Association</span></b></span>
+          <span class="scope">—</span>
+          <span class="chev" aria-hidden="true"></span>
+        </div>
+      </div>
+      <details class="proj">
+        <summary>
+          <span class="yr">2025 – 2026</span>
+          <span class="ttl"><b><span lang="ko">애경그룹 그룹웨어 고도화 2차</span><span lang="en">AK Group Groupware Enhancement, Phase 2</span></b><small>MSSQL → MySQL (Azure)</small></span>
+          <span class="scope">Data Migration</span>
+          <span class="chev" aria-hidden="true">＋</span>
+        </summary>
+        <div class="body">
+          <span lang="ko">전자결재와 계열사 게시판 시스템의 MSSQL → MySQL(Azure) 대규모 데이터 이관을 전담해 일정 내에 완료했습니다.</span>
+          <span lang="en">Owned the large-scale MSSQL → MySQL (Azure) migration of e-approval and affiliate board systems, delivered on schedule.</span>
+          <ul lang="ko">
+            <li><b>분석</b> — SQL Server 2016 SP1 레거시 데이터 모델 분석, AS-IS 문서화</li>
+            <li><b>설계</b> — MySQL 8.0 TO-BE 스키마 설계, 도메인 · 테넌트 · 기간 단위 이관 전략 수립</li>
+            <li><b>재설계</b> — 기존 프로시저와 C# 프로그램을 분석해 이관 로직 재설계</li>
+            <li><b>개발 · 이행</b> — Spring Boot · Spring Batch 이관 프로그램 개발, 실행 계획 수립과 실제 이관 수행</li>
+          </ul>
+          <ul lang="en">
+            <li><b>Analysis</b> — Legacy SQL Server 2016 SP1 data model analysis and AS-IS documentation</li>
+            <li><b>Design</b> — MySQL 8.0 TO-BE schema, migration strategy by domain, tenant and period</li>
+            <li><b>Redesign</b> — Rebuilt migration logic from existing stored procedures and C# programs</li>
+            <li><b>Build &amp; cut-over</b> — Spring Boot · Spring Batch migration programs, run planning and execution</li>
+          </ul>
+        </div>
+      </details>
+      <details class="proj">
+        <summary>
+          <span class="yr">2025</span>
+          <span class="ttl"><b><span lang="ko">네이버 데이터랩 연동 쇼핑데이터 열람 서비스</span><span lang="en">Naver Datalab Shopping Data Viewer</span></b><small>Data-driven Web Platform</small></span>
+          <span class="scope">Planning · PM</span>
+          <span class="chev" aria-hidden="true">＋</span>
+        </summary>
+        <div class="body">
+          <span lang="ko">네이버 데이터랩 API 로 실시간 쇼핑 트렌드 데이터를 열람하는 웹 플랫폼을 구축했습니다.</span>
+          <span lang="en">Built a web platform for browsing real-time shopping trend data via the Naver Datalab API.</span>
+          <ul lang="ko">
+            <li>서비스 기획, 데이터 수집 로직과 UI 흐름 설계 (Figma · Next.js)</li>
+            <li>개발 · 디자인 협업 체계 구성, 일정 관리와 산출물 검수</li>
+          </ul>
+          <ul lang="en">
+            <li>Service planning, data collection logic and UI flow design (Figma · Next.js)</li>
+            <li>Set up dev/design collaboration, schedule management and deliverable review</li>
+          </ul>
+        </div>
+      </details>
+    </div>
+  </div>
+</section>
+
+<!-- GEORU -->
+<section id="georu">
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="sec-num">04 — Open Source</div>
+      <div>
+        <h2><span lang="ko">Georu — DB 이관 프레임워크</span><span lang="en">Georu — a DB migration framework</span></h2>
+        <p>
+          <span lang="ko">실제 이관 프로젝트(Oracle → MySQL, MSSQL → MySQL)에서 쓰던 엔진을 고객사 코드와 분리해 공개한 Spring Batch 기반 프레임워크입니다.</span>
+          <span lang="en">A Spring Batch–based framework, extracted from the engine we used on real migration projects (Oracle → MySQL, MSSQL → MySQL) and released separately from client code.</span>
+        </p>
+      </div>
+    </div>
+
+    <div class="georu-top">
+      <div>
+        <img class="logo lt-only" src="assets/georu-logo-light.svg" alt="Georu" id="georuLogo">
+        <p class="tag"><span lang="ko">거룻배처럼, 데이터를 조금씩 나눠<br>안전하게 나르는 DB 이관 프레임워크</span><span lang="en">Like a lighter boat — moving data<br>safely, a little at a time.</span></p>
+        <p><span lang="ko">시스템을 바꿀 때마다 이관은 SQL 스크립트 묶음과 엑셀 대사표로 다시 만들어지고, 매번 같은 사고가 납니다. 두 사람이 동시에 돌리고, 테스트하다 운영 데이터를 덮고, 몇 건이 빠졌는지 끝나고 나서야 압니다.</span><span lang="en">Every system replacement rebuilds the migration from loose SQL scripts and spreadsheet reconciliations — and the same accidents repeat: two people run it at once, a test overwrites production data, and missing rows surface only at the end.</span></p>
+        <p><span lang="ko">Georu 에서 사람이 쓰는 것은 <b>변환 규칙(SQL · Java)</b> 뿐입니다. 실행 · 안전장치 · 기록 · 보고는 프레임워크가 맡습니다.</span><span lang="en">With Georu, people write only the <b>transformation rules (SQL · Java)</b>. Execution, safeguards, history and reporting are handled by the framework.</span></p>
+        <div class="badges"><span>Java 17</span><span>Spring Boot 3.2</span><span>Spring Batch 5</span><span>MyBatis 3</span><span>Apache 2.0</span><span>0.x beta</span></div>
+        <div class="btns">
+          <a class="btn primary" href="https://github.com/dvmoomoodv/georu-data-migration" target="_blank" rel="noopener">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+            GitHub
+          </a>
+          <a class="btn ghost" href="#quick"><span lang="ko">빠른 시작</span><span lang="en">Quick start</span></a>
+        </div>
+      </div>
+      <div class="name-card">
+        <div class="k"><span lang="ko">이름의 뜻</span><span lang="en">The name</span></div>
+        <h3><span lang="ko">거루 (거룻배)</span><span lang="en">Georu — 거룻배, a lighter boat</span></h3>
+        <p><span lang="ko">돛을 달지 않은 작은 배입니다. 큰 배가 닿지 못하는 곳까지 노를 저어 짐을 조금씩 나눠 날랐습니다.</span><span lang="en">A small, sail-less Korean boat that rowed cargo, a little at a time, to places big ships could not reach.</span></p>
+        <p><span lang="ko">Georu 도 큰 DB 를 한 번에 옮기지 않고 <b>청크(기본 200건) 단위로 나눠</b>, 출발 전에 점검하고 도착할 때마다 기록하며 나릅니다.</span><span lang="en">Georu works the same way: instead of moving a large database at once, it ships <b>chunks (200 rows by default)</b> — checking before departure and recording every arrival.</span></p>
+        <div class="chunks" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+      </div>
+    </div>
+
+    <figure class="diagram">
+      <img class="lt" src="assets/how-it-works-light.svg" alt="Georu how it works: read, process and write in chunks from source DB to target DB, recording progress in the operation store" loading="lazy">
+      <img class="dk" src="assets/how-it-works-dark.svg" alt="" loading="lazy">
+      <figcaption><span lang="ko">소스 DB 를 청크로 나눠 읽기 · 바꾸기 · 싣기를 거쳐 타겟 DB 로 나르고, 진행과 결과를 운영 저장소에 남깁니다.</span><span lang="en">Source data is read, transformed and written to the target in chunks, while progress and results are recorded in the operation store.</span></figcaption>
+    </figure>
+
+    <div class="feat">
+      <article>
+        <h3><em>01</em><span lang="ko">안전하게</span><span lang="en">Safe</span></h3>
+        <ul lang="ko">
+          <li><b>실행 게이트</b> — 한 번에 하나만 실행, 다른 실행 중이면 거절(409)</li>
+          <li><b>실행 전 점검</b> — 컬럼 길이 · NOT NULL · 타입 · PK 중복, 타겟 기존 데이터 경고</li>
+          <li><b>지우지 않음</b> — TRUNCATE · DELETE 를 실행하지 않습니다</li>
+        </ul>
+        <ul lang="en">
+          <li><b>Run gate</b> — one run at a time; concurrent requests are rejected (409)</li>
+          <li><b>Pre-flight checks</b> — column length, NOT NULL, type, PK duplicates; warns on existing target data</li>
+          <li><b>Never deletes</b> — no TRUNCATE or DELETE; cleanup stays with people</li>
+        </ul>
+      </article>
+      <article>
+        <h3><em>02</em><span lang="ko">코드로</span><span lang="en">As code</span></h3>
+        <ul lang="ko">
+          <li>테이블당 <b>Source SQL · Target SQL · Processor</b> 세 파일. Reader · Writer 는 엔진이 생성</li>
+          <li>MyBatis SQL 과 Java 라 버전 관리 · 코드 리뷰 · 단위 테스트 그대로</li>
+          <li>다중 DataSource, N:1 병합, 1:N 복제, 시퀀스 채번</li>
+        </ul>
+        <ul lang="en">
+          <li>Per table: <b>Source SQL, Target SQL, optional Processor</b>. Readers and writers are generated</li>
+          <li>MyBatis SQL and Java — version control, code review and unit tests just work</li>
+          <li>Multiple DataSources, N:1 merge, 1:N fan-out, sequence numbering</li>
+        </ul>
+      </article>
+      <article>
+        <h3><em>03</em><span lang="ko">보이게</span><span lang="en">Visible</span></h3>
+        <ul lang="ko">
+          <li>청크별 진행률, 실행 이력, 로그 · 오류, 빠진 행 채우기</li>
+          <li>보고서 JSON · CSV · XLSX · PDF, 텔레그램 · UI 알림</li>
+          <li>운영 UI 와 REST API(Swagger), 메뉴별 권한</li>
+        </ul>
+        <ul lang="en">
+          <li>Per-chunk progress, run history, logs and errors, missing-row backfill</li>
+          <li>Reports in JSON · CSV · XLSX · PDF; Telegram and UI alerts</li>
+          <li>Operations UI and REST API (Swagger) with per-menu permissions</li>
+        </ul>
+      </article>
+      <article>
+        <h3><em>04</em><span lang="ko">도구</span><span lang="en">Tooling</span></h3>
+        <ul lang="ko">
+          <li>TOBE 정의 xlsx → 코드 초안 zip 생성</li>
+          <li>이름 기준 관계 분석, 매핑 정의서 초안</li>
+          <li>엑셀 · CSV 업로드를 같은 파이프라인으로 적재</li>
+        </ul>
+        <ul lang="en">
+          <li>Generate a code skeleton zip from a TOBE definition xlsx</li>
+          <li>Name-based relationship analysis and mapping spec drafts</li>
+          <li>Load xlsx/csv uploads through the same pipeline</li>
+        </ul>
+      </article>
+    </div>
+
+    <div class="modes" aria-label="Test modes">
+      <span>READER_TEST</span><i>→</i><span>PROCESSOR_TEST</span><i>→</i><span>WRITER_TEST</span><i>→</i><span class="last">NORMAL</span>
+    </div>
+    <p class="modes-cap"><span lang="ko">4단계 테스트 모드 — 읽기만, 변환까지, 최대 100건 적재, 그리고 전량 적재.</span><span lang="en">Four test modes — read only, transform, write up to 100 rows, then the full load.</span></p>
+
+    <div class="quick" id="quick">
+      <div>
+        <h3><span lang="ko">빠른 시작</span><span lang="en">Quick start</span></h3>
+        <p><span lang="ko">Docker(Compose v2)와 메모리 8GB 이상이면 데모를 바로 돌려 볼 수 있습니다. 데모는 Oracle 12 테이블을 MySQL 로 옮깁니다.</span><span lang="en">With Docker (Compose v2) and 8 GB+ of memory you can run the demo right away. It migrates 12 Oracle tables to MySQL.</span></p>
+        <p><span lang="ko">접속 후 관리자 계정을 만들고 <b>안내서 → 데모 시작 가이드</b>를 따라가 보세요.</span><span lang="en">Create an admin account on first visit, then follow <b>Guide → Demo getting started</b>.</span></p>
+        <p class="status"><span lang="ko">0.x 베타 — 1.0 전까지 공개 API 와 설정 키가 바뀔 수 있습니다.</span><span lang="en">0.x beta — public APIs and config keys may change before 1.0.</span></p>
+      </div>
+<pre><span class="p">$ </span>git clone https://github.com/dvmoomoodv/georu-data-migration.git
+<span class="p">$ </span>cd georu-data-migration/examples/demo
+<span class="p">$ </span>cp docker/.env.example docker/.env
+<span class="p">$ </span>./run-scripts/run-docker.sh db     <span class="c"># Oracle + MySQL</span>
+<span class="p">$ </span>./run-scripts/run-docker.sh build  <span class="c"># app image</span>
+<span class="p">$ </span>./run-scripts/run-docker.sh up     <span class="c"># → http://localhost:8083/ui</span></pre>
+    </div>
+  </div>
+</section>
+
+<!-- STACK -->
+<section id="stack">
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="sec-num">05 — Tech Stack</div>
+      <div><h2><span lang="ko">기술 스택</span><span lang="en">Tech stack</span></h2></div>
+    </div>
+    <dl class="stack">
+      <dt>Languages</dt><dd><span>Java</span><span>TypeScript</span><span>JavaScript</span><span>Python</span><span>PHP</span><span>C#</span><span>SQL</span></dd>
+      <dt>Backend</dt><dd><span>Spring Boot</span><span>Spring Batch</span><span>Spring Framework</span><span>MyBatis</span><span>Node.js</span><span>Laravel</span><span>CodeIgniter</span><span>ASP.NET</span><span>JSP</span></dd>
+      <dt>Frontend</dt><dd><span>React</span><span>Next.js</span><span>Vue.js</span><span>Nuxt</span><span>Angular</span><span>HTML5</span><span>Sass</span><span>Bootstrap</span><span>jQuery</span><span>Webpack</span></dd>
+      <dt>Database</dt><dd><span>Oracle</span><span>MySQL</span><span>MariaDB</span><span>SQL Server</span></dd>
+      <dt>Cloud &amp; Infra</dt><dd><span>Samsung Cloud Platform</span><span>AWS</span><span>Azure</span><span>GCP</span><span>Kubernetes</span><span>VMware</span><span>RHEL</span><span>CentOS</span><span>IBM AIX</span><span>Tomcat</span><span>Nginx</span></dd>
+      <dt>DevOps &amp; VCS</dt><dd><span>Git</span><span>GitLab</span><span>Bitbucket</span><span>Bamboo</span><span>Jenkins</span><span>SVN</span></dd>
+      <dt>Enterprise</dt><dd><span>WebSquare</span><span>OZ Report</span><span>Oracle ERP</span><span>HCL Notes</span><span>DHTMLX</span></dd>
+      <dt>Design</dt><dd><span>Figma</span><span>Photoshop</span></dd>
+    </dl>
+    <p class="expertise">EXPERTISE — Database Migration · Query Tuning · Java Performance · Cloud Migration · Web Application Architecture · UI Component Development · Responsive Web · SEO · ITGC · Agile · Software Project Management &amp; Consulting</p>
+  </div>
+</section>
+
+<!-- CONTACT -->
+<section id="contact">
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="sec-num">06 — Contact</div>
+      <div></div>
+    </div>
+    <div class="contact indent">
+      <div>
+        <h2><span lang="ko">프로젝트 문의와<br>협업 제안을 기다립니다.</span><span lang="en">Let's build<br>something together.</span></h2>
+      </div>
+      <a class="mail" href="mailto:dvmoomoodv@gmail.com">dvmoomoodv@gmail.com →</a>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  <div class="wrap">
+    <span>© RM STUDIO · 알엠스튜디오</span>
+    <span><a href="https://github.com/rm-studio-org">github.com/rm-studio-org</a></span>
+  </div>
+</footer>
+
+<script>
+(function(){
+  var d=document.documentElement;
+  function setLang(l){
+    d.setAttribute('data-lang',l);d.lang=l;
+    try{localStorage.setItem('rm-lang',l);}catch(e){}
+    document.querySelectorAll('[data-set-lang]').forEach(function(b){b.setAttribute('aria-pressed',b.dataset.setLang===l?'true':'false');});
+    document.title=l==='ko'?'RM Studio · 알엠스튜디오':'RM Studio';
+  }
+  document.querySelectorAll('[data-set-lang]').forEach(function(b){b.addEventListener('click',function(){setLang(b.dataset.setLang);});});
+  setLang(d.getAttribute('data-lang')||'ko');
+
+  var mq=window.matchMedia('(prefers-color-scheme: dark)');
+  function isDark(){var t=d.getAttribute('data-theme');return t?t==='dark':mq.matches;}
+  function syncLogo(){document.getElementById('georuLogo').src=isDark()?'assets/georu-logo-dark.svg':'assets/georu-logo-light.svg';}
+  document.getElementById('themeBtn').addEventListener('click',function(){
+    var next=isDark()?'light':'dark';d.setAttribute('data-theme',next);
+    try{localStorage.setItem('rm-theme',next);}catch(e){}
+    syncLogo();
+  });
+  mq.addEventListener&&mq.addEventListener('change',syncLogo);
+  syncLogo();
+})();
+</script>
+</body>
+</html>

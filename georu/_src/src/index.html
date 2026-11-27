@@ -1,0 +1,149 @@
+<section class="hero">
+  <div class="wrap">
+    <div>
+      <div class="eyebrow"><i></i>[[오픈소스 · Apache 2.0 · Spring Batch 5||Open source · Apache 2.0 · Spring Batch 5]]</div>
+      <h1>[[데이터는 <em>청크로 나눠</em>,<br>이관은 <em>코드로</em>.||Ship data <em>in chunks</em>.<br>Keep migration <em>as code</em>.]]</h1>
+      <p class="lead">[[Georu(거루)는 실제 이관 프로젝트에서 쓰던 엔진을 공개한 DB 이관 프레임워크입니다. 사람은 변환 규칙(SQL · Java)만 쓰고, 실행 통제 · 이관 엔진 · 검증 · 재실행 · 기록 · 운영 화면은 Georu 가 맡습니다.||Georu is a database migration framework extracted from the engine we ran on real migration projects. People write only the transformation rules (SQL · Java); Georu handles execution control, the migration engine, verification, re-runs, records and the operation screens.]]</p>
+      <div class="btns">
+        <a class="btn light" href="architecture.html">[[아키텍처 문서 보기||Read the architecture]] →</a>
+        <a class="btn outline" href="api.html">[[API 레퍼런스||API reference]]</a>
+        <a class="btn outline" href="https://github.com/dvmoomoodv/georu-data-migration" target="_blank" rel="noopener">GitHub ↗</a>
+      </div>
+      <div class="meta"><span>Java 17</span><span>Spring Boot 3.2</span><span>Spring Batch 5</span><span>MyBatis 3</span><span>Oracle · MySQL · SQL Server · PostgreSQL · MariaDB</span></div>
+    </div>
+    <div class="flow-card" aria-hidden="true">
+      <div class="hd"><span class="dot"></span><b>tb_order</b> · NORMAL · DIV-2025-01..12</div>
+      <div class="lane"><span class="lbl">read</span><span class="bar"><i style="width:86%"></i></span><span class="n">86%</span></div>
+      <div class="lane"><span class="lbl">process</span><span class="bar"><i style="width:81%"></i></span><span class="n">81%</span></div>
+      <div class="lane"><span class="lbl">write ×6</span><span class="bar"><i style="width:74%"></i></span><span class="n">74%</span></div>
+      <div class="chunks"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+      <div class="log">
+        <div><span class="mut">09:12:01</span> <span class="ac">gate</span> acquired · 1 run in system</div>
+        <div><span class="mut">09:12:02</span> <span class="ac">precheck</span> length · NOT NULL · type · PK <span class="ok">pass</span></div>
+        <div><span class="mut">09:12:04</span> chunk #1,204 · 200 rows <span class="ok">✓</span></div>
+        <div><span class="mut">09:40:55</span> source 2,408,113 = target 2,408,113 <span class="ok">COMPLETED</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="band">
+  <div class="wrap">
+    <p class="kicker">[[왜 Georu 인가||Why Georu]]</p>
+    <h2>[[이관 사고는 매번 같은 곳에서 납니다||Migration accidents happen in the same places, every time]]</h2>
+    <p class="sub">[[두 사람이 동시에 돌리고, 테스트하다 운영 데이터를 덮고, 몇 건이 빠졌는지는 끝나고 나서야 압니다. Georu 는 이 사고들을 사람의 주의력이 아니라 프레임워크의 구조로 막습니다.||Two people run it at once, a test overwrites production data, and missing rows surface only at the end. Georu prevents these accidents by framework structure rather than by human attention.]]</p>
+    <div class="stats">
+      <div><b>1</b><span>[[시스템 전체 동시 실행 수 — 실행 게이트||Run at a time, system-wide — execution gate]]</span></div>
+      <div><b>200<small>[[건||rows]]</small></b><span>[[청크 단위 기록 · 건수 판정||Per-chunk records · count verdict]]</span></div>
+      <div><b>3<small>[[겹||layers]]</small></b><span>[[DB 쓰기 정책 — 삭제 · DDL 차단||DB write policy — no deletes · no DDL]]</span></div>
+      <div><b>4<small>[[단계||modes]]</small></b><span>[[테스트 모드 — 읽기만부터 전량까지||Test modes — read-only up to full load]]</span></div>
+    </div>
+  </div>
+</section>
+
+<section class="band alt">
+  <div class="wrap">
+    <p class="kicker">[[역할 분담||Division of work]]</p>
+    <h2>[[업체는 규칙만, 흐름은 Georu 가||You write the rules. Georu owns the flow.]]</h2>
+    <p class="sub">[[Georu 는 라이브러리 묶음(jar 7개)으로 배포되고, 업체는 이를 의존성으로 넣어 이관 앱을 만듭니다. 실행 흐름은 Georu 가 쥐고, 업체 코드를 정해진 자리에서 부릅니다.||Georu ships as a library bundle of seven jars. Vendors add it as a dependency to build a migration app; Georu owns the execution flow and calls vendor code at defined points.]]</p>
+    <div class="split">
+      <div class="panel you">
+        <h3>[[업체가 쓰는 것||What the vendor writes]]</h3>
+        <p class="cap">[[테이블마다 세 파일 — 버전 관리 · 코드 리뷰 · 단위 테스트 그대로||Three files per table — version control, code review and unit tests just work]]</p>
+        <ul class="ticks">
+          <li>[[<b>Source SQL</b> — 소스에서 읽고 변환하는 MyBatis 쿼리||<b>Source SQL</b> — MyBatis query that reads and transforms from the source]]</li>
+          <li>[[<b>Target SQL</b> — 타겟에 싣는 INSERT · UPSERT||<b>Target SQL</b> — INSERT · UPSERT into the target]]</li>
+          <li>[[<b>Processor</b> (선택) — 검증 · 옮겨 담기||<b>Processor</b> (optional) — validation · copying values]]</li>
+          <li>[[업무별 플러그인 · 테이블 선언(`TableOptions`) · 시나리오 JSON||Per-area plugins · table declarations (`TableOptions`) · scenario JSON]]</li>
+        </ul>
+      </div>
+      <div class="panel georu">
+        <h3>[[Georu 가 맡는 것||What Georu provides]]</h3>
+        <p class="cap">[[엔진 내부는 업체가 건드리지 않습니다||Engine internals stay untouched]]</p>
+        <ul class="ticks">
+          <li>[[실행 게이트 · 사전 검사 · 실행 시간대 · 부하 조절||Execution gate · pre-run checks · run windows · throttling]]</li>
+          <li>[[읽기 → 큐 → 적재 스레드 n 의 이관 엔진, 채번 · Lookup · N:1||Read → queue → n load threads engine, numbering · Lookup · N:1]]</li>
+          <li>[[테스트 모드 · 실행 전 점검 · DB 쓰기 정책 3겹||Test modes · precheck · three-layer DB write policy]]</li>
+          <li>[[재시도 · 빠진 행 채우기 · 날짜 분할 · 시나리오 · 스케줄||Retries · fill missing rows · date split · scenarios · schedules]]</li>
+          <li>[[이력 · 보고서(CSV · XLSX · PDF) · 알림 · 운영 UI 28화면 · REST API||History · reports (CSV · XLSX · PDF) · alerts · 28-screen UI · REST API]]</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="band">
+  <div class="wrap">
+    <p class="kicker">[[동작 방식||How it works]]</p>
+    <h2>[[테이블 하나가 옮겨지는 길||The path of one table]]</h2>
+    <p class="sub">[[요청부터 건수 판정까지 모든 단계가 운영 저장소에 남습니다. 읽기와 쓰기는 메모리 큐로 분리되어, 느린 타겟이 소스 읽기를 붙잡지 않습니다.||Every step from request to count verdict is recorded in the operations store. Reads and writes are separated by an in-memory queue, so a slow target never holds the source read.]]</p>
+    <figure class="diagram">
+      <div class="pipe">
+        <div class="stage"><span class="s-no">01</span><b>[[실행 게이트||Gate]]</b><p>[[다른 실행이 없는지 확인, 있으면 409||Confirms nothing else runs; otherwise 409]]</p></div>
+        <div class="lnk">→</div>
+        <div class="stage"><span class="s-no">02</span><b>[[사전 검사||Checks]]</b><p>[[이관 상태 · 기존 데이터 · 실행 전 점검 (쓰지 않음)||Status · existing data · precheck (writes nothing)]]</p></div>
+        <div class="lnk">→</div>
+        <div class="stage"><span class="s-no">03</span><b>Reader</b><p>[[PK 기준 페이지 읽기, 읽기 전용 연결||Paged by PK, read-only connection]]</p><span class="val">SELECT</span></div>
+        <div class="lnk">→</div>
+        <div class="stage"><span class="s-no">04</span><b>Processor</b><p>[[소스 DTO → 타겟 DTO||Source DTO → target DTO]]</p><span class="val">chunk 200</span></div>
+        <div class="lnk">→</div>
+        <div class="stage q"><span class="s-no">05</span><b>[[큐||Queue]]</b><p>[[읽기와 쓰기를 분리||Decouples read and write]]</p><span class="val">500,000</span></div>
+        <div class="lnk">→</div>
+        <div class="stage w"><span class="s-no">06</span><b>Writer × W</b><p>[[배치 INSERT, 자동 재시도 3회||Batch INSERT, 3 auto-retries]]</p><div class="threads"><i></i><i></i><i></i><i></i></div></div>
+        <div class="lnk">→</div>
+        <div class="stage"><span class="s-no">07</span><b>[[판정||Verdict]]</b><p>[[소스 = 타겟 건수 → 알림 · 보고서||Source = target count → alerts · reports]]</p></div>
+      </div>
+      <figcaption>[[예제 앱 기본값: 청크 200건, 큐 500,000건, 적재 스레드 4(prd 6), 500건 단위 배치 INSERT||Example defaults: chunk 200 rows, queue 500,000 rows, 4 load threads (6 in prd), batch INSERT in units of 500]]</figcaption>
+    </figure>
+  </div>
+</section>
+
+<section class="band alt">
+  <div class="wrap">
+    <p class="kicker">[[문서||Documentation]]</p>
+    <h2>[[구조부터 API 까지, 한 번에||From structure to API, in one place]]</h2>
+    <p class="sub">[[Georu 아키텍처 정의서(v1.4)를 웹 문서로 옮겼습니다. 고객 아키텍트 · IT 운영 · 보안 담당과 수행팀이 알아야 할 구조를 장별로 정리했습니다.||The Georu architecture definition (v1.4), rewritten for the web. Organized by chapter for client architects, IT operations, security staff and delivery teams.]]</p>
+    <div class="cards">
+      <a class="card" href="architecture.html"><div class="ic">01</div><h3>[[시스템 아키텍처||System architecture]]</h3><p>[[구성 요소 10개, 시스템 연관도, 인터페이스 12종, 프레임워크 계층과 7개 모듈||10 components, system context, 12 interfaces, framework layers and 7 modules]]</p><span class="more">[[읽기||Read]] →</span></a>
+      <a class="card" href="application.html"><div class="ic">02</div><h3>[[애플리케이션 구성||Application design]]</h3><p>[[운영 UI 와 메뉴 권한, 요청 처리 레이어, 7단계 보안 필터 체인, 빌드 · 배포 · 롤백||Operation UI and menu permissions, request layers, 7-stage security filter chain, build · deploy · rollback]]</p><span class="more">[[읽기||Read]] →</span></a>
+      <a class="card" href="engine.html"><div class="ic">03</div><h3>[[핵심 기능||Core features]]</h3><p>[[실행 게이트, 큐 분리 엔진, 날짜 분할 · 시나리오, 재시도 · 복구, 테스트 모드 · 쓰기 정책||Execution gate, queue-separated engine, date split · scenarios, retries · recovery, test modes · write policy]]</p><span class="more">[[읽기||Read]] →</span></a>
+      <a class="card" href="infrastructure.html"><div class="ic">04</div><h3>[[인프라 · 배포||Infrastructure]]</h3><p>[[로컬 · 도커 · 서버 실행 방식, 포트와 방화벽, 서버 사양, 스토리지, 지원 DB||Local · Docker · server, ports and firewall, sizing, storage, supported databases]]</p><span class="more">[[읽기||Read]] →</span></a>
+      <a class="card" href="api.html"><div class="ic">API</div><h3>[[API 레퍼런스||API reference]]</h3><p>[[HTTP Basic 인증, 공통 응답, 오류 코드, 18개 분류 123개 엔드포인트와 curl 예||HTTP Basic auth, common response, error codes, 123 endpoints in 18 groups with curl examples]]</p><span class="more">[[읽기||Read]] →</span></a>
+      <a class="card" href="https://github.com/dvmoomoodv/georu-data-migration" target="_blank" rel="noopener"><div class="ic">GH</div><h3>[[소스 · 예제 앱||Source · example app]]</h3><p>[[Docker 로 Oracle 12 테이블을 MySQL 로 옮기는 데모를 바로 실행해 볼 수 있습니다||Run the demo that migrates 12 Oracle tables to MySQL with Docker]]</p><span class="more">GitHub ↗</span></a>
+    </div>
+  </div>
+</section>
+
+<section class="band">
+  <div class="wrap">
+    <div class="split" style="align-items:center">
+      <div>
+        <p class="kicker">[[빠른 시작||Quick start]]</p>
+        <h2>[[데모를 바로 실행||Run the demo locally]]</h2>
+        <p class="muted" style="color:var(--ink-2)">[[Docker(Compose v2)와 메모리 8GB 이상이면 됩니다. 접속 후 관리자 계정을 만들고 <b>안내서 → 데모 시작 가이드</b>를 따라가세요.||All you need is Docker (Compose v2) and 8 GB+ of memory. Create an admin account on first visit, then follow <b>Guide → Demo getting started</b>.]]</p>
+        <p style="color:var(--ink-3);font-size:13.5px">[[0.x 베타 — 1.0 전까지 공개 API 와 설정 키가 바뀔 수 있습니다.||0.x beta — public APIs and config keys may change before 1.0.]]</p>
+      </div>
+<pre><span class="p">$ </span>git clone https://github.com/dvmoomoodv/georu-data-migration.git
+<span class="p">$ </span>cd georu-data-migration/examples/demo
+<span class="p">$ </span>cp docker/.env.example docker/.env
+<span class="p">$ </span>./run-scripts/run-docker.sh db     <span class="c"># Oracle + MySQL</span>
+<span class="p">$ </span>./run-scripts/run-docker.sh build  <span class="c"># app image</span>
+<span class="p">$ </span>./run-scripts/run-docker.sh up     <span class="c"># → http://localhost:8083/ui</span></pre>
+    </div>
+  </div>
+</section>
+
+<section class="band" style="padding-top:0">
+  <div class="wrap">
+    <div class="cta">
+      <div>
+        <h2>[[이관 프로젝트를 준비하고 계신가요?||Planning a migration project?]]</h2>
+        <p>[[Georu 를 만든 RM Studio 가 이관 설계부터 본 이관까지 함께합니다.||RM Studio, the team behind Georu, can work with you from migration design to cut-over.]]</p>
+      </div>
+      <div class="btns" style="display:flex;gap:12px;flex-wrap:wrap">
+        <a class="btn light" href="../index.html#contact">[[문의하기||Contact us]]</a>
+        <a class="btn outline" href="architecture.html">[[문서 시작하기||Start reading]] →</a>
+      </div>
+    </div>
+  </div>
+</section>

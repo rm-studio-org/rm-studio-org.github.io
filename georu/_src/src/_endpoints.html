@@ -1,0 +1,213 @@
+<div class="api-group" id="api-run">
+<div class="gh"><h3 id="g-run" data-notoc>[[마이그레이션 실행||Migration run]]</h3><span class="c">13</span></div>
+<p class="gd">[[마이그레이션 실행 API - Oracle → MySQL 데이터 이관||Run a table, stop a Job, fill missing rows and manage cron schedules.]]</p>
+<div class="eps">
+<div class="ep"><span class="m get">GET</span><span class="p">/api/migrate/jobs/<em>{migrationId}</em>/fill-missing</span><span class="d">[[빠진 행 채우기 확인||Check fill-missing-rows eligibility]]</span></div>
+<div class="ep"><span class="m post">POST</span><span class="p">/api/migrate/jobs/<em>{migrationId}</em>/fill-missing</span><span class="d">[[빠진 행 채우기 실행||Fill missing rows]]</span></div>
+<div class="ep"><span class="m get">GET</span><span class="p">/api/migrate/schedules</span><span class="d">[[등록된 스케줄 목록||List schedules]]</span></div>
+<div class="ep"><span class="m post">POST</span><span class="p">/api/migrate/schedules/pause-all</span><span class="d">[[활성 스케줄 전체 일시정지||Pause all active schedules]]</span></div>
+<div class="ep"><span class="m post">POST</span><span class="p">/api/migrate/schedules/resume-all</span><span class="d">[[일시정지한 스케줄 전체 재개||Resume all paused schedules]]</span></div>
+<div class="ep"><span class="m get">GET</span><span class="p">/api/migrate/schedules/validate-cron</span><span class="d">[[Cron 표현식 유효성 검증||Validate a cron expression]]</span></div>
+<div class="ep"><span class="m delete">DELETE</span><span class="p">/api/migrate/schedules/<em>{scheduleId}</em></span><span class="d">[[마이그레이션 스케줄 취소||Cancel a schedule]]</span></div>
+<div class="ep"><span class="m post">POST</span><span class="p">/api/migrate/schedules/<em>{scheduleId}</em>/pause</span><span class="d">[[스케줄 일시정지||Pause a schedule]]</span></div>
+<div class="ep"><span class="m post">POST</span><span class="p">/api/migrate/schedules/<em>{scheduleId}</em>/resume</span><span class="d">[[스케줄 재개||Resume a schedule]]</span></div>
+<div class="ep"><span class="m get">GET</span><span class="p">/api/migrate/schedules/<em>{scheduleId}</em>/runs</span><span class="d">[[스케줄 주기 기록||Schedule run history]]</span></div>
+<div class="ep"><span class="m post">POST</span><span class="p">/api/migrate/schedules/<em>{scheduleId}</em>/trigger</span><span class="d">[[스케줄 즉시 실행||Trigger a schedule now]]</span></div>
+<div class="ep"><span class="m post">POST</span><span class="p">/api/migrate/stop/<em>{jobId}</em></span><span class="d">[[실행 중인 마이그레이션 중지||Stop a running migration]]</span></div>
+<div class="ep"><span class="m post">POST</span><span class="p">/api/migrate/table</span><span class="d">[[특정 테이블 마이그레이션 실행||Run migration for one table]]</span></div>
+</div></div>
+<div class="api-group" id="api-groups">
+<div class="gh"><h3 id="g-groups" data-notoc>[[실행 그룹||Execution groups]]</h3><span class="c">3</span></div>
+<p class="gd">[[날짜 분할·시나리오 실행의 진행·결과(성공·실패·미실행 횟수)·중지||Progress, results (success · failed · not run) and stop for date-split and scenario runs.]]</p>
+<div class="eps">
+<div class="ep"><span class="m get">GET</span><span class="p">/api/migrate/groups</span><span class="d">[[실행 그룹 목록||List execution groups]]</span></div>
+<div class="ep"><span class="m get">GET</span><span class="p">/api/migrate/groups/<em>{groupId}</em></span><span class="d">[[실행 그룹 상세||Execution group detail]]</span></div>
+<div class="ep"><span class="m post">POST</span><span class="p">/api/migrate/groups/<em>{groupId}</em>/stop</span><span class="d">[[실행 그룹 중지 요청||Request group stop]]</span></div>
+</div></div>
+<div class="api-group" id="api-scenarios">
+<div class="gh"><h3 id="g-scenarios" data-notoc>[[시나리오 이관||Scenarios]]</h3><span class="c">14</span></div>
+<p class="gd">[[정의된 순서로 단계(테이블)·날짜 구간을 Job 으로 나눠 순차 실행. 진행·중지는 실행 그룹 API||Run steps (tables) and date ranges as sequential Jobs in a defined order. Progress and stop are on the execution-group API.]]</p>
+<div class="eps">
+<div class="ep"><span class="m get">GET</span><span class="p">/api/scenarios</span><span class="d">[[시나리오 목록||List scenarios]]</span></div>
+<div class="ep"><span class="m post">POST</span><span class="p">/api/scenarios</span><span class="d">[[사용자 정의 시나리오 추가||Add a user-defined scenario]]</span></div>
+<div class="ep"><span class="m post">POST</span><span class="p">/api/scenarios/check</span><span class="d">[[저장 전 사전 확인||Pre-confirm before saving]]</span></div>
+<div class="ep"><span class="m get">GET</span><span class="p">/api/scenarios/next-id</span><span class="d">[[다음 자동 채번 id||Next auto-assigned id]]</span></div>
+<div class="ep"><span class="m post">POST</span><span class="p">/api/scenarios/preview-ranges</span><span class="d">[[분할 구간 미리보기||Preview split ranges]]</span></div>
+<div class="ep"><span class="m post">POST</span><span class="p">/api/scenarios/validate</span><span class="d">[[정의 검증||Validate a definition]]</span></div>
+<div class="ep"><span class="m get">GET</span><span class="p">/api/scenarios/<em>{id}</em></span><span class="d">[[시나리오 정의||Scenario definition]]</span></div>
+<div class="ep"><span class="m put">PUT</span><span class="p">/api/scenarios/<em>{id}</em></span><span class="d">[[사용자 정의 시나리오 수정||Update a user-defined scenario]]</span></div>
+<div class="ep"><span class="m post">POST</span><span class="p">/api/scenarios/<em>{id}</em>/check</span><span class="d">[[시나리오 사전 확인||Pre-confirm a scenario]]</span></div>
+<div class="ep"><span class="m put">PUT</span><span class="p">/api/scenarios/<em>{id}</em>/enabled</span><span class="d">[[사용 여부 변경||Enable / disable]]</span></div>
+<div class="ep"><span class="m get">GET</span><span class="p">/api/scenarios/<em>{id}</em>/export</span><span class="d">[[정의 JSON 내려받기||Download definition JSON]]</span></div>
+<div class="ep"><span class="m get">GET</span><span class="p">/api/scenarios/<em>{id}</em>/history</span><span class="d">[[변경 이력||Change history]]</span></div>
+<div class="ep"><span class="m get">GET</span><span class="p">/api/scenarios/<em>{id}</em>/history/<em>{historyId}</em></span><span class="d">[[이력 시점 정의 전문||Full definition at a history point]]</span></div>
+<div class="ep"><span class="m post">POST</span><span class="p">/api/scenarios/<em>{id}</em>/run</span><span class="d">[[시나리오 실행||Run a scenario]]</span></div>
+</div></div>
+<div class="api-group" id="api-gate">
+<div class="gh"><h3 id="g-gate" data-notoc>[[실행 게이트||Execution gate]]</h3><span class="c">2</span></div>
+<p class="gd">[[단일 실행 규칙: 현재 실행 중인 단위 조회, 강제 해제||Single-run rule: see the unit currently running, force-release the gate.]]</p>
+<div class="eps">
+<div class="ep"><span class="m get">GET</span><span class="p">/api/migrate/gate</span><span class="d">[[게이트 상태||Gate status]]</span></div>
+<div class="ep"><span class="m post">POST</span><span class="p">/api/migrate/gate/release</span><span class="d">[[게이트 강제 해제||Force-release the gate]]</span></div>
+</div></div>
+<div class="api-group" id="api-chunks">
+<div class="gh"><h3 id="g-chunks" data-notoc>[[청크||Chunks]]</h3><span class="c">2</span></div>
+<p class="gd">[[청크별 상태 관리 및 선택적 재실행 API||Per-chunk status and selective re-run.]]</p>
+<div class="eps">
+<div class="ep"><span class="m get">GET</span><span class="p">/api/migration/chunks/<em>{migrationId}</em>/progress</span><span class="d">[[청크 진행률 조회||Chunk progress]]</span></div>
+<div class="ep"><span class="m post">POST</span><span class="p">/api/migration/chunks/<em>{migrationId}</em>/retry</span><span class="d">[[청크 재실행||Re-run chunks]]</span></div>
+</div></div>
+<div class="api-group" id="api-precheck">
+<div class="gh"><h3 id="g-precheck" data-notoc>[[실행 전 점검 · 알림||Precheck · notifications]]</h3><span class="c">8</span></div>
+<p class="gd">[[실행 전 점검(타겟에 쓰지 않음), 미완 코드 현황, UI 알림 목록, 묶음 실행 요약||Precheck (writes nothing to the target), unfinished-code status, UI notifications, group-run summary.]]</p>
+<div class="eps">
+<div class="ep"><span class="m post">POST</span><span class="p">/api/precheck</span><span class="d">[[실행 전 점검 시작||Start a precheck]]</span></div>
+<div class="ep"><span class="m get">GET</span><span class="p">/api/precheck/runs</span><span class="d">[[최근 실행 전 점검 목록||Recent prechecks]]</span></div>
+<div class="ep"><span class="m get">GET</span><span class="p">/api/precheck/<em>{runId}</em></span><span class="d">[[실행 전 점검 결과||Precheck result]]</span></div>
+<div class="ep"><span class="m get">GET</span><span class="p">/api/precheck/<em>{runId}</em>/export</span><span class="d">[[실행 전 점검 결과 내보내기 (csv / xlsx)||Export precheck result (csv / xlsx)]]</span></div>
+<div class="ep"><span class="m post">POST</span><span class="p">/api/ui/batches/<em>{batchId}</em>/finish</span><span class="d">[[묶음 실행 종료 (요약 알림)||Finish a group run (summary alert)]]</span></div>
+<div class="ep"><span class="m get">GET</span><span class="p">/api/ui/guides/<em>{name}</em></span><span class="d">[[안내서 원문 (Markdown)||Guide source (Markdown)]]</span></div>
+<div class="ep"><span class="m get">GET</span><span class="p">/api/ui/mapping-status</span><span class="d">[[미완 코드 현황||Unfinished-code status]]</span></div>
+<div class="ep"><span class="m get">GET</span><span class="p">/api/ui/notifications</span><span class="d">[[UI 알림 목록||UI notifications]]</span></div>
+</div></div>
+<div class="api-group" id="api-report">
+<div class="gh"><h3 id="g-report" data-notoc>[[보고서||Reports]]</h3><span class="c">10</span></div>
+<p class="gd">[[이관 결과 보고서 / CSV·XLSX·PDF 내보내기||Migration result reports and CSV · XLSX · PDF exports.]]</p>
+<div class="eps">
+<div class="ep"><span class="m get">GET</span><span class="p">/api/report/exports</span><span class="d">[[내보내기 목록||List exports]]</span></div>
+<div class="ep"><span class="m post">POST</span><span class="p">/api/report/exports</span><span class="d">[[비동기 zip 내보내기 요청||Request an async zip export]]</span></div>
+<div class="ep"><span class="m get">GET</span><span class="p">/api/report/exports/<em>{exportId}</em></span><span class="d">[[내보내기 상태||Export status]]</span></div>
+<div class="ep"><span class="m delete">DELETE</span><span class="p">/api/report/exports/<em>{exportId}</em></span><span class="d">[[내보내기 삭제||Delete an export]]</span></div>
+<div class="ep"><span class="m get">GET</span><span class="p">/api/report/exports/<em>{exportId}</em>/download</span><span class="d">[[내보내기 zip 다운로드||Download export zip]]</span></div>
+<div class="ep"><span class="m get">GET</span><span class="p">/api/report/jobs</span><span class="d">[[Job 목록 (json/csv/xlsx)||Job list (json/csv/xlsx)]]</span></div>
+<div class="ep"><span class="m get">GET</span><span class="p">/api/report/jobs/<em>{migrationId}</em></span><span class="d">[[Job 1건 결과 보고서 (json/pdf/xlsx)||Single Job report (json/pdf/xlsx)]]</span></div>
+<div class="ep"><span class="m get">GET</span><span class="p">/api/report/jobs/<em>{migrationId}</em>/chunks</span><span class="d">[[Job 청크 상태 (json/csv)||Job chunk status (json/csv)]]</span></div>
+<div class="ep"><span class="m get">GET</span><span class="p">/api/report/jobs/<em>{migrationId}</em>/logs</span><span class="d">[[Job 로그 (json/csv)||Job logs (json/csv)]]</span></div>
+<div class="ep"><span class="m get">GET</span><span class="p">/api/report/summary</span><span class="d">[[기간 요약 보고서 (json/pdf/xlsx/csv)||Period summary report (json/pdf/xlsx/csv)]]</span></div>
+</div></div>
+<div class="api-group" id="api-excel">
+<div class="gh"><h3 id="g-excel" data-notoc>[[엑셀 이관||Excel load]]</h3><span class="c">14</span></div>
+<p class="gd">[[엑셀 이관 - 업로드한 엑셀(TOBE 컬럼 헤더)을 테이블 이관 파이프라인으로 적재||Load an uploaded Excel file (TOBE column headers) through the table migration pipeline.]]</p>
+<div class="eps">
+<div class="ep"><span class="m get">GET</span><span class="p">/api/excel-load/binding</span><span class="d">[[컬럼 대응표 (타겟 컬럼 ↔ DTO 프로퍼티, 필수·감사·채번)||Column binding (target column ↔ DTO property, required · audit · numbering)]]</span></div>
+<div class="ep"><span class="m get">GET</span><span class="p">/api/excel-load/files</span><span class="d">[[파일 목록||List files]]</span></div>
+<div class="ep"><span class="m post">POST</span><span class="p">/api/excel-load/files</span><span class="d">[[업로드 (저장 후 즉시 검증)||Upload (validated immediately)]]</span></div>
+<div class="ep"><span class="m get">GET</span><span class="p">/api/excel-load/files/<em>{fileId}</em></span><span class="d">[[파일 1건||File detail]]</span></div>
+<div class="ep"><span class="m delete">DELETE</span><span class="p">/api/excel-load/files/<em>{fileId}</em></span><span class="d">[[삭제 (실행 중 제외)||Delete (not while running)]]</span></div>
+<div class="ep"><span class="m get">GET</span><span class="p">/api/excel-load/files/<em>{fileId}</em>/download</span><span class="d">[[원본 다운로드||Download original]]</span></div>
+<div class="ep"><span class="m get">GET</span><span class="p">/api/excel-load/files/<em>{fileId}</em>/issues.xlsx</span><span class="d">[[검증·실행 오류 목록 xlsx||Validation · run errors xlsx]]</span></div>
+<div class="ep"><span class="m get">GET</span><span class="p">/api/excel-load/files/<em>{fileId}</em>/preview</span><span class="d">[[미리보기 (헤더·앞 N행·컬럼 대응표)||Preview (header · first N rows · column binding)]]</span></div>
+<div class="ep"><span class="m get">GET</span><span class="p">/api/excel-load/files/<em>{fileId}</em>/report</span><span class="d">[[검증 보고서·실행 오류 목록||Validation report · run errors]]</span></div>
+<div class="ep"><span class="m post">POST</span><span class="p">/api/excel-load/files/<em>{fileId}</em>/validate</span><span class="d">[[재검증||Re-validate]]</span></div>
+<div class="ep"><span class="m get">GET</span><span class="p">/api/excel-load/limits</span><span class="d">[[크기 제한 (업로드 상한·xlsx 셀 상한·권장값·Excel 형식 한계)||Size limits (upload · xlsx cells · recommended · Excel format)]]</span></div>
+<div class="ep"><span class="m get">GET</span><span class="p">/api/excel-load/split-plan</span><span class="d">[[분할 안내 계산 (데이터 행 수·열 수 → 파일당 행 수·파일별 범위)||Split plan (rows · columns → rows per file · ranges)]]</span></div>
+<div class="ep"><span class="m get">GET</span><span class="p">/api/excel-load/summary</span><span class="d">[[상태별 건수||Counts by status]]</span></div>
+<div class="ep"><span class="m get">GET</span><span class="p">/api/excel-load/template</span><span class="d">[[템플릿 xlsx (헤더 + 컬럼 설명 시트)||Template xlsx (header + column notes sheet)]]</span></div>
+</div></div>
+<div class="api-group" id="api-project">
+<div class="gh"><h3 id="g-project" data-notoc>[[이관 진행||Migration progress]]</h3><span class="c">6</span></div>
+<p class="gd">[[이관 진행 - 권장 단계 · 체크리스트 · 엑셀 양식||Recommended phases, checklist and Excel template.]]</p>
+<div class="eps">
+<div class="ep"><span class="m get">GET</span><span class="p">/api/project/checklist</span><span class="d">[[체크리스트||Checklist]]</span></div>
+<div class="ep"><span class="m get">GET</span><span class="p">/api/project/checklist/download</span><span class="d">[[엑셀 내려받기||Download Excel]]</span></div>
+<div class="ep"><span class="m get">GET</span><span class="p">/api/project/checklist/events</span><span class="d">[[기록||Events]]</span></div>
+<div class="ep"><span class="m put">PUT</span><span class="p">/api/project/checklist/items/<em>{id}</em></span><span class="d">[[항목 체크 · 메모||Check item · memo]]</span></div>
+<div class="ep"><span class="m post">POST</span><span class="p">/api/project/checklist/reset</span><span class="d">[[권장 단계로 되돌리기||Reset to recommended phases]]</span></div>
+<div class="ep"><span class="m post">POST</span><span class="p">/api/project/checklist/upload</span><span class="d">[[엑셀 올리기||Upload Excel]]</span></div>
+</div></div>
+<div class="api-group" id="api-status">
+<div class="gh"><h3 id="g-status" data-notoc>[[시스템 상태||System status]]</h3><span class="c">8</span></div>
+<p class="gd">[[시스템 상태 및 모니터링 API||System status and monitoring.]]</p>
+<div class="eps">
+<div class="ep"><span class="m get">GET</span><span class="p">/api/status/database</span><span class="d">[[데이터베이스 연결 상태||Database connection status]]</span></div>
+<div class="ep"><span class="m get">GET</span><span class="p">/api/status/history</span><span class="d">[[작업 실행 이력||Job execution history]]</span></div>
+<div class="ep"><span class="m get">GET</span><span class="p">/api/status/logs</span><span class="d">[[로그 목록||Logs]]</span></div>
+<div class="ep"><span class="m get">GET</span><span class="p">/api/status/logs/files</span><span class="d">[[로그 파일 목록||Log files]]</span></div>
+<div class="ep"><span class="m get">GET</span><span class="p">/api/status/overview</span><span class="d">[[시스템 전체 현황||System overview]]</span></div>
+<div class="ep"><span class="m get">GET</span><span class="p">/api/status/performance</span><span class="d">[[성능 메트릭||Performance metrics]]</span></div>
+<div class="ep"><span class="m get">GET</span><span class="p">/api/status/plugins</span><span class="d">[[플러그인 목록 및 상태||Plugins and status]]</span></div>
+<div class="ep"><span class="m get">GET</span><span class="p">/api/status/running</span><span class="d">[[실행 중인 작업 목록 조회||Running jobs]]</span></div>
+</div></div>
+<div class="api-group" id="api-metrics">
+<div class="gh"><h3 id="g-metrics" data-notoc>[[시스템 지표||System metrics]]</h3><span class="c">2</span></div>
+<p class="gd">[[상단 요약 바 현재 값, 5분 주기 지표 이력 (그래프)||Current values for the top summary bar and 5-minute metric history.]]</p>
+<div class="eps">
+<div class="ep"><span class="m get">GET</span><span class="p">/api/status/metrics/history</span><span class="d">[[시스템 지표 이력||Metric history]]</span></div>
+<div class="ep"><span class="m get">GET</span><span class="p">/api/status/metrics/now</span><span class="d">[[현재 시스템 지표||Current metrics]]</span></div>
+</div></div>
+<div class="api-group" id="api-cleanup">
+<div class="gh"><h3 id="g-cleanup" data-notoc>[[운영 기록 정리||Operations-store cleanup]]</h3><span class="c">2</span></div>
+<p class="gd">[[운영 저장소의 오래된 기록을 사용자가 직접 정리 (자동 정리 없음)||User-initiated cleanup of old records in the operations store (no automatic cleanup).]]</p>
+<div class="eps">
+<div class="ep"><span class="m post">POST</span><span class="p">/api/operation/cleanup</span><span class="d">[[정리 실행||Run cleanup]]</span></div>
+<div class="ep"><span class="m get">GET</span><span class="p">/api/operation/cleanup/preview</span><span class="d">[[정리 미리보기 (건수만)||Preview cleanup (counts only)]]</span></div>
+</div></div>
+<div class="api-group" id="api-sequence">
+<div class="gh"><h3 id="g-sequence" data-notoc>[[채번||Numbering (sequence v1)]]</h3><span class="c">6</span></div>
+<p class="gd">[[시퀀스 관리 테이블 조회·일괄 선점·값 설정·MAX 동기화 (core.sequence v1)||Sequence control table: query, bulk reserve, set value, sync to MAX.]]</p>
+<div class="eps">
+<div class="ep"><span class="m get">GET</span><span class="p">/api/v1/sequence</span><span class="d">[[관리 테이블 전체 목록||All control rows]]</span></div>
+<div class="ep"><span class="m get">GET</span><span class="p">/api/v1/sequence/policies</span><span class="d">[[정책 목록||Policies]]</span></div>
+<div class="ep"><span class="m get">GET</span><span class="p">/api/v1/sequence/<em>{table}</em>/<em>{column}</em></span><span class="d">[[현재값 조회||Current value]]</span></div>
+<div class="ep"><span class="m put">PUT</span><span class="p">/api/v1/sequence/<em>{table}</em>/<em>{column}</em></span><span class="d">[[값 설정 (운영 보정)||Set value (operational fix)]]</span></div>
+<div class="ep"><span class="m post">POST</span><span class="p">/api/v1/sequence/<em>{table}</em>/<em>{column}</em>/reserve</span><span class="d">[[일괄 선점||Bulk reserve]]</span></div>
+<div class="ep"><span class="m post">POST</span><span class="p">/api/v1/sequence/<em>{table}</em>/<em>{column}</em>/sync</span><span class="d">[[MAX 동기화||Sync to MAX]]</span></div>
+</div></div>
+<div class="api-group" id="api-generator">
+<div class="gh"><h3 id="g-generator" data-notoc>[[이관 설계 도구||Design tools]]</h3><span class="c">14</span></div>
+<p class="gd">[[이관 설계 도구 - 코드 생성 · 관계 분석 · 매핑 정의서 초안||Code generation, relationship analysis, draft mapping definition.]]</p>
+<div class="eps">
+<div class="ep"><span class="m post">POST</span><span class="p">/api/generator/code/check</span><span class="d">[[코드 생성 검사||Check code generation]]</span></div>
+<div class="ep"><span class="m post">POST</span><span class="p">/api/generator/code/generate</span><span class="d">[[코드 zip 내려받기||Download generated code zip]]</span></div>
+<div class="ep"><span class="m get">GET</span><span class="p">/api/generator/code/template</span><span class="d">[[코드 생성 예제 양식||Code generation sample]]</span></div>
+<div class="ep"><span class="m get">GET</span><span class="p">/api/generator/history</span><span class="d">[[최근 실행 기록||Recent runs]]</span></div>
+<div class="ep"><span class="m post">POST</span><span class="p">/api/generator/mapping/check</span><span class="d">[[매핑 정의서 초안 검사||Check draft mapping]]</span></div>
+<div class="ep"><span class="m get">GET</span><span class="p">/api/generator/mapping/code-template</span><span class="d">[[공통코드 표 예제 양식||Common-code table sample]]</span></div>
+<div class="ep"><span class="m post">POST</span><span class="p">/api/generator/mapping/draft</span><span class="d">[[매핑 정의서 초안 xlsx 내려받기||Download draft mapping xlsx]]</span></div>
+<div class="ep"><span class="m get">GET</span><span class="p">/api/generator/options</span><span class="d">[[화면 기본값||Screen defaults]]</span></div>
+<div class="ep"><span class="m post">POST</span><span class="p">/api/generator/relations/analyze</span><span class="d">[[관계 분석 xlsx 내려받기||Download relationship analysis xlsx]]</span></div>
+<div class="ep"><span class="m post">POST</span><span class="p">/api/generator/relations/check</span><span class="d">[[관계 분석 검사||Check relationship analysis]]</span></div>
+<div class="ep"><span class="m get">GET</span><span class="p">/api/generator/relations/template</span><span class="d">[[테이블 정의 예제 양식||Table definition sample]]</span></div>
+<div class="ep"><span class="m post">POST</span><span class="p">/api/generator/rules/export</span><span class="d">[[현재 규칙 내려받기||Download current rules]]</span></div>
+<div class="ep"><span class="m post">POST</span><span class="p">/api/generator/rules/read</span><span class="d">[[업체 규칙 파일 읽기||Read vendor rules file]]</span></div>
+<div class="ep"><span class="m get">GET</span><span class="p">/api/generator/rules/template</span><span class="d">[[업체 규칙 파일 양식||Vendor rules template]]</span></div>
+</div></div>
+<div class="api-group" id="api-account">
+<div class="gh"><h3 id="g-account" data-notoc>[[내 계정||My account]]</h3><span class="c">2</span></div>
+<p class="gd">[[로그인한 사용자 자신의 계정 정보 · 비밀번호 바꾸기||The signed-in user&#x27;s own account info and password change.]]</p>
+<div class="eps">
+<div class="ep"><span class="m get">GET</span><span class="p">/api/account/me</span><span class="d">[[내 계정 정보 (이름 · 권한 · 메뉴별 단계 · 유휴 잠금)||My account (name · role · menu levels · idle lock)]]</span></div>
+<div class="ep"><span class="m post">POST</span><span class="p">/api/account/password</span><span class="d">[[내 비밀번호 바꾸기||Change my password]]</span></div>
+</div></div>
+<div class="api-group" id="api-users">
+<div class="gh"><h3 id="g-users" data-notoc>[[사용자 관리||User management]]</h3><span class="c">7</span></div>
+<p class="gd">[[운영 UI 사용자 추가 · 고치기 · 사용 중지 · 잠금 풀기 · 비밀번호 초기화 · 삭제 (총관리자만). 로그인이 꺼져 있으면 404 SECURITY_DISABLED||Add, edit, suspend, unlock, reset password and delete UI users (super administrator only). 404 SECURITY_DISABLED when sign-in is off.]]</p>
+<div class="eps">
+<div class="ep"><span class="m get">GET</span><span class="p">/api/users</span><span class="d">[[사용자 목록||List users]]</span></div>
+<div class="ep"><span class="m post">POST</span><span class="p">/api/users</span><span class="d">[[사용자 추가 (초기 비밀번호는 관리자가 정함, 첫 로그인 때 변경 강제)||Add user (admin sets initial password; change forced at first sign-in)]]</span></div>
+<div class="ep"><span class="m put">PUT</span><span class="p">/api/users/<em>{username}</em></span><span class="d">[[사용자 고치기 (이름 · 권한)||Edit user (name · role)]]</span></div>
+<div class="ep"><span class="m delete">DELETE</span><span class="p">/api/users/<em>{username}</em></span><span class="d">[[사용자 삭제||Delete user]]</span></div>
+<div class="ep"><span class="m put">PUT</span><span class="p">/api/users/<em>{username}</em>/enabled</span><span class="d">[[사용 중지 · 다시 사용||Suspend · re-enable]]</span></div>
+<div class="ep"><span class="m post">POST</span><span class="p">/api/users/<em>{username}</em>/password</span><span class="d">[[비밀번호 초기화 (다음 로그인 때 변경 강제)||Reset password (change forced at next sign-in)]]</span></div>
+<div class="ep"><span class="m post">POST</span><span class="p">/api/users/<em>{username}</em>/unlock</span><span class="d">[[로그인 실패 잠금 풀기||Unlock after failed sign-ins]]</span></div>
+</div></div>
+<div class="api-group" id="api-roles">
+<div class="gh"><h3 id="g-roles" data-notoc>[[권한 관리||Role management]]</h3><span class="c">6</span></div>
+<p class="gd">[[권한(역할)별 메뉴 단계 · 유휴 잠금 관리 (총관리자만). 로그인이 꺼져 있으면 404 SECURITY_DISABLED||Per-role menu levels and idle lock (super administrator only). 404 SECURITY_DISABLED when sign-in is off.]]</p>
+<div class="eps">
+<div class="ep"><span class="m get">GET</span><span class="p">/api/roles</span><span class="d">[[권한 목록 (사용자 수 포함)||List roles (with user counts)]]</span></div>
+<div class="ep"><span class="m post">POST</span><span class="p">/api/roles</span><span class="d">[[권한 추가||Add role]]</span></div>
+<div class="ep"><span class="m get">GET</span><span class="p">/api/roles/menus</span><span class="d">[[권한표에 쓰는 메뉴 목록||Menus used in the permission table]]</span></div>
+<div class="ep"><span class="m put">PUT</span><span class="p">/api/roles/<em>{id}</em></span><span class="d">[[권한 고치기 (관리자 권한은 유휴 잠금만)||Edit role (admin role: idle lock only)]]</span></div>
+<div class="ep"><span class="m delete">DELETE</span><span class="p">/api/roles/<em>{id}</em></span><span class="d">[[권한 삭제 — 그 권한의 사용자도 함께 지움||Delete role — also deletes its users]]</span></div>
+<div class="ep"><span class="m get">GET</span><span class="p">/api/roles/<em>{id}</em>/users</span><span class="d">[[그 권한의 사용자 목록 (삭제 전 확인)||Users in a role (check before delete)]]</span></div>
+</div></div>
+<div class="api-group" id="api-internal">
+<div class="gh"><h3 id="g-internal" data-notoc>[[화면 내부용||UI internal]]</h3><span class="c">4</span> <span class="badge">[[안정 API 아님||not a stable API]]</span></div>
+<p class="gd">[[운영 UI 화면이 쓰는 조회 API (읽기 전용). 화면에 맞춰 바뀔 수 있어 외부 연동용 안정 API 가 아님||Read-only queries used by the operation UI. They follow the screens and are not a stable integration API.]]</p>
+<div class="eps">
+<div class="ep"><span class="m get">GET</span><span class="p">/api/ui/environment</span><span class="d">[[화면 공통 정보 (환경 · 프로파일)||Common UI info (environment · profile)]]</span></div>
+<div class="ep"><span class="m get">GET</span><span class="p">/api/ui/jobs/<em>{migrationId}</em></span><span class="d">[[실행 1건 상세 (화면용)||Run detail (UI)]]</span></div>
+<div class="ep"><span class="m get">GET</span><span class="p">/api/ui/scenario-catalog</span><span class="d">[[시나리오 설계용 테이블 카탈로그||Table catalog for scenario design]]</span></div>
+<div class="ep"><span class="m get">GET</span><span class="p">/api/ui/target-count</span><span class="d">[[타겟 테이블 현재 건수 (화면용)||Current target row count (UI)]]</span></div>
+</div></div>

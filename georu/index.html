@@ -1,0 +1,196 @@
+<!doctype html>
+<html lang="ko" data-lang="ko" data-title-ko="Georu — 코드로 관리하는 DB 이관 프레임워크" data-title-en="Georu — code-first database migration framework">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Georu — 코드로 관리하는 DB 이관 프레임워크</title>
+<meta name="description" content="Georu 는 Spring Batch 기반의 오픈소스 DB 이관 프레임워크입니다. 실행 통제 · 이관 엔진 · 검증 · 재실행 · 기록 · 운영 화면을 제공하고, 사람은 변환 규칙만 작성합니다.">
+<meta property="og:title" content="Georu — code-first database migration framework">
+<meta property="og:description" content="Georu 는 Spring Batch 기반의 오픈소스 DB 이관 프레임워크입니다. 실행 통제 · 이관 엔진 · 검증 · 재실행 · 기록 · 운영 화면을 제공하고, 사람은 변환 규칙만 작성합니다.">
+<meta property="og:type" content="website">
+<meta property="og:image" content="https://rm-studio-org.github.io/assets/banner.png">
+<link rel="icon" href="../assets/georu-mark-light.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+KR:wght@400;500;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/georu.css">
+<script>
+(function(){var d=document.documentElement,l=null,t=null;
+try{var q=new URLSearchParams(location.search).get('lang');if(q==='ko'||q==='en')l=q;}catch(e){}
+try{l=l||localStorage.getItem('rm-lang');t=localStorage.getItem('rm-theme');}catch(e){}
+if(!l)l=(navigator.language||'ko').toLowerCase().indexOf('ko')===0?'ko':'en';
+d.setAttribute('data-lang',l);d.lang=l;if(t==='light'||t==='dark')d.setAttribute('data-theme',t);})();
+</script>
+</head>
+<body>
+<header class="g-top on-dark" data-hero>
+  <div class="wrap">
+    
+    <a class="g-brand" href="index.html" aria-label="Georu home"><img class="lt-only" src="../assets/georu-mark-light.svg" alt="" data-lm><img class="dk-only" src="../assets/georu-mark-dark.svg" alt="">Georu<span class="chip">v0.8 beta</span></a>
+    <nav class="g-nav" aria-label="Georu"><a href="index.html" aria-current="page"><span lang="ko">소개</span><span lang="en">Overview</span></a><a href="architecture.html"><span lang="ko">아키텍처</span><span lang="en">Architecture</span></a><a href="engine.html"><span lang="ko">핵심 기능</span><span lang="en">Core features</span></a><a href="api.html"><span lang="ko">API</span><span lang="en">API</span></a></nav>
+    <div class="g-tools">
+      <a class="gh-link" href="https://github.com/dvmoomoodv/georu-data-migration" target="_blank" rel="noopener"><svg width="15" height="15" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg><span>GitHub</span></a>
+      <div class="seg" role="group" aria-label="Language"><button type="button" data-set-lang="ko">KO</button><button type="button" data-set-lang="en">EN</button></div>
+      <button type="button" class="icon-btn" id="themeBtn" aria-label="Toggle theme"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg></button>
+    </div>
+  </div>
+</header>
+<main>
+<section class="hero">
+  <div class="wrap">
+    <div>
+      <div class="eyebrow"><i></i><span lang="ko">오픈소스 · Apache 2.0 · Spring Batch 5</span><span lang="en">Open source · Apache 2.0 · Spring Batch 5</span></div>
+      <h1><span lang="ko">데이터는 <em>청크로 나눠</em>,<br>이관은 <em>코드로</em>.</span><span lang="en">Ship data <em>in chunks</em>.<br>Keep migration <em>as code</em>.</span></h1>
+      <p class="lead"><span lang="ko">Georu(거루)는 실제 이관 프로젝트에서 쓰던 엔진을 공개한 DB 이관 프레임워크입니다. 사람은 변환 규칙(SQL · Java)만 쓰고, 실행 통제 · 이관 엔진 · 검증 · 재실행 · 기록 · 운영 화면은 Georu 가 맡습니다.</span><span lang="en">Georu is a database migration framework extracted from the engine we ran on real migration projects. People write only the transformation rules (SQL · Java); Georu handles execution control, the migration engine, verification, re-runs, records and the operation screens.</span></p>
+      <div class="btns">
+        <a class="btn light" href="architecture.html"><span lang="ko">아키텍처 문서 보기</span><span lang="en">Read the architecture</span> →</a>
+        <a class="btn outline" href="api.html"><span lang="ko">API 레퍼런스</span><span lang="en">API reference</span></a>
+        <a class="btn outline" href="https://github.com/dvmoomoodv/georu-data-migration" target="_blank" rel="noopener">GitHub ↗</a>
+      </div>
+      <div class="meta"><span>Java 17</span><span>Spring Boot 3.2</span><span>Spring Batch 5</span><span>MyBatis 3</span><span>Oracle · MySQL · SQL Server · PostgreSQL · MariaDB</span></div>
+    </div>
+    <div class="flow-card" aria-hidden="true">
+      <div class="hd"><span class="dot"></span><b>tb_order</b> · NORMAL · DIV-2025-01..12</div>
+      <div class="lane"><span class="lbl">read</span><span class="bar"><i style="width:86%"></i></span><span class="n">86%</span></div>
+      <div class="lane"><span class="lbl">process</span><span class="bar"><i style="width:81%"></i></span><span class="n">81%</span></div>
+      <div class="lane"><span class="lbl">write ×6</span><span class="bar"><i style="width:74%"></i></span><span class="n">74%</span></div>
+      <div class="chunks"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+      <div class="log">
+        <div><span class="mut">09:12:01</span> <span class="ac">gate</span> acquired · 1 run in system</div>
+        <div><span class="mut">09:12:02</span> <span class="ac">precheck</span> length · NOT NULL · type · PK <span class="ok">pass</span></div>
+        <div><span class="mut">09:12:04</span> chunk #1,204 · 200 rows <span class="ok">✓</span></div>
+        <div><span class="mut">09:40:55</span> source 2,408,113 = target 2,408,113 <span class="ok">COMPLETED</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="band">
+  <div class="wrap">
+    <p class="kicker"><span lang="ko">왜 Georu 인가</span><span lang="en">Why Georu</span></p>
+    <h2><span lang="ko">이관 사고는 매번 같은 곳에서 납니다</span><span lang="en">Migration accidents happen in the same places, every time</span></h2>
+    <p class="sub"><span lang="ko">두 사람이 동시에 돌리고, 테스트하다 운영 데이터를 덮고, 몇 건이 빠졌는지는 끝나고 나서야 압니다. Georu 는 이 사고들을 사람의 주의력이 아니라 프레임워크의 구조로 막습니다.</span><span lang="en">Two people run it at once, a test overwrites production data, and missing rows surface only at the end. Georu prevents these accidents by framework structure rather than by human attention.</span></p>
+    <div class="stats">
+      <div><b>1</b><span><span lang="ko">시스템 전체 동시 실행 수 — 실행 게이트</span><span lang="en">Run at a time, system-wide — execution gate</span></span></div>
+      <div><b>200<small><span lang="ko">건</span><span lang="en">rows</span></small></b><span><span lang="ko">청크 단위 기록 · 건수 판정</span><span lang="en">Per-chunk records · count verdict</span></span></div>
+      <div><b>3<small><span lang="ko">겹</span><span lang="en">layers</span></small></b><span><span lang="ko">DB 쓰기 정책 — 삭제 · DDL 차단</span><span lang="en">DB write policy — no deletes · no DDL</span></span></div>
+      <div><b>4<small><span lang="ko">단계</span><span lang="en">modes</span></small></b><span><span lang="ko">테스트 모드 — 읽기만부터 전량까지</span><span lang="en">Test modes — read-only up to full load</span></span></div>
+    </div>
+  </div>
+</section>
+
+<section class="band alt">
+  <div class="wrap">
+    <p class="kicker"><span lang="ko">역할 분담</span><span lang="en">Division of work</span></p>
+    <h2><span lang="ko">업체는 규칙만, 흐름은 Georu 가</span><span lang="en">You write the rules. Georu owns the flow.</span></h2>
+    <p class="sub"><span lang="ko">Georu 는 라이브러리 묶음(jar 7개)으로 배포되고, 업체는 이를 의존성으로 넣어 이관 앱을 만듭니다. 실행 흐름은 Georu 가 쥐고, 업체 코드를 정해진 자리에서 부릅니다.</span><span lang="en">Georu ships as a library bundle of seven jars. Vendors add it as a dependency to build a migration app; Georu owns the execution flow and calls vendor code at defined points.</span></p>
+    <div class="split">
+      <div class="panel you">
+        <h3><span lang="ko">업체가 쓰는 것</span><span lang="en">What the vendor writes</span></h3>
+        <p class="cap"><span lang="ko">테이블마다 세 파일 — 버전 관리 · 코드 리뷰 · 단위 테스트 그대로</span><span lang="en">Three files per table — version control, code review and unit tests just work</span></p>
+        <ul class="ticks">
+          <li><span lang="ko"><b>Source SQL</b> — 소스에서 읽고 변환하는 MyBatis 쿼리</span><span lang="en"><b>Source SQL</b> — MyBatis query that reads and transforms from the source</span></li>
+          <li><span lang="ko"><b>Target SQL</b> — 타겟에 싣는 INSERT · UPSERT</span><span lang="en"><b>Target SQL</b> — INSERT · UPSERT into the target</span></li>
+          <li><span lang="ko"><b>Processor</b> (선택) — 검증 · 옮겨 담기</span><span lang="en"><b>Processor</b> (optional) — validation · copying values</span></li>
+          <li><span lang="ko">업무별 플러그인 · 테이블 선언(<code>TableOptions</code>) · 시나리오 JSON</span><span lang="en">Per-area plugins · table declarations (<code>TableOptions</code>) · scenario JSON</span></li>
+        </ul>
+      </div>
+      <div class="panel georu">
+        <h3><span lang="ko">Georu 가 맡는 것</span><span lang="en">What Georu provides</span></h3>
+        <p class="cap"><span lang="ko">엔진 내부는 업체가 건드리지 않습니다</span><span lang="en">Engine internals stay untouched</span></p>
+        <ul class="ticks">
+          <li><span lang="ko">실행 게이트 · 사전 검사 · 실행 시간대 · 부하 조절</span><span lang="en">Execution gate · pre-run checks · run windows · throttling</span></li>
+          <li><span lang="ko">읽기 → 큐 → 적재 스레드 n 의 이관 엔진, 채번 · Lookup · N:1</span><span lang="en">Read → queue → n load threads engine, numbering · Lookup · N:1</span></li>
+          <li><span lang="ko">테스트 모드 · 실행 전 점검 · DB 쓰기 정책 3겹</span><span lang="en">Test modes · precheck · three-layer DB write policy</span></li>
+          <li><span lang="ko">재시도 · 빠진 행 채우기 · 날짜 분할 · 시나리오 · 스케줄</span><span lang="en">Retries · fill missing rows · date split · scenarios · schedules</span></li>
+          <li><span lang="ko">이력 · 보고서(CSV · XLSX · PDF) · 알림 · 운영 UI 28화면 · REST API</span><span lang="en">History · reports (CSV · XLSX · PDF) · alerts · 28-screen UI · REST API</span></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="band">
+  <div class="wrap">
+    <p class="kicker"><span lang="ko">동작 방식</span><span lang="en">How it works</span></p>
+    <h2><span lang="ko">테이블 하나가 옮겨지는 길</span><span lang="en">The path of one table</span></h2>
+    <p class="sub"><span lang="ko">요청부터 건수 판정까지 모든 단계가 운영 저장소에 남습니다. 읽기와 쓰기는 메모리 큐로 분리되어, 느린 타겟이 소스 읽기를 붙잡지 않습니다.</span><span lang="en">Every step from request to count verdict is recorded in the operations store. Reads and writes are separated by an in-memory queue, so a slow target never holds the source read.</span></p>
+    <figure class="diagram">
+      <div class="pipe">
+        <div class="stage"><span class="s-no">01</span><b><span lang="ko">실행 게이트</span><span lang="en">Gate</span></b><p><span lang="ko">다른 실행이 없는지 확인, 있으면 409</span><span lang="en">Confirms nothing else runs; otherwise 409</span></p></div>
+        <div class="lnk">→</div>
+        <div class="stage"><span class="s-no">02</span><b><span lang="ko">사전 검사</span><span lang="en">Checks</span></b><p><span lang="ko">이관 상태 · 기존 데이터 · 실행 전 점검 (쓰지 않음)</span><span lang="en">Status · existing data · precheck (writes nothing)</span></p></div>
+        <div class="lnk">→</div>
+        <div class="stage"><span class="s-no">03</span><b>Reader</b><p><span lang="ko">PK 기준 페이지 읽기, 읽기 전용 연결</span><span lang="en">Paged by PK, read-only connection</span></p><span class="val">SELECT</span></div>
+        <div class="lnk">→</div>
+        <div class="stage"><span class="s-no">04</span><b>Processor</b><p><span lang="ko">소스 DTO → 타겟 DTO</span><span lang="en">Source DTO → target DTO</span></p><span class="val">chunk 200</span></div>
+        <div class="lnk">→</div>
+        <div class="stage q"><span class="s-no">05</span><b><span lang="ko">큐</span><span lang="en">Queue</span></b><p><span lang="ko">읽기와 쓰기를 분리</span><span lang="en">Decouples read and write</span></p><span class="val">500,000</span></div>
+        <div class="lnk">→</div>
+        <div class="stage w"><span class="s-no">06</span><b>Writer × W</b><p><span lang="ko">배치 INSERT, 자동 재시도 3회</span><span lang="en">Batch INSERT, 3 auto-retries</span></p><div class="threads"><i></i><i></i><i></i><i></i></div></div>
+        <div class="lnk">→</div>
+        <div class="stage"><span class="s-no">07</span><b><span lang="ko">판정</span><span lang="en">Verdict</span></b><p><span lang="ko">소스 = 타겟 건수 → 알림 · 보고서</span><span lang="en">Source = target count → alerts · reports</span></p></div>
+      </div>
+      <figcaption><span lang="ko">예제 앱 기본값: 청크 200건, 큐 500,000건, 적재 스레드 4(prd 6), 500건 단위 배치 INSERT</span><span lang="en">Example defaults: chunk 200 rows, queue 500,000 rows, 4 load threads (6 in prd), batch INSERT in units of 500</span></figcaption>
+    </figure>
+  </div>
+</section>
+
+<section class="band alt">
+  <div class="wrap">
+    <p class="kicker"><span lang="ko">문서</span><span lang="en">Documentation</span></p>
+    <h2><span lang="ko">구조부터 API 까지, 한 번에</span><span lang="en">From structure to API, in one place</span></h2>
+    <p class="sub"><span lang="ko">Georu 아키텍처 정의서(v1.4)를 웹 문서로 옮겼습니다. 고객 아키텍트 · IT 운영 · 보안 담당과 수행팀이 알아야 할 구조를 장별로 정리했습니다.</span><span lang="en">The Georu architecture definition (v1.4), rewritten for the web. Organized by chapter for client architects, IT operations, security staff and delivery teams.</span></p>
+    <div class="cards">
+      <a class="card" href="architecture.html"><div class="ic">01</div><h3><span lang="ko">시스템 아키텍처</span><span lang="en">System architecture</span></h3><p><span lang="ko">구성 요소 10개, 시스템 연관도, 인터페이스 12종, 프레임워크 계층과 7개 모듈</span><span lang="en">10 components, system context, 12 interfaces, framework layers and 7 modules</span></p><span class="more"><span lang="ko">읽기</span><span lang="en">Read</span> →</span></a>
+      <a class="card" href="application.html"><div class="ic">02</div><h3><span lang="ko">애플리케이션 구성</span><span lang="en">Application design</span></h3><p><span lang="ko">운영 UI 와 메뉴 권한, 요청 처리 레이어, 7단계 보안 필터 체인, 빌드 · 배포 · 롤백</span><span lang="en">Operation UI and menu permissions, request layers, 7-stage security filter chain, build · deploy · rollback</span></p><span class="more"><span lang="ko">읽기</span><span lang="en">Read</span> →</span></a>
+      <a class="card" href="engine.html"><div class="ic">03</div><h3><span lang="ko">핵심 기능</span><span lang="en">Core features</span></h3><p><span lang="ko">실행 게이트, 큐 분리 엔진, 날짜 분할 · 시나리오, 재시도 · 복구, 테스트 모드 · 쓰기 정책</span><span lang="en">Execution gate, queue-separated engine, date split · scenarios, retries · recovery, test modes · write policy</span></p><span class="more"><span lang="ko">읽기</span><span lang="en">Read</span> →</span></a>
+      <a class="card" href="infrastructure.html"><div class="ic">04</div><h3><span lang="ko">인프라 · 배포</span><span lang="en">Infrastructure</span></h3><p><span lang="ko">로컬 · 도커 · 서버 실행 방식, 포트와 방화벽, 서버 사양, 스토리지, 지원 DB</span><span lang="en">Local · Docker · server, ports and firewall, sizing, storage, supported databases</span></p><span class="more"><span lang="ko">읽기</span><span lang="en">Read</span> →</span></a>
+      <a class="card" href="api.html"><div class="ic">API</div><h3><span lang="ko">API 레퍼런스</span><span lang="en">API reference</span></h3><p><span lang="ko">HTTP Basic 인증, 공통 응답, 오류 코드, 18개 분류 123개 엔드포인트와 curl 예</span><span lang="en">HTTP Basic auth, common response, error codes, 123 endpoints in 18 groups with curl examples</span></p><span class="more"><span lang="ko">읽기</span><span lang="en">Read</span> →</span></a>
+      <a class="card" href="https://github.com/dvmoomoodv/georu-data-migration" target="_blank" rel="noopener"><div class="ic">GH</div><h3><span lang="ko">소스 · 예제 앱</span><span lang="en">Source · example app</span></h3><p><span lang="ko">Docker 로 Oracle 12 테이블을 MySQL 로 옮기는 데모를 바로 실행해 볼 수 있습니다</span><span lang="en">Run the demo that migrates 12 Oracle tables to MySQL with Docker</span></p><span class="more">GitHub ↗</span></a>
+    </div>
+  </div>
+</section>
+
+<section class="band">
+  <div class="wrap">
+    <div class="split" style="align-items:center">
+      <div>
+        <p class="kicker"><span lang="ko">빠른 시작</span><span lang="en">Quick start</span></p>
+        <h2><span lang="ko">데모를 바로 실행</span><span lang="en">Run the demo locally</span></h2>
+        <p class="muted" style="color:var(--ink-2)"><span lang="ko">Docker(Compose v2)와 메모리 8GB 이상이면 됩니다. 접속 후 관리자 계정을 만들고 <b>안내서 → 데모 시작 가이드</b>를 따라가세요.</span><span lang="en">All you need is Docker (Compose v2) and 8 GB+ of memory. Create an admin account on first visit, then follow <b>Guide → Demo getting started</b>.</span></p>
+        <p style="color:var(--ink-3);font-size:13.5px"><span lang="ko">0.x 베타 — 1.0 전까지 공개 API 와 설정 키가 바뀔 수 있습니다.</span><span lang="en">0.x beta — public APIs and config keys may change before 1.0.</span></p>
+      </div>
+<pre><span class="p">$ </span>git clone https://github.com/dvmoomoodv/georu-data-migration.git
+<span class="p">$ </span>cd georu-data-migration/examples/demo
+<span class="p">$ </span>cp docker/.env.example docker/.env
+<span class="p">$ </span>./run-scripts/run-docker.sh db     <span class="c"># Oracle + MySQL</span>
+<span class="p">$ </span>./run-scripts/run-docker.sh build  <span class="c"># app image</span>
+<span class="p">$ </span>./run-scripts/run-docker.sh up     <span class="c"># → http://localhost:8083/ui</span></pre>
+    </div>
+  </div>
+</section>
+
+<section class="band" style="padding-top:0">
+  <div class="wrap">
+    <div class="cta">
+      <div>
+        <h2><span lang="ko">이관 프로젝트를 준비하고 계신가요?</span><span lang="en">Planning a migration project?</span></h2>
+        <p><span lang="ko">Georu 를 만든 RM Studio 가 이관 설계부터 본 이관까지 함께합니다.</span><span lang="en">RM Studio, the team behind Georu, can work with you from migration design to cut-over.</span></p>
+      </div>
+      <div class="btns" style="display:flex;gap:12px;flex-wrap:wrap">
+        <a class="btn light" href="../index.html#contact"><span lang="ko">문의하기</span><span lang="en">Contact us</span></a>
+        <a class="btn outline" href="architecture.html"><span lang="ko">문서 시작하기</span><span lang="en">Start reading</span> →</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+</main>
+<footer class="g-foot"><div class="wrap">
+  <span>© 2026 RM Studio · Georu is licensed under the Apache License 2.0</span>
+  <span><a href="https://github.com/dvmoomoodv/georu-data-migration" target="_blank" rel="noopener">GitHub</a> · <a href="../index.html">rm-studio-org.github.io</a></span>
+</div></footer>
+<script src="assets/georu.js"></script>
+</body>
+</html>

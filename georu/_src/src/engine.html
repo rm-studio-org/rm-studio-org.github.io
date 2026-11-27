@@ -1,0 +1,159 @@
+<header class="doc-head">
+  <h1>[[핵심 기능||Core features]]</h1>
+  <p class="lede">[[Georu 가 사고를 막는 방식 — 동시 실행을 막는 실행 게이트, 읽기와 쓰기를 나누는 이관 엔진, 큰 테이블을 나누는 분할 실행, 실패 뒤 자동 · 수동 복구, 적재 전에 검증하고 DB 를 지키는 안전장치입니다.||How Georu prevents accidents — an execution gate against concurrent runs, an engine that separates reads from writes, split runs for large tables, automatic and manual recovery after failures, and safeguards that verify before loading and protect the databases.]]</p>
+  <div class="tags"><span class="tag">[[정의서 8 ~ 13장||Chapters 8–13]]</span><span class="tag">Spring Batch 5</span><span class="tag">[[예제 앱 기본값||Example defaults]]</span></div>
+</header>
+
+<h2 id="control"><span class="no">8</span>[[실행 통제||Execution control]]</h2>
+<p>[[이관 사고의 상당수는 "두 사람이 동시에 돌렸다"에서 시작합니다. Georu 는 실행 단위를 시스템 전체에서 <b>하나만</b> 허용하고, 실행 전에 정해진 순서로 검사를 돌린 뒤에야 Job 을 시작합니다.||Many migration accidents start with "two people ran it at the same time". Georu allows <b>exactly one</b> execution unit system-wide, and only starts a Job after running checks in a fixed order.]]</p>
+
+<h3 id="gate">[[8.1 실행 게이트 · 테이블 사용 대장||8.1 Execution gate · table usage register]]</h3>
+<tbl>
+[[장치||Mechanism]] | [[동작||Behavior]]
+[[실행 게이트||Execution gate]] | [[실행 단위(테이블 · 시나리오 묶음 · 스케줄 · 청크 재시도 · 엑셀)는 <b>시스템 전체에서 1개</b>. 실행 중 새 요청은 409, cron 은 건너뜀. 단위의 모든 Job 이 끝나야 풀림. Job 없이 열린 단위는 600초 뒤 자동 해제. 실행기 스레드가 1 이 아니면 기동 실패||<b>One</b> execution unit (table · scenario group · schedule · chunk retry · Excel) <b>system-wide</b>. New requests during a run get 409; cron runs are skipped. Released only when every Job of the unit ends. A unit opened without a Job auto-releases after 600 s. Startup fails if the executor thread count is not 1]]
+[[테이블 사용 대장||Table usage register]] | [[이관과 실행 전 점검이 <b>같은 테이블을 동시에</b> 쓰지 않게 테이블 단위로 막음 (채번 상태가 섞이지 않게)||Blocks per table so a migration and a precheck never use <b>the same table at once</b> (numbering state never mixes)]]
+[[강제 해제||Force release]] | [[실행이 없는데 게이트가 남았을 때 실행 현황 화면에서 (`POST /api/migrate/gate/release`)||From the Execution Status screen when the gate remains with nothing running (`POST /api/migrate/gate/release`)]]
+</tbl>
+
+<h3 id="prechecks">[[8.2 사전 검사 순서||8.2 Order of pre-run checks]]</h3>
+<div class="flowline"><span>[[이관 상태 (대기 · 제외 차단)||Migration status (Pending · Excluded blocked)]]</span><i>→</i><span>[[사용 중 · 시퀀스 · 미완 코드||In use · sequence · unfinished code]]</span><i>→</i><span>[[타겟 기존 데이터 (NORMAL 이면 경고 · 중단)||Existing target data (warn · stop for NORMAL)]]</span><i>→</i><span class="hl">[[자동 실행 전 점검||Automatic precheck]]</span></div>
+<p>[[막히면 `BLOCKED_*` 코드와 이유가 실행 기록에 남습니다.||When blocked, a `BLOCKED_*` code and the reason are recorded in the run history.]]</p>
+
+<h3 id="window">[[8.3 실행 시간대 · 부하 · 종료||8.3 Run window · load · shutdown]]</h3>
+<tbl>
+[[장치||Mechanism]] | [[동작||Behavior]]
+[[실행 시간대||Run window]] | [[금지 시간대(예: 평일 08:00 ~ 21:00)에 들어가면 <b>지금 청크를 마치고</b> 멈춤 → 허용 시간대에 자동 재시작||On entering a blocked window (e.g. weekdays 08:00–21:00), <b>finishes the current chunk</b> and pauses → restarts automatically in the allowed window]]
+[[부하 조절||Throttling]] | [[페이지 · 청크 사이 지연 (최대 10초)||Delay between pages · chunks (up to 10 s)]]
+[[유휴 종료||Idle shutdown]] | [[실행이 없으면 정해진 시간 뒤 앱 종료 (선택)||Shuts the app down after a set idle time (optional)]]
+[[정상 종료||Graceful shutdown]] | [[실행 중 Job 에 정지 요청 → 최대 35초 대기 → 남은 Job 은 실패로 기록||Stop request to running Jobs → waits up to 35 s → remaining Jobs recorded as failed]]
+</tbl>
+
+<h2 id="pipeline"><span class="no">9</span>[[이관 엔진||Migration engine]]</h2>
+<p>[[테이블 하나가 Spring Batch Job 하나입니다. 엔진은 읽기와 쓰기 사이에 <b>메모리 큐</b>를 두어 둘을 분리합니다. 소스는 PK 순서로 꾸준히 읽고, 여러 적재 스레드가 큐에서 꺼내 타겟에 배치로 씁니다. 느린 타겟이 소스 커서를 오래 붙잡지 않고, 적재 병렬도는 타겟 여유에 맞춰 조절할 수 있습니다.||One table is one Spring Batch Job. The engine puts an <b>in-memory queue</b> between reads and writes. The source is read steadily in PK order, while several load threads take rows off the queue and batch-write them to the target. A slow target never holds the source cursor for long, and write parallelism can be tuned to the target's capacity.]]</p>
+
+<figure class="diagram">
+  <div class="pipe">
+    <div class="stage"><span class="s-no">READ</span><b>Reader</b><p>[[정렬 키(PK) 기준 페이지 읽기. 읽기 전용 연결 · SELECT 만||Paged by sort key (PK). Read-only connection · SELECT only]]</p><span class="val">source-*</span></div>
+    <div class="lnk">→</div>
+    <div class="stage"><span class="s-no">TRANSFORM</span><b>Processor</b><p>[[소스 DTO → 타겟 DTO, 청크 단위||Source DTO → target DTO, per chunk]]</p><span class="val">chunk = 200</span></div>
+    <div class="lnk">→</div>
+    <div class="stage q"><span class="s-no">BUFFER</span><b>[[메모리 큐||In-memory queue]]</b><p>[[읽기와 쓰기를 분리||Separates read from write]]</p><span class="val">cap 500,000</span></div>
+    <div class="lnk">→</div>
+    <div class="stage w"><span class="s-no">LOAD</span><b>[[적재 스레드 × W||Load threads × W]]</b><p>[[5,000건 또는 10초마다 꺼내 500건 단위 배치 INSERT||Takes rows every 5,000 or 10 s, batch-INSERTs 500 at a time]]</p><div class="threads"><i></i><i></i><i></i><i></i></div><span class="val">W = 4 · prd 6</span></div>
+    <div class="lnk">→</div>
+    <div class="stage"><span class="s-no">VERIFY</span><b>[[판정||Verdict]]</b><p>[[소스 건수 = 타겟 건수||Source count = target count]]</p><span class="val">target-*</span></div>
+  </div>
+  <figcaption>[[그림 1. 큐 분리 구조 — 청크마다 진행 · 건수 · 오류가 운영 저장소에 기록됨||Figure 1. Queue separation — progress, counts and errors recorded per chunk in the operations store]]</figcaption>
+</figure>
+
+<h3 id="queue">[[9.1 큐 분리 구조||9.1 Queue separation]]</h3>
+<tbl>
+[[단계||Stage]] | [[내용 (예제 기본값)||Content (example defaults)]]
+[[읽기||Read]] | [[Reader 가 정렬 키(PK) 기준으로 페이지를 나눠 읽음. 소스는 읽기 전용 연결 · SELECT 만||The Reader reads pages by sort key (PK). Read-only connection · SELECT only on the source]]
+[[변환||Transform]] | [[Processor 가 소스 DTO → 타겟 DTO, 청크(기본 200건) 단위||The Processor maps source DTO → target DTO per chunk (default 200 rows)]]
+[[큐||Queue]] | [[읽기와 쓰기를 나누는 메모리 큐, 용량 500,000건||In-memory queue separating reads and writes, capacity 500,000 rows]]
+[[적재||Load]] | [[적재 스레드 W 개(예제 4 · prd 6)가 5,000건 또는 10초마다 꺼내 <b>500건 단위 배치 INSERT</b>||W load threads (example 4 · prd 6) take rows every 5,000 rows or 10 s and <b>batch-INSERT 500 at a time</b>]]
+[[실패||Failure]] | [[적재 실패는 Step 실패로 전파 (자동 재시도 뒤)||A load failure propagates as a Step failure (after automatic retries)]]
+[[종료 대기||Completion wait]] | [[Step 이 끝날 때 진척 없음 30초 · 최대 600초 대기, 넘으면 미적재로 보고 실패||At Step end, waits 30 s without progress · up to 600 s; beyond that, reports unloaded rows and fails]]
+</tbl>
+
+<h3 id="verdict">[[9.2 청크 · 기록 · 판정||9.2 Chunks · records · verdict]]</h3>
+<p>[[청크마다 진행 · 건수 · 오류를 운영 저장소에 남기고(Job · Step · 청크 리스너), N 청크마다 진행 알림을 보냅니다. 끝나면 소스 건수 = 타겟 건수를 판정해 상태를 정합니다.||Each chunk records progress, counts and errors in the operations store (Job · Step · chunk listeners), and a progress alert is sent every N chunks. At the end, source count = target count decides the status.]]</p>
+<div class="flowline"><span class="hl">[[완료||Completed]]</span><span>[[완료(경고)||Completed (warning)]]</span><span>[[실패||Failed]]</span><span>[[차단||Blocked]]</span></div>
+
+<h3 id="patterns">[[9.3 채번 · 변환 패턴||9.3 Numbering · transformation patterns]]</h3>
+<tbl>
+[[기능||Feature]] | [[내용||Content]]
+[[채번||Numbering]] | [[관리 테이블에서 번호를 1,000개씩 미리 확보, 실행 전 관리 값을 타겟 MAX 이상으로 맞추고 끝난 뒤 MAX 로 동기화||Reserves numbers 1,000 at a time from the control table; before a run raises the control value to ≥ target MAX, and syncs to MAX afterward]]
+[[병합 (N:1)||Merge (N:1)]] | [[여러 소스 → 한 타겟||Several sources → one target]]
+[[분할 (1:N)||Fan-out (1:N)]] | [[한 번 읽어 여러 타겟||Read once, write to several targets]]
+Lookup | [[다른 DataSource 의 값을 붙임||Attaches values from another DataSource]]
+[[직접 만든 Reader · Writer||Custom Reader · Writer]] | [[공용 클래스로 안 되는 경우||When the shared classes do not fit]]
+</tbl>
+
+<h2 id="split"><span class="no">10</span>[[분할 · 묶음 실행||Splitting · group runs]]</h2>
+<p>[[큰 테이블과 여러 테이블을 한 번에 옮기지 않습니다. 기간으로 나누거나 단계로 묶어 <b>Job 여러 개를 차례로</b> 돌리고, 묶음 ID 로 진행과 결과를 한꺼번에 봅니다.||Large tables and many tables are not moved in one shot. They are split by period or grouped into steps, running <b>several Jobs in sequence</b>, with progress and results tracked under a group ID.]]</p>
+<div class="cards" style="grid-template-columns:repeat(2,1fr)">
+  <div class="card"><div class="ic">DIV</div><h3>[[날짜 분할||Date split]]</h3><p>[[기간을 일 · 주 · 월 · 년 구간으로 나눠 <b>구간마다 Job 하나</b>. 앞 Job 이 끝나면 다음 Job. 묶음 ID `DIV-`. 구간 실패 시 `onUnitFailure` 로 멈춤 · 계속을 고름.||Splits a period into day · week · month · year ranges, <b>one Job per range</b>, run back-to-back. Group ID `DIV-`. On a range failure, `onUnitFailure` picks stop or continue.]]</p></div>
+  <div class="card"><div class="ic">SCF</div><h3>[[시나리오||Scenario]]</h3><p>[[단계 → 단계 안 여러 테이블. 단계 실패 시 기본은 전체 멈춤(선택: 다음 단계). 사전 확인 · 단계별 덮어쓰기. 묶음 ID `SCF-`.||Steps → several tables per step. By default a step failure stops everything (optional: next step). Pre-confirmation · per-step overrides. Group ID `SCF-`.]]</p></div>
+  <div class="card"><div class="ic">⏱</div><h3>[[스케줄||Schedule]]</h3><p>[[Cron 등록 · 일시정지 · 재개 · 즉시 실행. 재기동하면 일시정지 상태로 올라와 의도치 않은 실행을 막습니다.||Cron registration · pause · resume · run now. After a restart schedules come up paused, preventing unintended runs.]]</p></div>
+  <div class="card"><div class="ic">XLS</div><h3>[[엑셀 이관||Excel migration]]</h3><p>[[업로드(헤더 = TOBE 컬럼) → 검증(헤더 · 필수 · 길이 · 타입 · PK 중복) → DB 이관과 같은 파이프라인으로 적재.||Upload (header = TOBE columns) → validation (header · required · length · type · duplicate PK) → loaded through the same pipeline as DB migration.]]</p></div>
+</div>
+
+<h2 id="recovery"><span class="no">11</span>[[재시도 · 재실행 · 복구||Retries · re-runs · recovery]]</h2>
+<p>[[실패 대응은 자동에서 수동 순으로 쌓여 있습니다. 일시적인 오류는 엔진이 스스로 넘기고, 사람이 개입해야 할 때도 <b>지우지 않고</b> 빠진 행만 채우는 방법이 먼저입니다.||Failure handling is layered from automatic to manual. Transient errors are absorbed by the engine, and when people must step in, the first option is to fill only the missing rows — <b>without deleting</b> anything.]]</p>
+<h3 id="failure">[[11.1 실패 대응 (자동 → 수동)||11.1 Failure handling (automatic → manual)]]</h3>
+<tbl>
+# | [[대응||Handling]] | [[동작||Behavior]]
+1 | [[적재 자동 재시도||Automatic load retry]] | [[flush 1회에 최대 3회, 5 → 10 → 15초. 교착 · 잠금 · 시간 초과 · 연결 끊김만||Up to 3 times per flush, 5 → 10 → 15 s. Deadlock · lock · timeout · lost connection only]]
+2 | [[오류 유형별 재시도||Retry by error type]] | [[오류를 분류해 유형별로 재시도 (기본 3회 · 1초 · 2배)||Classifies errors and retries per type (default 3 × · 1 s · ×2)]]
+3 | [[시간대 자동 재시작||Run-window restart]] | [[금지 시간대로 멈춘 실행을 허용 시간대에 다시 시작||Restarts a run paused by a blocked window in the allowed window]]
+4 | [[빠진 행 채우기||Fill missing rows]] | [[실패한 실행의 요청 그대로 다시 읽고, 타겟 PK 로 이미 있는 행은 걸러 없는 행만 적재. 새 실행으로 남기고 원 실행과 연결||Re-reads with the failed run's exact request, filters out rows already in the target by PK, loads only missing ones. Recorded as a new run linked to the original]]
+5 | [[추가분만 (증분)||Increment only]] | [[기간 조건으로 새로 생긴 행만||Only newly created rows, by period condition]]
+6 | [[전량 다시||Full re-run]] | [[DBA 가 타겟을 정리한 뒤 새 실행 (앱은 지우지 않음)||A new run after the DBA cleans the target (the app never deletes)]]
+7 | [[강제 종료 뒤 정리||Cleanup after forced stop]] | [[정리 스크립트로 '실행 중'을 실패로 정리 → 4 또는 6||Cleanup script turns 'Running' into failed → 4 or 6]]
+</tbl>
+<h3 id="rerun">[[11.2 재실행 방식 고르기||11.2 Choosing a re-run method]]</h3>
+<tbl>
+[[상황||Situation]] | [[방식||Method]] | [[타겟 정리||Target cleanup]]
+[[잠금 · 연결 끊김으로 실패||Failed by lock · lost connection]] | [[빠진 행 채우기||Fill missing rows]] | [[필요 없음||Not needed]]
+[[데이터 · 매핑 오류||Data · mapping error]] | [[코드 수정 → 정리 후 전량 다시||Fix code → clean up → full re-run]] | <b>[[필요||Needed]]</b>
+[[본 이관 뒤 추가 데이터||New data after cut-over]] | [[추가분만 (증분)||Increment only]] | [[필요 없음||Not needed]]
+[[서버 다운 · 강제 종료||Server down · forced stop]] | [[정리 스크립트 → 빠진 행 채우기||Cleanup script → fill missing rows]] | [[필요 없음||Not needed]]
+[[UPSERT 테이블||UPSERT table]] | [[그대로 다시||Run again as is]] | [[필요 없음||Not needed]]
+</tbl>
+
+<h2 id="safety"><span class="no">12</span>[[검증 · 안전||Verification · safety]]</h2>
+<h3 id="test-modes">[[12.1 테스트 모드||12.1 Test modes]]</h3>
+<p>[[같은 요청을 모드만 바꿔 네 단계로 올립니다. 읽기만 → 변환까지 → 100건 적재 → 전량.||The same request is promoted through four modes by changing only the mode: read → transform → 100 rows → everything.]]</p>
+<div class="modes">
+  <div><code>READER_TEST</code><p>[[읽기만||Read only]]</p><span class="w no">[[쓰기 없음||No writes]]</span></div>
+  <div><code>PROCESSOR_TEST</code><p>[[읽기 + 변환||Read + transform]]</p><span class="w no">[[쓰기 없음||No writes]]</span></div>
+  <div><code>WRITER_TEST</code><p>[[100건 적재 (표시 `MIG-TEST`)||Loads 100 rows (marked `MIG-TEST`)]]</p><span class="w yes">[[정리 필요||Cleanup needed]]</span></div>
+  <div><code>NORMAL</code><p>[[전량 (등록자 `MIG-DATA`)||Everything (`MIG-DATA`)]]</p><span class="w all">[[전량 적재||Full load]]</span></div>
+</div>
+<div class="note warn"><b>[[주의||Caution]]</b><p>[[API 로 테이블을 실행할 때 `testMode` 를 빼면 <b>NORMAL(전량 적재)</b>입니다. 테스트할 때는 반드시 적습니다.||When running a table through the API, omitting `testMode` means <b>NORMAL (full load)</b>. Always set it when testing.]]</p></div>
+
+<h3 id="precheck">[[12.2 실행 전 점검||12.2 Precheck]]</h3>
+<div class="flowline"><span>[[사용 중||In use]]</span><i>→</i><span>[[이관 상태||Status]]</span><i>→</i><span>[[미완 코드||Unfinished code]]</span><i>→</i><span>[[타겟 정의 · 기존 건수 · INSERT 구조||Target definition · count · INSERT shape]]</span><i>→</i><span>[[소스 샘플||Source sample]]</span><i>→</i><span>[[변환||Transform]]</span><i>→</i><span>[[값 점검||Value checks]]</span><i>→</i><span class="hl">[[판정||Verdict]]</span></div>
+<p>[[값 점검은 길이 · NOT NULL · 타입 · PK 중복을 봅니다. 타겟 · 소스를 나눠 돌릴 수 있고(타겟만이면 소스 쿼리 0), 점검 전용 Processor 와 변환 시간 제한(30초)을 씁니다. <b>쓰지 않는다는 근거</b>로 접속 기록과 실행하지 않은 INSERT 문을 결과에 남깁니다. NORMAL 실행 직전에는 자동으로 돕니다.||Value checks cover length · NOT NULL · type · duplicate PK. Target and source can run separately (target-only means zero source queries), with a check-only Processor and a 30 s transformation limit. As <b>evidence that nothing is written</b>, the result keeps the connection record and the INSERT statements that were not executed. It runs automatically just before a NORMAL run.]]</p>
+
+<h3 id="write-policy">[[12.3 DB 쓰기 정책||12.3 DB write policy]]</h3>
+<div class="policy">
+  <div>
+    <h4>[[소스 DB||Source DB]]</h4>
+    <div class="pills ok"><span>SELECT</span><span>WITH</span><span>SHOW</span><span>DESC</span><span>EXPLAIN</span></div>
+    <div class="pills bad"><span>[[그 밖 전부||everything else]]</span></div>
+  </div>
+  <div>
+    <h4>[[타겟 · 채번 DB||Target · numbering DB]]</h4>
+    <div class="pills ok"><span>SELECT</span><span>INSERT</span><span>UPDATE</span><span>MERGE*</span><span>ON DUPLICATE KEY UPDATE</span></div>
+    <div class="pills bad"><span>DELETE</span><span>TRUNCATE</span><span>REPLACE</span><span>DDL</span><span>GRANT</span><span>CALL</span></div>
+    <p class="muted" style="font-size:12.5px;margin:0">[[* 삭제 절 없는 MERGE 만||* MERGE without a delete clause]]</p>
+  </div>
+</div>
+<ol class="chain">
+  <li><b>[[기동 때 매퍼 검사||Mapper check at startup]]</b><span>[[모든 매퍼 문장을 검사해 금지 문장이 있으면 기동하지 않습니다.||All mapper statements are checked; startup stops on any forbidden statement.]]</span></li>
+  <li><b>[[실행 중 연결 검사||Connection check at runtime]]</b><span>[[정책 DataSource 가 실제로 나가는 SQL 을 검사합니다.||The policy DataSource checks the SQL actually sent.]]</span></li>
+  <li><b>[[소스 읽기 전용 연결||Read-only source connections]]</b><span>[[소스 연결 자체를 읽기 전용으로 엽니다. 최종 보장은 DB 계정 권한입니다.||Source connections are opened read-only. The final guarantee is the DB account privilege.]]</span></li>
+</ol>
+<p>[[이관 상태가 대기 · 제외인 테이블은 모든 모드에서 실행이 막힙니다.||Tables whose migration status is Pending · Excluded are blocked in every mode.]]</p>
+
+<h2 id="ops"><span class="no">13</span>[[운영 · 관리||Operations · administration]]</h2>
+<h3 id="authz">[[13.1 인증 · 권한||13.1 Authentication · permissions]]</h3>
+<tbl>
+[[항목||Item]] | [[내용||Content]]
+[[흐름||Flow]] | [[<a href="application.html#security">보안 필터 체인</a>||<a href="application.html#security">Security filter chain</a>]]
+[[저장||Storage]] | [[운영 저장소 `migration_user`(계정 · bcrypt · 잠금) · `migration_role`(권한 · 메뉴별 없음 · 조회 · 실행 · 유휴 잠금 시간)||Operations store `migration_user` (accounts · bcrypt · lock) · `migration_role` (roles · per-menu None · View · Execute · idle lock)]]
+[[기본 권한||Default roles]] | [[관리자 · 실행자 · 조회자 (추가 가능), 총관리자 1명||Administrator · Executor · Viewer (extensible), one super administrator]]
+[[외부 IAM · SSO||External IAM · SSO]] | [[<b>연계 없음.</b> 자체 계정 · 권한. 고객 SSO 연동이 필요하면 별도 협의||<b>No integration.</b> Own accounts · roles. Client SSO integration requires a separate agreement]]
+</tbl>
+<h3 id="records">[[13.2 기록 · 결과 · 알림 · 설계 도구||13.2 Records · results · alerts · design tools]]</h3>
+<tbl>
+[[기능||Feature]] | [[내용||Content]]
+[[기록||Records]] | [[실행 이력(요청 내용 · 실행자) · 청크 · 로그 · 점검 결과||Run history (request · executor) · chunks · logs · check results]]
+[[결과||Results]] | [[건수 판정 · 대사 항목 · 보고서(CSV · XLSX · PDF) · 7일 요약||Count verdict · reconciliation · reports (CSV · XLSX · PDF) · 7-day summary]]
+[[알림||Alerts]] | [[텔레그램 · 화면 (테이블 결과 · 묶음 요약 · 차단 · 시스템 상태)||Telegram · on-screen (table results · group summaries · blocks · system status)]]
+[[이관 진행||Migration progress]] | [[권장 단계 · 할 일 · 체크리스트, 엑셀로 주고받기||Recommended phases · to-dos · checklist, exchanged via Excel]]
+[[설계 도구||Design tools]] | [[정의서 → 이관 코드 초안 zip, 스키마 → 관계 분석 · 적재 순서, 정의서 → 매핑 정의서 초안, DDL 도구. 올린 파일은 저장하지 않음, 운영 프로파일에서 꺼짐||Definition → draft code zip, schema → relationship analysis · load order, definition → draft mapping, DDL tools. Uploads are not stored; off in production]]
+</tbl>

@@ -1,0 +1,142 @@
+<header class="doc-head">
+  <h1>[[애플리케이션 구성||Application design]]</h1>
+  <p class="lede">[[이관 앱 하나의 내부 — 브라우저가 보는 운영 UI, 요청이 지나가는 레이어와 보안 필터, 데이터 접근 규칙, 그리고 업체 프로젝트를 빌드 · 배포 · 롤백하는 방법입니다.||Inside one migration app — the operation UI the browser sees, the layers and security filters a request passes through, data access rules, and how a vendor project is built, deployed and rolled back.]]</p>
+  <div class="tags"><span class="tag">[[정의서 4 ~ 7장||Chapters 4–7]]</span><span class="tag">Thymeleaf</span><span class="tag">Spring Security</span><span class="tag">MyBatis · HikariCP</span></div>
+</header>
+
+<h2 id="frontend"><span class="no">4</span>[[프론트엔드 구성||Frontend]]</h2>
+<p>[[운영 UI 는 <b>서버 렌더(Thymeleaf)</b> 화면 28개로, 별도 프론트엔드 빌드 없이 `georu-ui` jar 안에 들어 있습니다. 화면은 틀만 그려 보내고, 데이터는 공통 스크립트가 운영 API 를 불러 채웁니다. 따라서 화면에서 할 수 있는 일은 모두 API 로도 할 수 있습니다.||The operation UI is <b>28 server-rendered (Thymeleaf) screens</b> inside the `georu-ui` jar, with no separate frontend build. The server renders the frame; shared scripts call the operation API to fill in data — so anything a screen can do, the API can do too.]]</p>
+
+<h3 id="screens">[[4.1 화면 구성 요소||4.1 Screen components]]</h3>
+<tbl>
+[[요소||Element]] | [[내용||Content]]
+[[레이아웃||Layout]] | [[왼쪽 메뉴(권한에 따라 보이는 메뉴만, 검색 `/`) · 상단 바(시스템 지표 · 실행 게이트 점 · 로그인 이름) · 본문 · 도움말 서랍||Left menu (only menus allowed by the role, search `/`) · top bar (system metrics · execution gate dot · signed-in name) · body · help drawer]]
+[[화면 템플릿||Templates]] | [[Thymeleaf 서버 렌더 — 대시보드 · 실행 · 시나리오 · 엑셀 · 이력 · 점검 · 시스템 · 사용자 · 권한 · 설계 도구 · 안내서 등 28개||Thymeleaf server rendering — 28 screens: dashboard · run · scenario · Excel · history · checks · system · users · roles · design tools · guides, etc.]]
+[[공통 스크립트||Shared scripts]] | [[`ui.js` (API 호출 · 표 · 확인창 · 배지) · `ui-panel.js` (슬라이드 패널 · 도움말 서랍 · 팝오버 · ⋯ 더보기 · 카드 접기)||`ui.js` (API calls · tables · dialogs · badges) · `ui-panel.js` (slide panel · help drawer · popover · ⋯ more · card collapse)]]
+[[도구 스크립트||Tool scripts]] | [[DDL 도구 3종 (`ddl-parser.js` · `ddl-codegen.js` · `ddl-samples.js`)||3 DDL tools (`ddl-parser.js` · `ddl-codegen.js` · `ddl-samples.js`)]]
+[[정적 파일||Static files]] | [[`/ui-assets/**`, 내용 해시로 캐시 무효화||`/ui-assets/**`, cache busting by content hash]]
+</tbl>
+
+<h3 id="menus">[[4.2 메뉴와 권한||4.2 Menus and permissions]]</h3>
+<p>[[권한은 메뉴마다 <b>없음 · 조회 · 실행</b> 세 단계입니다. 기본 권한은 관리자 · 실행자 · 조회자이며 추가할 수 있습니다.||Permissions are set per menu in three levels: <b>None · View · Execute</b>. Default roles are Administrator · Executor · Viewer, and more can be added.]]</p>
+<tbl>
+[[묶음||Group]] | [[화면||Screens]] | [[권한 동작||Permission behavior]]
+[[(맨 위)||(Top)]] | [[이관 진행||Migration progress]] | [[조회 · 실행(체크)||View · Execute (checklist)]]
+[[실행||Run]] | [[테이블 이관 실행 · 시나리오 이관 실행(설계) · 엑셀 이관||Run table migration · run scenario (design) · Excel migration]] | [[실행 권한이 있어야 실행 버튼||Run buttons need Execute]]
+[[현황 · 결과||Status · results]] | [[대시보드 · 테이블 현황 · 실행 현황 · 이력 · 알림||Dashboard · table status · execution status · history · notifications]] | [[조회||View]]
+[[점검 · 관리||Checks · admin]] | [[실행 전 점검 · 시스템 · 로그 · 사용자 · 권한||Precheck · system · logs · users · roles]] | [[사용자 · 권한은 관리자||Users · roles: administrators]]
+[[설계 · 개발 도구||Design · dev tools]] | [[코드 생성 · 관계 분석 · 매핑 정의서 초안 · DDL 도구||Code generation · relationship analysis · draft mapping · DDL tools]] | [[운영 프로파일에서 꺼짐||Off in the production profile]]
+[[도움말||Help]] | [[시작하기 · 안내서 · 구조 설명||Getting started · guide · architecture]] | [[누구나||Everyone]]
+</tbl>
+
+<h3 id="screen-flow">[[4.3 화면 하나의 동작||4.3 How a screen works]]</h3>
+<ol class="chain">
+  <li><b>[[화면 요청||Screen request]]</b><span>[[브라우저가 `/ui/...` 요청 → 로그인 · 권한 확인 → 서버가 화면을 그려 보냅니다.||The browser requests `/ui/...` → sign-in · permission check → the server renders and sends the screen.]]</span></li>
+  <li><b>[[데이터 채우기||Fill data]]</b><span>[[공통 스크립트가 `/api/...` 를 불러 데이터를 채웁니다 (CSRF 토큰 헤더).||Shared scripts call `/api/...` to fill in data (CSRF token header).]]</span></li>
+  <li><b>[[실행 · 변경||Run · change]]</b><span>[[확인창(NORMAL 은 빨간 실행 바) → API → 결과는 패널 · 알림으로.||Confirmation dialog (a red run bar for NORMAL) → API → results in panels · notifications.]]</span></li>
+  <li><b>[[서버 측 보호||Server-side guard]]</b><span>[[버튼을 숨기는 것과 별개로 서버가 모든 API 를 권한표로 막습니다.||Independently of hidden buttons, the server guards every API with the permission table.]]</span></li>
+</ol>
+
+<h2 id="backend"><span class="no">5</span>[[백엔드 구성||Backend]]</h2>
+<h3 id="layers">[[5.1 요청 처리 레이어||5.1 Request processing layers]]</h3>
+<figure class="diagram">
+  <div class="dg-col" style="min-width:680px;gap:6px">
+    <div class="box ac"><b>[[보안 필터||Security filters]]</b><small>[[초기 설정 → CSRF → 로그인 · Basic → 계정 상태 → 메뉴 권한 → 비밀번호 변경 → 실행자 기록||Setup → CSRF → sign-in · Basic → account → menu permission → password change → executor]]</small></div>
+    <div class="box"><b>[[프레젠테이션||Presentation]]</b><small>[[화면 컨트롤러(서버 렌더) · REST 컨트롤러(실행 · 묶음 · 게이트 · 청크 · 점검 · 보고서 · 시나리오 · 엑셀 · 시스템 · 정리 · 채번)||Screen controllers (server-rendered) · REST controllers (run · group · gate · chunk · check · report · scenario · Excel · system · cleanup · numbering)]]</small></div>
+    <div class="box"><b>[[서비스||Service]]</b><small>[[요청 검증 → 실행 게이트 → 사전 검사 → 비동기 실행기(스레드 1개)||Request validation → execution gate → pre-run checks → async executor (1 thread)]]</small></div>
+    <div class="box fill"><b>[[배치 엔진||Batch engine]]</b><small>[[Spring Batch Job · Step · Reader · Processor · 큐 · 적재 스레드 · 리스너||Spring Batch Job · Step · Reader · Processor · queue · load threads · listeners]]</small></div>
+    <div class="box"><b>[[데이터 접근||Data access]]</b><small>[[DataSource 마다 SqlSessionFactory · 트랜잭션, 정책 검사 DataSource, HikariCP||SqlSessionFactory · transaction per DataSource, policy-check DataSource, HikariCP]]</small></div>
+    <div class="grid-boxes" style="grid-template-columns:repeat(4,1fr)">
+      <div class="box ext"><b>[[운영 저장소||Ops store]]</b><small>operation</small></div>
+      <div class="box ext"><b>[[소스 DB × n||Source × n]]</b><small>source-*</small></div>
+      <div class="box ext"><b>[[타겟 DB × n||Target × n]]</b><small>target-*</small></div>
+      <div class="box ext"><b>[[채번 DB||Numbering]]</b><small>sequence-*</small></div>
+    </div>
+  </div>
+  <figcaption>[[그림 4. 요청 처리 레이어 — 위에서 아래로||Figure 4. Request processing layers — top to bottom]]</figcaption>
+</figure>
+<div class="note"><b>[[설계 포인트||Design point]]</b><p>[[서비스 레이어의 비동기 실행기는 <b>스레드가 정확히 1개</b>여야 합니다. 1이 아니면 앱이 기동하지 않습니다. 이것이 "시스템 전체에서 실행은 하나"를 코드 수준에서 보장하는 두 번째 장치입니다(첫 번째는 <a href="engine.html#control">실행 게이트</a>).||The service layer's async executor must have <b>exactly one thread</b>; otherwise the app refuses to start. This is the second mechanism that enforces "one run system-wide" at code level (the first is the <a href="engine.html#control">execution gate</a>).]]</p></div>
+
+<h2 id="security" data-sec><span class="no">5.2</span>[[보안 필터 체인||Security filter chain]]</h2>
+<p>[[모든 요청은 아래 7단계를 순서대로 지납니다. 앞 단계에서 막히면 뒤 단계는 돌지 않습니다.||Every request passes the seven stages below in order; a failure stops the chain.]]</p>
+<ol class="chain">
+  <li><b>[[초기 설정 확인||Initial setup check]]</b><span>[[총관리자가 없으면 화면은 `/setup`, API 는 503 (30초 기억)||Without a super administrator, screens go to `/setup` and the API returns 503 (cached 30 s)]] → <code class="err">503 SETUP_REQUIRED</code></span></li>
+  <li><b>CSRF</b><span>[[화면 요청은 쿠키 토큰 · 헤더 확인, HTTP Basic 호출은 제외||Screen requests check cookie token · header; HTTP Basic calls are exempt]] → <code class="err">403</code></span></li>
+  <li><b>[[인증||Authentication]]</b><span>[[폼 로그인 세션 또는 HTTP Basic. 5회 실패 시 15분 잠금||Form sign-in session or HTTP Basic. 5 failures lock the account for 15 minutes]] → <code class="err">401</code></span></li>
+  <li><b>[[계정 상태||Account status]]</b><span>[[지워지거나 중지된 계정은 바로 로그아웃||Removed or suspended accounts are signed out immediately]] → <code class="err">401</code></span></li>
+  <li><b>[[메뉴 권한||Menu permission]]</b><span>[[경로 → 메뉴 → 없음 · 조회 · 실행 판단. 표에 없는 경로는 관리자만||Path → menu → None · View · Execute. Paths not in the table are admin-only]] → <code class="err">403 FORBIDDEN</code></span></li>
+  <li><b>[[비밀번호 변경||Password change]]</b><span>[[관리자가 만든 계정은 먼저 비밀번호를 바꿔야 함||Accounts created by an admin must change the password first]] → <code class="err">403 PASSWORD_CHANGE_REQUIRED</code></span></li>
+  <li><b>[[실행자 기록||Executor record]]</b><span>[[로그인 이름을 실행자로 기록 — 헤더로 바꿀 수 없음||The signed-in name is recorded as executor — cannot be overridden by a header]]</span></li>
+</ol>
+<p class="muted">[[공개 경로: `/login` · `/logout` · `/setup` · `/ui-assets/**` · `/actuator/health/**` 와 로그인 안내서.||Public paths: `/login` · `/logout` · `/setup` · `/ui-assets/**` · `/actuator/health/**` and the sign-in guide.]]</p>
+
+<h3 id="data-access">[[5.3 데이터 접근 · 공통 응답||5.3 Data access · common response]]</h3>
+<tbl>
+[[항목||Item]] | [[내용||Content]]
+DataSource | [[`operation`(1) · `source-*` · `target-*` · `sequence-*`. 이름 규칙 밖이면 기동 중지||`operation` (1) · `source-*` · `target-*` · `sequence-*`. Startup stops if a name breaks the rule]]
+[[정책 검사||Policy checks]] | [[기동 때 매퍼 문장 검사, 실행 중 연결에서 SQL 검사, 소스는 읽기 전용 연결 (<a href="engine.html#write-policy">DB 쓰기 정책</a>)||Mapper statements checked at startup, SQL checked on connections at runtime, read-only source connections (<a href="engine.html#write-policy">DB write policy</a>)]]
+[[풀 크기||Pool size]] | [[동시 Job J = 1. 소스 J × 2 + 2, 타겟 J × W + 2 (W = 적재 스레드)||Concurrent Jobs J = 1. Source J × 2 + 2, target J × W + 2 (W = load threads)]]
+[[공통 응답||Common response]] | [[`success` · `message` · `data` · `errorCode` · `timestamp`. 오류는 전역 예외 처리에서 오류 코드로 (<a href="api.html#basics">API 공통 규칙</a>)||`success` · `message` · `data` · `errorCode` · `timestamp`. Errors become error codes in the global handler (<a href="api.html#basics">API conventions</a>)]]
+</tbl>
+
+<h2 id="devenv"><span class="no">6</span>[[개발 환경 · 빌드 · 배포||Development · build · deployment]]</h2>
+<h3 id="dev">[[6.1 개발 환경||6.1 Development environment]]</h3>
+<tbl>
+[[요소||Element]] | [[내용||Content]]
+[[개발 PC||Developer PC]] | [[JDK 17 · Gradle(Wrapper) · IDE(자유) · Lombok||JDK 17 · Gradle (Wrapper) · any IDE · Lombok]]
+[[라이브러리 저장소||Library repository]] | [[Georu 라이브러리 묶음(Maven 저장소 모양)을 업체 저장소 `libs/` 에 함께 올림. 공개 저장소 미배포||The Georu bundle (laid out as a Maven repository) is committed under `libs/` in the vendor repo. Not published to public repositories]]
+[[형상 관리||Source control]] | [[업체 저장소. 이관 코드 · 설정 · 시나리오를 코드 리뷰||Vendor repository. Migration code · settings · scenarios go through code review]]
+[[개발 DB||Development DB]] | [[본 타겟과 다른 DB. 예제 앱은 Oracle · MySQL · SQL Server · PostgreSQL · MariaDB 컨테이너||A DB other than the production target. The example app uses Oracle · MySQL · SQL Server · PostgreSQL · MariaDB containers]]
+[[검사||Checks]] | [[의존 경계 테스트(`georu-test`), 매핑 할 일 집계(`scanMappingStatus`), 단위 테스트||Dependency boundary tests (`georu-test`), mapping to-do tally (`scanMappingStatus`), unit tests]]
+[[CI · 정적 분석||CI · static analysis]] | [[업체 표준을 씀 (Georu 가 정하지 않음)||Vendor standard (not defined by Georu)]]
+</tbl>
+
+<h3 id="deploy">[[6.2 빌드 · 배포 · 롤백||6.2 Build · deploy · rollback]]</h3>
+<div class="flowline"><span>./gradlew test</span><i>→</i><span>./gradlew bootJar</span><i>→</i><span>[[jar · 이미지 보관||Archive jar · image]]</span><i>→</i><span class="hl">[[배포||Deploy]]</span></div>
+<tbl>
+[[단계||Step]] | [[내용||Content]]
+[[빌드||Build]] | [[`./gradlew test` → `./gradlew bootJar` (선택: 멀티스테이지 · 비root 컨테이너 이미지)||`./gradlew test` → `./gradlew bootJar` (optional: multi-stage · non-root container image)]]
+[[보관||Archive]] | [[판마다 jar · 이미지를 남김||Keep the jar · image for every version]]
+[[배포||Deploy]] | [[실행 중인 이관이 없는지 확인 → 운영 저장소 백업 → 정상 종료 → 새 판 기동 → 헬스 · 시스템 화면 확인 → 스케줄 재개||Confirm nothing is running → back up the operations store → graceful shutdown → start the new version → check health · System screen → resume schedules]]
+[[롤백||Rollback]] | [[정상 종료 → (운영 저장소 스키마가 바뀐 판이면) 백업 복원 → 옛 판 기동||Graceful shutdown → (if the store schema changed) restore the backup → start the old version]]
+</tbl>
+
+<h3 id="branch">[[6.3 브랜치 · 판 정책||6.3 Branch · version policy]]</h3>
+<tbl>
+[[대상||Target]] | [[정책||Policy]]
+[[Georu 제품||Georu product]] | [[작업 브랜치 → PR → `dev` → `main`, 판 태그 `v0.x.y`, CHANGELOG 의 "올릴 때"||Work branch → PR → `dev` → `main`, version tags `v0.x.y`, "When upgrading" in the CHANGELOG]]
+[[업체 이관 프로젝트 (권장)||Vendor project (recommended)]] | [[리허설 · 본 이관에 쓴 판을 태그로 고정, 본 이관 기간에는 판 동결||Pin versions used for rehearsals · production with tags; freeze during the production migration]]
+[[무중단 배포||Zero-downtime deploy]] | [[<b>하지 않습니다.</b> 앱 1대 · 한 번에 한 실행이라 실행이 없는 시간에 배포합니다. 정상 종료가 실행 중 Job 을 정리하고, 재기동 후 스케줄을 다시 켭니다||<b>Not done.</b> With one app and one run at a time, deploy when nothing runs. Graceful shutdown cleans up running Jobs; schedules are turned back on after restart]]
+</tbl>
+
+<h2 id="project"><span class="no">7</span>[[업체 이관 프로젝트 구성||Vendor project structure]]</h2>
+<p>[[업무구분 하나가 패키지 하나(플러그인)가 되고, 테이블마다 Source SQL · Target SQL · (선택) Processor 를 둡니다. Reader · Writer 는 엔진이 만듭니다.||Each business area becomes one package (plugin); every table gets Source SQL, Target SQL and an optional Processor. Readers and writers are generated by the engine.]]</p>
+<pre><span class="c"># [[예시 레이아웃||example layout]]</span>
+acme-migration/
+├── libs/                         <span class="c"># Georu bundle (Maven layout)</span>
+├── build.gradle
+└── src/main/
+    ├── java/com/acme/migration/
+    │   ├── MigrationApplication.java
+    │   ├── common/               <span class="c"># transformation utils · audit columns</span>
+    │   └── member/               <span class="c"># one business area = one plugin</span>
+    │       ├── MemberPlugin.java <span class="c"># plugin + TableOptions</span>
+    │       ├── dto/
+    │       └── processor/
+    └── resources/
+        ├── application.yml
+        ├── application-prd.yml
+        ├── mapper/member/source/  <span class="c"># Source SQL</span>
+        ├── mapper/member/target/  <span class="c"># Target SQL</span>
+        └── scenarios/*.json       <span class="c"># run order</span></pre>
+<tbl>
+[[위치||Location]] | [[내용||Content]]
+[[시작 · 설정||Startup · settings]] | [[시작 클래스, `application.yml` · `application-<프로파일>.yml`||Main class, `application.yml` · `application-<profile>.yml`]]
+[[업무별 플러그인||Per-area plugins]] | [[업무구분 하나 = 패키지 하나 (플러그인 선언 · 테이블 선언 · DTO · Processor)||One area = one package (plugin · table declarations · DTOs · Processors)]]
+[[매퍼 XML||Mapper XML]] | [[업무별 `source/` · `target/` (Source SQL · Target SQL)||Per area `source/` · `target/` (Source SQL · Target SQL)]]
+[[시나리오||Scenarios]] | [[`scenarios/*.json` (실행 순서)||`scenarios/*.json` (run order)]]
+[[공통||Common]] | [[업체 변환 유틸 · 감사 컬럼 규칙||Vendor transformation utilities · audit column rules]]
+[[테스트||Tests]] | [[의존 경계 테스트 · 카탈로그 테스트 · Processor 단위 테스트||Boundary tests · catalog tests · Processor unit tests]]
+[[빌드||Build]] | [[`libs/`(Georu 묶음) · `build.gradle` · 매핑 할 일 집계 스크립트||`libs/` (Georu bundle) · `build.gradle` · mapping to-do tally script]]
+</tbl>
+<p class="muted" style="font-size:13.5px">[[위 트리는 이해를 돕기 위한 예시이며, 실제 패키지 · 파일 이름은 업체 규칙을 따릅니다.||The tree above is illustrative; actual package and file names follow the vendor's conventions.]]</p>

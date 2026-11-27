@@ -1,0 +1,122 @@
+<header class="doc-head">
+  <h1>[[인프라 · 배포||Infrastructure]]</h1>
+  <p class="lede">[[이관 앱이 어디에 놓이고 무엇을 여는지 — 논리 구성과 포트, 로컬 · 도커 · 서버 세 가지 실행 방식, 내부망 서버와 방화벽, 사양, 로그 · 데이터 보관, 지원 DB 와 기술 스택입니다.||Where the migration app lives and what it opens — logical layout and ports, three ways to run (local · Docker · server), internal-network servers and firewall rules, sizing, log and data retention, supported databases and the stack.]]</p>
+  <div class="tags"><span class="tag">[[정의서 14 ~ 18장||Chapters 14–18]]</span><span class="tag">Docker Compose</span><span class="tag">Java 17</span></div>
+</header>
+
+<h2 id="logical"><span class="no">14</span>[[논리 구성||Logical view]]</h2>
+<tbl>
+[[구성||Component]] | [[경로 · 포트||Path · port]]
+[[이관 앱 (내장 Tomcat)||Migration app (embedded Tomcat)]] | [[`8081` (`SERVER_PORT`)||`8081` (`SERVER_PORT`)]]
+[[운영 UI · 운영 API||Operation UI · API]] | `/ui/**` · `/api/**`
+[[서버 진단 · 헬스||Diagnostics · health]] | `/admin` · `/actuator/health/live` · `/actuator/health/ready`
+[[운영 저장소 H2 TCP||Operations store H2 TCP]] | [[`9092` (기본 꺼짐, 조회가 필요할 때만)||`9092` (off by default, only when needed)]]
+[[소스 · 타겟 DB||Source · target DBs]] | [[각 DB 포트 (JDBC)||Each DB port (JDBC)]]
+[[앞단 리버스 프록시 · HTTPS||Reverse proxy · HTTPS]] | [[고객 표준에 따라 둘 수 있음||Optional, per client standard]]
+</tbl>
+
+<h2 id="physical"><span class="no">15</span>[[실행 방식 — 어디서든 돌린다||Ways to run — anywhere]]</h2>
+<p>[[같은 이관 앱 하나를 세 방식으로 돌리며, 바뀌는 것은 <b>프로파일과 접속 정보(환경 변수)</b>뿐입니다. 개발 PC 에서 검증한 앱이 그대로 리허설 · 본 이관 서버로 갑니다.||The same migration app runs three ways; only the <b>profile and connection details (environment variables)</b> change. The app verified on a developer PC goes unchanged to the rehearsal and production servers.]]</p>
+<div class="cards">
+  <div class="card"><div class="ic">dev</div><h3>[[로컬||Local]]</h3><p>[[개발 · 단위 테스트. `./gradlew bootRun` 또는 실행 스크립트. 운영 저장소는 H2 파일 `data/`.||Development · unit tests. `./gradlew bootRun` or the run script. Operations store: H2 file `data/`.]]</p></div>
+  <div class="card"><div class="ic">dkr</div><h3>[[도커||Docker]]</h3><p>[[예제 · 통합 시험 · 리허설. `docker compose up` (`run-docker.sh`). 운영 저장소는 H2 파일(볼륨).||Example · integration testing · rehearsal. `docker compose up` (`run-docker.sh`). Operations store: H2 file (volume).]]</p></div>
+  <div class="card"><div class="ic">prd</div><h3>[[서버||Server]]</h3><p>[[리허설 · 본 이관. `java -jar` 또는 컨테이너. 운영 저장소는 H2 파일 또는 MySQL(DBA 관리).||Rehearsal · production. `java -jar` or container. Operations store: H2 file or MySQL (DBA-managed).]]</p></div>
+</div>
+
+<h3 id="docker">[[15.2 도커 구성 (예제 compose 기본값)||15.2 Docker layout (example compose defaults)]]</h3>
+<tbl>
+[[컨테이너||Container]] | [[이미지||Image]] | [[호스트 → 컨테이너 포트||Host → container]] | [[비고||Notes]]
+app | [[`georu:local` (멀티스테이지 · 비root)||`georu:local` (multi-stage · non-root)]] | [[8083 → 8081, 9093 → 9092 (로컬만)||8083 → 8081, 9093 → 9092 (local only)]] | [[볼륨 logs · data, 30초 헬스체크||Volumes logs · data, 30 s health check]]
+oracle | oracle-free 23 | 1523 → 1521 | [[소스 예||Source example]]
+mysql | mysql 8.0 | 3308 → 3306 | [[타겟 예||Target example]]
+postgres · mssql · mariadb | 16 · azure-sql-edge · 11 | 5434 · 1434 · 3309 | [[프로필 `xdb` (여러 DB 예제)||Profile `xdb` (multi-DB example)]]
+</tbl>
+<pre><span class="c"># run-scripts/run-docker.sh</span>
+<span class="p">$ </span>./run-scripts/run-docker.sh <span class="n">db</span> | <span class="n">build</span> | <span class="n">up</span> | <span class="n">demo</span> | <span class="n">xdb</span> | <span class="n">logs</span> | <span class="n">ps</span> | <span class="n">down</span> | <span class="n">health</span></pre>
+
+<h2 id="network"><span class="no">15.3</span>[[서버 · 네트워크 (내부망)||Servers · network (internal)]]</h2>
+<figure class="diagram">
+  <div class="dg-row" style="align-items:center">
+    <div class="dg-col">
+      <div class="box ext"><b>[[사용자 PC||User PC]]</b><small>[[운영 UI · API||UI · API]]</small></div>
+      <div class="box ext"><b>[[감시 도구||Monitoring]]</b><small>[[헬스 · 지표||Health · metrics]]</small></div>
+    </div>
+    <div class="arrow"><i></i><span>8081 / 443</span></div>
+    <div class="zone app" style="min-width:230px">
+      <span class="zl">[[내부망 · 이관 서버 1대||Internal network · 1 server]]</span>
+      <div class="box fill"><b>[[이관 앱||Migration app]]</b><small>Java 17 · jar / container</small></div>
+      <div class="box" style="margin-top:8px"><b>[[운영 저장소||Operations store]]</b><small>[[H2 (내장) 또는 MySQL||H2 (embedded) or MySQL]]</small></div>
+    </div>
+    <div class="arrow"><i></i><span>JDBC</span></div>
+    <div class="dg-col">
+      <div class="box ext"><b>[[소스 DB||Source DB]]</b><small>[[읽기||Read]]</small></div>
+      <div class="box ext"><b>[[타겟 · 채번 DB||Target · numbering]]</b><small>[[쓰기||Write]]</small></div>
+      <div class="box ext"><b>[[텔레그램 (선택)||Telegram (opt.)]]</b><small>443</small></div>
+    </div>
+  </div>
+  <figcaption>[[그림 1. 배치도 — DMZ 에 두지 않고 내부망에만 둡니다||Figure 1. Placement — internal network only, never in the DMZ]]</figcaption>
+</figure>
+<tbl>
+[[환경||Environment]] | [[이관 서버||Migration server]] | [[타겟||Target]]
+[[개발계||Development]] | [[개발 PC 또는 개발 서버||Developer PC or dev server]] | [[개발 DB||Development DB]]
+[[검증계 (리허설)||Staging (rehearsal)]] | [[이관 서버 1대||One migration server]] | [[리허설용 타겟||Rehearsal target]]
+[[운영계 (본 이관)||Production (cut-over)]] | [[이관 서버 1대||One migration server]] | [[본 타겟||Production target]]
+</tbl>
+<h3 id="firewall">[[방화벽에서 열 것||Firewall openings]]</h3>
+<tbl>
+[[출발||From]] | [[도착||To]] | [[포트||Port]] | [[용도||Purpose]]
+[[사용자 PC||User PC]] | [[이관 서버||Migration server]] | [[8081 (또는 프록시 443)||8081 (or proxy 443)]] | [[운영 UI · API||UI · API]]
+[[감시 도구||Monitoring]] | [[이관 서버||Migration server]] | 8081 | [[헬스 · 지표||Health · metrics]]
+[[이관 서버||Migration server]] | [[소스 DB||Source DB]] | [[DB 포트||DB port]] | [[읽기||Read]]
+[[이관 서버||Migration server]] | [[타겟 · 채번 DB||Target · numbering]] | [[DB 포트||DB port]] | [[쓰기||Write]]
+[[이관 서버||Migration server]] | [[운영 저장소 DB (MySQL 일 때)||Ops store DB (when MySQL)]] | [[DB 포트||DB port]] | [[기록||Records]]
+[[이관 서버||Migration server]] | [[텔레그램||Telegram]] | 443 | [[알림 (선택)||Alerts (optional)]]
+</tbl>
+
+<h2 id="sizing"><span class="no">16</span>[[서버 구성 · 사양||Servers · sizing]]</h2>
+<tbl>
+[[실행 방식||Run method]] | [[최소||Minimum]] | [[권장||Recommended]] | [[근거||Basis]]
+[[로컬 (개발 PC, 앱만)||Local (dev PC, app only)]] | [[2 코어 · 4GB · 10GB||2 cores · 4GB · 10GB]] | [[4 코어 · 16GB · 30GB||4 cores · 16GB · 30GB]] | [[앱 컨테이너 메모리 한도 3GB, 실행 스크립트 기본 힙 16g||App container limit 3GB, run-script default heap 16g]]
+[[도커 (앱 + Oracle + MySQL)||Docker (app + Oracle + MySQL)]] | [[4 코어 · 8GB · 30GB||4 cores · 8GB · 30GB]] | [[8 코어 · 16GB · 50GB||8 cores · 16GB · 50GB]] | [[예제 환경 8GB 이상, 컨테이너 한도 합 7GB (xdb +3GB)||Example needs 8GB+, container limits total 7GB (xdb +3GB)]]
+[[서버 (이관 서버 1대)||Server (one migration server)]] | [[4 코어 · 8GB · 50GB||4 cores · 8GB · 50GB]] | [[8 코어 · 16GB 이상 · 100GB||8 cores · 16GB+ · 100GB]] | [[적재 스레드 4 ~ 6 + 읽기, 로그 최대 10GB + 운영 저장소 + 보고서||4–6 load threads + reads, logs up to 10GB + store + reports]]
+[[DB 서버||DB server]] | [[(고객 자산)||(Client asset)]] | [[(고객 자산)||(Client asset)]] | [[풀 크기만 안내 (<a href="application.html#data-access">5.3</a>)||Pool sizes only (<a href="application.html#data-access">5.3</a>)]]
+</tbl>
+<div class="note"><b>[[사양 확정||Finalizing sizes]]</b><p>[[최소는 예제 데모가 도는 값, 권장은 리허설 · 본 이관에 여유를 둔 값입니다. <b>본 이관 서버 값은 데이터 크기와 리허설 측정으로 확정합니다.</b> OS 는 Java 17 또는 Docker 가 도는 리눅스 · 윈도 · macOS.||Minimum runs the example demo; recommended leaves headroom for rehearsals and cut-over. <b>Production server values are finalized from data size and rehearsal measurements.</b> OS: any Linux · Windows · macOS running Java 17 or Docker.]]</p></div>
+<tbl>
+[[역할||Role]] | [[수량||Qty]] | [[소프트웨어||Software]] | [[비고||Notes]]
+[[이관 서버||Migration server]] | [[1 (이중화 없음)||1 (no redundancy)]] | [[Java 17 또는 Docker, 이관 앱 jar · 이미지||Java 17 or Docker, app jar · image]] | [[컨테이너면 JVM 메모리 = 한도의 70% · ZGC||In a container JVM memory = 70% of the limit · ZGC]]
+[[운영 저장소||Operations store]] | [[이관 서버 안 (H2) 또는 DB 서버 1||Inside the server (H2) or 1 DB server]] | H2 · MySQL · MariaDB | [[타겟과 다른 스키마||Different schema from the target]]
+[[소스 · 타겟 DB||Source · target DBs]] | [[고객 자산||Client assets]] | Oracle · MySQL · SQL Server · MariaDB · PostgreSQL | [[앱 계정 권한은 <a href="engine.html#write-policy">쓰기 정책</a> 기준||App account privileges per <a href="engine.html#write-policy">write policy</a>]]
+</tbl>
+
+<h2 id="storage"><span class="no">17</span>[[스토리지||Storage]]</h2>
+<tbl>
+[[경로||Path]] | [[내용||Content]] | [[보관||Retention]]
+`logs/application.log` | [[앱 로그||App log]] | [[월 · 100MB 단위 gzip, 최대 120개 · 10GB||gzip by month · 100MB, up to 120 files · 10GB]]
+`logs/sql.log` | [[SQL 로그||SQL log]] | [[일 · 50MB, 7일||Daily · 50MB, 7 days]]
+`logs/gc.log` · `heapdump.hprof` | [[GC 로그 · 메모리 부족 덤프 (컨테이너)||GC log · OOM dump (container)]] | [[덤프는 바로 옮기고 지움||Move dumps off and delete promptly]]
+`data/operation/` | [[H2 운영 저장소||H2 operations store]] | [[백업 대상||Backup target]]
+`data/backup/` | [[운영 저장소 백업||Store backups]] | [[7일 권장||7 days recommended]]
+[[보고서 내보내기 폴더||Report export folder]] | [[zip 내보내기||zip exports]] | [[72시간||72 hours]]
+</tbl>
+<p>[[컨테이너는 `docker/volumes/logs` → `/app/logs`, `docker/volumes/data` → `/app/data` 로 마운트하고, 실행 계정은 `app`(uid 1001)입니다. 서버 1대라 공유 스토리지(NAS)는 필요 없습니다.||Containers mount `docker/volumes/logs` → `/app/logs` and `docker/volumes/data` → `/app/data`, running as `app` (uid 1001). With one server, no shared storage (NAS) is needed.]]</p>
+
+<h2 id="stack"><span class="no">18</span>[[지원 DB · 기술 스택||Databases · technology stack]]</h2>
+<tbl>
+DB | [[확인한 범위||Verified scope]]
+Oracle | [[소스 · 실제 프로젝트 · 예제 앱||Source · real project · example app]]
+MySQL 8 | [[타겟 · 실제 프로젝트 두 곳 · 운영 저장소||Target · two real projects · operations store]]
+SQL Server | [[소스 · 실제 프로젝트 · 예제 앱||Source · real project · example app]]
+MariaDB 11 | [[타겟 · 예제 앱 · 운영 저장소||Target · example app · operations store]]
+PostgreSQL 16 | [[소스 · 예제 앱||Source · example app]]
+H2 | [[운영 저장소 기본 · 테스트||Operations store default · tests]]
+</tbl>
+<tbl>
+[[영역||Area]] | [[기술 · 판||Technology · version]]
+[[언어 · 런타임||Language · runtime]] | Java 17
+[[기반 프레임워크||Base framework]] | Spring Boot 3.2.4 · Spring Batch 5 · Spring Security · Spring Retry
+[[라이브러리 · 데이터 접근||Libraries · data access]] | MyBatis 3 (spring-boot 3.0.3) · HikariCP
+[[화면 · 문서||Screens · documents]] | Thymeleaf · springdoc 2.2 · Apache POI 5.2 · openhtmltopdf
+[[진단 · 테스트||Diagnostics · testing]] | Actuator · Spring Boot Admin 3.2 · JUnit 5 · ArchUnit 1.3
+[[라이선스||License]] | Apache License 2.0
+</tbl>

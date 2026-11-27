@@ -1,0 +1,146 @@
+<header class="doc-head">
+  <h1>[[API 레퍼런스||API reference]]</h1>
+  <p class="lede">[[운영 UI 없이 JSON 으로 실행 · 테스트 · 조회할 때 쓰는 REST API 입니다. 화면도 이 API 를 부르므로 결과 · 기록 · 권한 판단이 화면과 같습니다.||The REST API for running, testing and querying with JSON instead of the operation UI. The screens call the same API, so results, records and permission checks are identical.]]</p>
+  <div class="tags"><span class="tag">REST · JSON</span><span class="tag">HTTP Basic</span><span class="tag">[[18개 분류 · 123개 엔드포인트||18 groups · 123 endpoints]]</span><span class="tag">[[OpenAPI 0.7.0 스냅숏 기준||From the OpenAPI 0.7.0 snapshot]]</span></div>
+</header>
+
+<div class="kv">
+  <div><b>/api/**</b><span>[[운영 API 기본 경로||Operation API base path]]</span></div>
+  <div><b>HTTP Basic</b><span>[[화면과 같은 계정 · 권한, CSRF 불필요||Same accounts · roles as the UI, no CSRF]]</span></div>
+  <div><b>409</b><span>[[다른 실행 중 · 활성 스케줄 있음||Another run or active schedule]]</span></div>
+  <div><b>/swagger-ui</b><span>[[앱 안 Swagger (운영 프로파일에서 꺼짐)||In-app Swagger (off in production)]]</span></div>
+</div>
+
+<h2 id="basics"><span class="no">01</span>[[공통 규칙||Conventions]]</h2>
+<tbl>
+[[항목||Item]] | [[내용||Content]]
+[[기본 주소||Base URL]] | [[`http://<서버>:<포트>` (예제 앱 Docker 8083, 생성 앱 기본 8081)||`http://<server>:<port>` (example app on Docker 8083, generated app default 8081)]]
+[[요청 형식||Request]] | [[`Content-Type: application/json` (업로드는 `multipart/form-data`)||`Content-Type: application/json` (uploads use `multipart/form-data`)]]
+[[응답 형식||Response]] | [[모든 응답은 공통 봉투 `success` · `message` · `data` · `errorCode` · `timestamp`||Every response uses the common envelope `success` · `message` · `data` · `errorCode` · `timestamp`]]
+[[파일 응답||File responses]] | [[보고서 · 내보내기 · 양식은 파일로 내려옵니다 (`curl -o 파일명`). `format=json` 이면 공통 봉투||Reports · exports · templates are returned as files (`curl -o file`). With `format=json`, the common envelope]]
+[[날짜||Dates]] | [[이관 기간 `startDate` · `endDate` 는 `yyyyMMdd` (종료일 포함). 보고서 조회 `from` · `to` 는 `yyyy-MM-dd`||Migration period `startDate` · `endDate` use `yyyyMMdd` (end inclusive). Report queries `from` · `to` use `yyyy-MM-dd`]]
+[[실행자||Executor]] | [[실행 기록의 실행자는 로그인한 계정 이름. `X-Executed-By` 헤더 · `executedBy` 필드는 서버가 덮어씀||The executor is the signed-in account name. The server overwrites the `X-Executed-By` header · `executedBy` field]]
+[[단일 실행||Single run]] | [[다른 실행이 돌고 있거나 활성 스케줄이 있으면 실행 API 는 409||Run APIs return 409 while another run or an active schedule exists]]
+</tbl>
+<div class="envelope">
+<pre><span class="c">// 200 OK — [[성공||success]]</span>
+{
+  <span class="n">"success"</span>: <span class="k">true</span>,
+  <span class="n">"message"</span>: <span class="s">"요청이 성공적으로 처리되었습니다."</span>,
+  <span class="n">"data"</span>: {
+    <span class="n">"migrationId"</span>: <span class="s">"migration-001"</span>,
+    <span class="n">"status"</span>: <span class="s">"RUNNING"</span>
+  },
+  <span class="n">"errorCode"</span>: <span class="k">null</span>,
+  <span class="n">"timestamp"</span>: <span class="s">"2026-11-07T09:12:01"</span>
+}</pre>
+<pre><span class="c">// 403 — [[실패||failure]]</span>
+{
+  <span class="n">"success"</span>: <span class="k">false</span>,
+  <span class="n">"message"</span>: <span class="s">"…"</span>,
+  <span class="n">"data"</span>: <span class="k">null</span>,
+  <span class="n">"errorCode"</span>: <span class="s">"FORBIDDEN"</span>,
+  <span class="n">"timestamp"</span>: <span class="s">"2026-11-07T09:12:01"</span>
+}</pre>
+</div>
+
+<h2 id="auth"><span class="no">02</span>[[인증 · 권한||Authentication · permissions]]</h2>
+<p>[[화면과 같은 계정으로 <b>HTTP Basic</b> 을 보냅니다. HTTP Basic 호출에는 CSRF 토큰이 필요 없습니다. 권한은 화면의 메뉴 권한과 같습니다 — 실행은 <b>실행</b>, 조회는 <b>조회</b> 단계가 필요하고, 권한표에 없는 API 는 관리자만 부를 수 있습니다.||Send <b>HTTP Basic</b> with the same account used on the screens; HTTP Basic calls need no CSRF token. Permissions mirror the UI menu permissions — runs need the <b>Execute</b> level, queries need <b>View</b>, and APIs not in the permission table are admin-only.]]</p>
+<pre><span class="c"># [[아래 예는 셸 변수를 씁니다||The examples below use shell variables]]</span>
+<span class="p">$ </span>B=http://&lt;server&gt;:&lt;port&gt;
+<span class="p">$ </span>U=&lt;username&gt;:&lt;password&gt;
+<span class="p">$ </span>curl -u $U $B/api/account/me</pre>
+<div class="note warn"><b>[[첫 로그인 전||Before first sign-in]]</b><p>[[관리자가 만든 계정은 비밀번호를 바꾸기 전에는 `POST /api/account/password` 만 됩니다. 나머지는 `403 PASSWORD_CHANGE_REQUIRED`.||Accounts created by an administrator can only call `POST /api/account/password` until the password is changed; everything else returns `403 PASSWORD_CHANGE_REQUIRED`.]]</p></div>
+<p>[[요청이 거치는 순서는 <a href="application.html#security">보안 필터 체인</a>을 참고하세요.||See the <a href="application.html#security">security filter chain</a> for the order a request goes through.]]</p>
+
+<h2 id="errors"><span class="no">03</span>[[오류 코드||Error codes]]</h2>
+<tbl>
+HTTP | errorCode | [[뜻||Meaning]] | [[나는 곳||Raised by]]
+401 | `UNAUTHORIZED` | [[로그인 · HTTP Basic 이 없거나 틀림||Missing or wrong sign-in · HTTP Basic]] | [[보안||Security]]
+401 | `ACCOUNT_DISABLED` | [[사용 중지 · 삭제된 계정||Suspended or deleted account]] | [[보안||Security]]
+403 | `FORBIDDEN` | [[그 API 를 부를 권한이 없음 (메뉴 단계 부족 또는 관리자 전용)||No permission for this API (menu level too low or admin-only)]] | [[보안||Security]]
+403 | `PASSWORD_CHANGE_REQUIRED` | [[비밀번호를 먼저 바꿔야 함||Password must be changed first]] | [[보안||Security]]
+503 | `SETUP_REQUIRED` | [[총관리자 초기 설정 전 (`/setup`)||Super administrator not set up yet (`/setup`)]] | [[보안||Security]]
+400 | `PLUGIN_NOT_FOUND` · [[검증 오류||validation]] | [[플러그인 · 테이블명 · 필수 필드 확인||Check plugin · table name · required fields]] | [[실행||Run]]
+404 | `SECURITY_DISABLED` | [[로그인이 꺼져 있을 때 사용자 · 권한 API||User · role APIs when sign-in is off]] | [[관리||Admin]]
+409 | — | [[다른 실행 중이거나 활성 스케줄 있음 (실행 게이트)||Another run in progress or an active schedule (execution gate)]] | [[실행||Run]]
+</tbl>
+<p class="muted">[[사전 검사에서 막히면 실행 기록에 `BLOCKED_*` 코드와 이유가 남습니다 (<a href="engine.html#prechecks">사전 검사 순서</a>).||When pre-run checks block a run, a `BLOCKED_*` code and the reason are kept in the run history (<a href="engine.html#prechecks">order of pre-run checks</a>).]]</p>
+
+<h2 id="run-request"><span class="no">04</span>[[실행 요청 — `POST /api/migrate/table`||Run request — `POST /api/migrate/table`]]</h2>
+<p>[[가장 많이 쓰는 API 입니다. 실행은 백그라운드로 돌고, 응답 `data.migrationId` 로 결과를 봅니다. 날짜 분할이면 `data.groupId` 로 묶음을 봅니다.||The most used API. The run proceeds in the background; follow it with `data.migrationId` from the response, or `data.groupId` for a date split.]]</p>
+<tbl>
+[[필드||Field]] | [[필수||Req.]] | [[뜻||Meaning]]
+`pluginName` · `tableName` | [[예||yes]] | [[플러그인 · 타겟 테이블명||Plugin · target table name]]
+`tenantLevel1` ~ `5` | [[예||yes]] | [[테넌트 5칸 (또는 점으로 이은 `fullTenantId`)||Five tenant levels (or dot-joined `fullTenantId`)]]
+`testMode` | | [[`READER_TEST` · `PROCESSOR_TEST` · `WRITER_TEST` · `NORMAL` — <b>생략하면 NORMAL</b>||`READER_TEST` · `PROCESSOR_TEST` · `WRITER_TEST` · `NORMAL` — <b>defaults to NORMAL</b>]]
+`testMaxItems` | | [[테스트 모드 건수 (기본 READER 5, 그 밖 100, 최대 100)||Rows in test modes (default READER 5, others 100, max 100)]]
+`chunkSize` | | [[청크 크기 (기본 200, 1 ~ 10000)||Chunk size (default 200, 1–10000)]]
+`startDate` · `endDate` | | [[기간 조건 `yyyyMMdd`, 종료일 포함||Period `yyyyMMdd`, end inclusive]]
+`enableDateDivision` · `dateDivideUnit` · `onUnitFailure` | | [[날짜 분할 (`1d` · `2w` · `1m` · `1y`), 구간 실패 시 `STOP`(기본) / `CONTINUE`||Date split (`1d` · `2w` · `1m` · `1y`), on range failure `STOP` (default) / `CONTINUE`]]
+`cronExpression` · `executeImmediately` | | [[cron 이 있으면 스케줄 등록, 없으면 즉시 실행||Registers a schedule when cron is given, otherwise runs now]]
+`ignoreExistingData` | | [[타겟에 기존 데이터가 있어도 적재 (기본 false: 경고 후 중단)||Load even if the target has rows (default false: warn and stop)]]
+`skipPrecheck` · `ignorePrecheckErrors` | | [[NORMAL 직전 자동 점검 끄기 · 차단 항목 무시 (권장하지 않음)||Skip the automatic precheck before NORMAL · ignore its blocking items (not recommended)]]
+`sequenceColumns` · `sequencePolicy` · `sequenceSync` | | [[채번 컬럼 · 정책 · 끝난 뒤 MAX 동기화 (미지정 시 `TableOptions`)||Numbering columns · policy · sync to MAX after (defaults from `TableOptions`)]]
+`source` · `excelFileId` · `onRowError` | | [[`EXCEL` 이면 업로드 파일을 같은 Target 매퍼로 적재, 오류 행 `STOP` / `SKIP`||With `EXCEL`, loads the uploaded file via the same target mapper; error rows `STOP` / `SKIP`]]
+`attribute1` ~ `25` | | [[테이블별 커스텀 속성 (SQL 에서 참조)||Per-table custom attributes (referenced in SQL)]]
+</tbl>
+<div class="note"><b>[[더 이상 쓰지 않음||Deprecated]]</b><p>[[`truncateTarget` 은 true 면 요청을 거부합니다 (제품은 데이터를 지우지 않음). `upsertMode` 는 무시됩니다 (적재 방식은 Mapper 쿼리로 결정).||`truncateTarget: true` is rejected (the product never deletes data). `upsertMode` is ignored (the load style is decided by the mapper query).]]</p></div>
+
+<h2 id="endpoints"><span class="no">05</span>[[엔드포인트||Endpoints]]</h2>
+<p>[[분류별 전체 목록입니다. 경로 · 설명으로 찾을 수 있습니다. 요청 필드와 스키마 전체는 앱 안 Swagger 또는 저장소의 OpenAPI 명세를 보세요.||The full list, grouped. Filter by path or description. For every request field and schema, see the in-app Swagger or the OpenAPI spec in the repository.]]</p>
+<div class="api-search">
+  <input id="apiQuery" type="search" placeholder="Filter — e.g. /api/report, fill-missing, schedule, 시나리오" aria-label="Filter endpoints">
+  <span class="cnt" id="apiCount"></span>
+</div>
+<!--include:_endpoints.html-->
+
+<h2 id="examples"><span class="no">06</span>[[호출 예||Examples]]</h2>
+<h3 id="ex-reader">[[① 테이블 하나 — READER_TEST (적재 없음)||① One table — READER_TEST (no writes)]]</h3>
+<pre><span class="p">$ </span>curl -u $U -X POST $B/api/migrate/table -H 'Content-Type: application/json' -d '{
+  <span class="n">"pluginName"</span>: <span class="s">"acme.member"</span>, <span class="n">"tableName"</span>: <span class="s">"tb_member"</span>,
+  <span class="n">"tenantLevel1"</span>: <span class="s">"ACME"</span>, <span class="n">"tenantLevel2"</span>: <span class="s">"ACME"</span>, <span class="n">"tenantLevel3"</span>: <span class="s">"ACME"</span>,
+  <span class="n">"tenantLevel4"</span>: <span class="s">"ACME"</span>, <span class="n">"tenantLevel5"</span>: <span class="s">"ACME"</span>,
+  <span class="n">"testMode"</span>: <span class="s">"READER_TEST"</span>, <span class="n">"testMaxItems"</span>: 5 }'</pre>
+<p class="muted">[[응답 `data.migrationId` 로 결과를 봅니다. 실행은 백그라운드입니다.||Follow the result with `data.migrationId`; the run is in the background.]]</p>
+
+<h3 id="ex-result">[[② 진행 · 결과 · 오류 로그||② Progress · result · error logs]]</h3>
+<pre><span class="p">$ </span>curl -u $U $B/api/migration/chunks/&lt;migrationId&gt;/progress
+<span class="p">$ </span>curl -u $U "$B/api/report/jobs/&lt;migrationId&gt;?format=json"
+<span class="p">$ </span>curl -u $U "$B/api/report/jobs/&lt;migrationId&gt;/logs?level=ERROR"
+<span class="p">$ </span>curl -u $U "$B/api/report/jobs/&lt;migrationId&gt;?format=xlsx" -o result.xlsx</pre>
+
+<h3 id="ex-precheck">[[③ 실행 전 점검 (적재 없음)||③ Precheck (no writes)]]</h3>
+<pre><span class="p">$ </span>curl -u $U -X POST $B/api/precheck -H 'Content-Type: application/json' -d '{
+  <span class="n">"pluginName"</span>: <span class="s">"acme.member"</span>, <span class="n">"tableNames"</span>: [<span class="s">"tb_member"</span>],
+  <span class="n">"tenantLevel1"</span>: <span class="s">"ACME"</span>, <span class="n">"tenantLevel2"</span>: <span class="s">"ACME"</span>, <span class="n">"tenantLevel3"</span>: <span class="s">"ACME"</span>,
+  <span class="n">"tenantLevel4"</span>: <span class="s">"ACME"</span>, <span class="n">"tenantLevel5"</span>: <span class="s">"ACME"</span> }'
+<span class="p">$ </span>curl -u $U $B/api/precheck/&lt;runId&gt;                     <span class="c"># RUNNING → result</span>
+<span class="p">$ </span>curl -u $U "$B/api/precheck/&lt;runId&gt;/export?format=xlsx" -o precheck.xlsx</pre>
+<p class="muted">[[`tableNames` 를 비우면 플러그인 전체 테이블입니다.||An empty `tableNames` means every table in the plugin.]]</p>
+
+<h3 id="ex-split">[[④ 기간 + 날짜 분할 NORMAL||④ Period + date split, NORMAL]]</h3>
+<pre><span class="p">$ </span>curl -u $U -X POST $B/api/migrate/table -H 'Content-Type: application/json' -d '{
+  <span class="n">"pluginName"</span>: <span class="s">"acme.order"</span>, <span class="n">"tableName"</span>: <span class="s">"tb_order"</span>,
+  <span class="n">"tenantLevel1"</span>: <span class="s">"ACME"</span>, <span class="n">"tenantLevel2"</span>: <span class="s">"ACME"</span>, <span class="n">"tenantLevel3"</span>: <span class="s">"ACME"</span>,
+  <span class="n">"tenantLevel4"</span>: <span class="s">"ACME"</span>, <span class="n">"tenantLevel5"</span>: <span class="s">"ACME"</span>,
+  <span class="n">"testMode"</span>: <span class="s">"NORMAL"</span>, <span class="n">"startDate"</span>: <span class="s">"20250101"</span>, <span class="n">"endDate"</span>: <span class="s">"20251231"</span>,
+  <span class="n">"enableDateDivision"</span>: <span class="k">true</span>, <span class="n">"dateDivideUnit"</span>: <span class="s">"1m"</span>, <span class="n">"onUnitFailure"</span>: <span class="s">"STOP"</span> }'
+<span class="p">$ </span>curl -u $U $B/api/migrate/groups/&lt;groupId&gt;</pre>
+
+<h3 id="ex-scenario">[[⑤ 시나리오 사전 확인 → 실행 → 진행 → 중지||⑤ Scenario pre-confirm → run → progress → stop]]</h3>
+<pre><span class="p">$ </span>curl -u $U $B/api/scenarios
+<span class="p">$ </span>curl -u $U -X POST $B/api/scenarios/&lt;id&gt;/check -H 'Content-Type: application/json' -d '{"testMode":"NORMAL"}'
+<span class="p">$ </span>curl -u $U -X POST $B/api/scenarios/&lt;id&gt;/run   -H 'Content-Type: application/json' -d '{"testMode":"NORMAL"}'
+<span class="p">$ </span>curl -u $U $B/api/migrate/groups/&lt;groupId&gt;
+<span class="p">$ </span>curl -u $U -X POST $B/api/migrate/groups/&lt;groupId&gt;/stop</pre>
+<p class="muted">[[중지는 지금 Job 이 끝나면 다음 Job 을 내지 않는 방식입니다.||Stop lets the current Job finish and does not start the next one.]]</p>
+
+<h3 id="ex-fill">[[⑥ 실패한 실행의 빠진 행 채우기||⑥ Fill missing rows of a failed run]]</h3>
+<pre><span class="p">$ </span>curl -u $U $B/api/migrate/jobs/&lt;migrationId&gt;/fill-missing           <span class="c"># check eligibility · reason</span>
+<span class="p">$ </span>curl -u $U -X POST $B/api/migrate/jobs/&lt;migrationId&gt;/fill-missing</pre>
+
+<h3 id="ex-ops">[[⑦ 스케줄 전체 일시정지 · 지금 실행 중인 것||⑦ Pause all schedules · what is running now]]</h3>
+<pre><span class="p">$ </span>curl -u $U -X POST $B/api/migrate/schedules/pause-all
+<span class="p">$ </span>curl -u $U $B/api/migrate/gate</pre>
+<div class="note warn"><b>[[주의||Caution]]</b><p>[[게이트 강제 해제(`POST /api/migrate/gate/release`)는 실행이 정말 없을 때만 씁니다.||Use the gate force-release (`POST /api/migrate/gate/release`) only when nothing is really running.]]</p></div>

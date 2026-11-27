@@ -1,0 +1,211 @@
+<header class="doc-head">
+  <h1>[[시스템 아키텍처||System architecture]]</h1>
+  <p class="lede">[[Georu 와 Georu 로 만든 이관 앱이 무엇으로 이뤄져 있고, 무엇과 연결되며, 어떤 계층으로 나뉘는지 설명합니다. 고객 아키텍트 · IT 운영 · 보안 담당과 수행팀(PM · 이관 리더 · 개발자)을 위한 문서입니다.||What Georu and a migration app built on it are made of, what they connect to, and how they are layered. Written for client architects, IT operations and security staff, and delivery teams (PM · migration lead · developers).]]</p>
+  <div class="tags"><span class="tag">Georu 0.8.8</span><span class="tag">[[정의서 1 ~ 3장 · 7장||Chapters 1–3 · 7]]</span><span class="tag">[[설정 값은 예제 앱 기본값||Values are example-app defaults]]</span></div>
+</header>
+
+<h2 id="system"><span class="no">1</span>[[시스템 구성도||System configuration]]</h2>
+<p>[[Georu 는 데이터 이관 <b>프레임워크</b>입니다. <b>라이브러리 묶음</b>(jar 모듈 7개)으로 배포되며, 업체는 이를 의존성으로 넣어 <b>이관 앱</b>을 만듭니다. 실행 흐름은 Georu 가 쥐고, 업체가 쓴 이관 코드(SQL · 변환)를 정해진 자리에서 부릅니다. 이관 앱이 소스 DB 를 읽어 타겟 DB 에 씁니다.||Georu is a data migration <b>framework</b>. It ships as a <b>library bundle</b> (seven jar modules), and vendors add it as a dependency to build a <b>migration app</b>. Georu owns the execution flow and calls the vendor's migration code (SQL · transformations) at defined points. The migration app reads the source DB and writes to the target DB.]]</p>
+
+<figure class="diagram">
+  <div class="sysmap-v">
+<div class="grid-boxes" style="grid-template-columns:repeat(4,1fr)">
+      <div class="box ext"><b>[[실행 담당 · 관리자||Operators · admins]]</b><small>[[브라우저 · 세션||Browser · session]]</small></div>
+      <div class="box ext"><b>[[고객 · 업무 담당||Client · business staff]]</b><small>[[조회 권한||View permission]]</small></div>
+      <div class="box ext"><b>[[업체 스크립트||Vendor scripts]]</b><small>JSON · HTTP Basic</small></div>
+      <div class="box ext"><b>[[감시 도구||Monitoring]]</b><small>[[헬스 · 지표||Health · metrics]]</small></div>
+    </div>
+<div class="vflow"><div class="arrow down"><i></i></div><span>HTTP(S) · [[세션 · HTTP Basic||session · HTTP Basic]]</span></div>
+<div class="zone app">
+      <span class="zl">[[이관 앱 (Spring Boot · 서버 1대)||Migration app (Spring Boot · one server)]]</span>
+      <div class="grid-boxes" style="grid-template-columns:repeat(4,1fr);margin-bottom:10px">
+        <div class="box"><b>/ui</b><small>[[운영 UI||Operation UI]]</small></div>
+        <div class="box"><b>/api</b><small>[[운영 API||Operation API]]</small></div>
+        <div class="box"><b>/admin</b><small>[[서버 진단||Diagnostics]]</small></div>
+        <div class="box"><b>/actuator</b><small>[[헬스||Health]]</small></div>
+      </div>
+      <div class="grid-boxes" style="grid-template-columns:repeat(4,1fr)">
+        <div class="box ac"><b><span class="num">①</span>[[계정 · 권한||Accounts · roles]]</b><small>[[5회 실패 잠금 · 메뉴별 권한||Lock after 5 · per-menu]]</small></div>
+        <div class="box ac"><b><span class="num">②</span>[[실행 통제||Execution control]]</b><small>[[게이트 · 사전 검사 · 시간대||Gate · checks · windows]]</small></div>
+        <div class="box fill"><b><span class="num" style="color:#fff">③</span>[[이관 엔진||Migration engine]]</b><small>[[읽기 → 큐 → 적재 n||Read → queue → load n]]</small></div>
+        <div class="box ac"><b><span class="num">④</span>[[검증 · 안전||Verification · safety]]</b><small>[[테스트 모드 · 쓰기 정책||Test modes · write policy]]</small></div>
+        <div class="box ac"><b><span class="num">⑤</span>[[분할 · 묶음||Split · groups]]</b><small>[[날짜 분할 · 시나리오 · 스케줄||Date split · scenarios · cron]]</small></div>
+        <div class="box ac"><b><span class="num">⑥</span>[[재시도 · 재실행||Retries · re-runs]]</b><small>[[자동 3회 · 빠진 행 채우기||3 auto · fill missing]]</small></div>
+        <div class="box ac"><b><span class="num">⑦</span>[[기록 · 결과 · 알림||Records · alerts]]</b><small>[[이력 · 보고서 · 텔레그램||History · reports · Telegram]]</small></div>
+        <div class="box ac"><b><span class="num">⑧</span>[[설계 도구||Design tools]]</b><small>[[정의서 → 코드 초안||Definition → draft code]]</small></div>
+      </div>
+      <div class="box vendor" style="margin-top:10px"><b><span class="num" style="color:var(--warn)">⑨</span>[[업체 이관 코드||Vendor migration code]]</b><small>[[업무별 플러그인 · Source SQL · Target SQL · DTO · Processor · 시나리오||Per-area plugins · Source SQL · Target SQL · DTOs · Processors · scenarios]]</small></div>
+      <div class="flowline" style="margin:10px 0 0;justify-content:center"><span>Spring Boot</span><span>Spring Batch</span><span>Spring Security</span><span>MyBatis</span><span>HikariCP</span><span>Thymeleaf</span></div>
+    </div>
+<div class="vflow"><div class="arrow down"><i></i></div><span>JDBC · HTTPS</span></div>
+<div class="grid-boxes" style="grid-template-columns:repeat(5,1fr)">
+      <div class="box ext"><b>[[소스 DB × n||Source DB × n]]</b><small>[[읽기 전용 · SELECT 만||Read-only · SELECT only]]</small></div>
+      <div class="box ext"><b>[[타겟 DB × n||Target DB × n]]</b><small>INSERT · UPDATE</small></div>
+      <div class="box ext"><b>[[채번 DB (선택)||Numbering DB (opt.)]]</b><small>SELECT · UPDATE</small></div>
+      <div class="box ac"><b><span class="num">⑩</span>[[운영 저장소||Operations store]]</b><small>H2 · MySQL · MariaDB</small></div>
+      <div class="box ext"><b>[[텔레그램 (선택)||Telegram (opt.)]]</b><small>HTTPS Bot API</small></div>
+    </div>
+</div>
+  <figcaption>[[그림 1. 시스템 구성도 — 파란 테두리는 Georu 제공, 점선 주황은 업체 코드, 점선 회색은 고객 · 외부 자산||Figure 1. System configuration — blue: provided by Georu, dashed orange: vendor code, dashed grey: client · external assets]]</figcaption>
+</figure>
+
+<h3 id="components">[[1.1 구성 요소||1.1 Components]]</h3>
+<tbl>
+# | [[구성 요소||Component]] | [[역할||Role]] | [[제공||Provided by]]
+- | [[사용자 · 채널||Users · channels]] | [[실행 담당 · 관리자(브라우저 · 세션), 고객 · 업무 담당(조회 권한), 업체 스크립트(JSON · HTTP Basic), 감시 도구(헬스 · 지표)||Operators · administrators (browser · session), client · business staff (view permission), vendor scripts (JSON · HTTP Basic), monitoring tools (health · metrics)]] | [[고객 · 업체||Client · vendor]]
+- | [[입구||Entry points]] | [[운영 UI `/ui` · 운영 API `/api` · 서버 진단 `/admin` · 헬스 `/actuator`||Operation UI `/ui` · operation API `/api` · diagnostics `/admin` · health `/actuator`]] | Georu
+① | [[계정 · 권한||Accounts · permissions]] | [[로그인 · 5회 실패 잠금, 메뉴별 없음 · 조회 · 실행, 실행자 자동 기록||Sign-in · lock after 5 failures, per-menu None · View · Execute, executor recorded automatically]] | Georu
+② | [[실행 통제||Execution control]] | [[실행 게이트(한 번에 1개), 사전 검사 · 테이블 사용 대장, 실행 시간대 · 부하 조절||Execution gate (one at a time), pre-run checks · table usage register, run window · load throttling]] | Georu
+③ | [[이관 엔진||Migration engine]] | [[읽기 → 큐 → 적재 스레드 n, 청크 기록 · 건수 판정, 채번 · Lookup · N:1||Read → queue → n load threads, chunk records · count verdict, numbering · Lookup · N:1]] | Georu
+④ | [[검증 · 안전||Verification · safety]] | [[테스트 모드 4단계, 실행 전 점검(쓰지 않음), DB 쓰기 정책 3겹||Four test modes, precheck (writes nothing), three-layer DB write policy]] | Georu
+⑤ | [[분할 · 묶음 실행||Splitting · group runs]] | [[날짜 분할(구간마다 Job), 시나리오 단계 실행, 스케줄 · 엑셀 이관||Date split (one Job per range), scenario steps, schedules · Excel migration]] | Georu
+⑥ | [[재시도 · 재실행||Retries · re-runs]] | [[적재 자동 재시도 3회, 빠진 행 채우기 · 증분, 시간대 중단 후 자동 재시작||Automatic load retry ×3, fill missing rows · increment, auto-restart after a run-window pause]] | Georu
+⑦ | [[기록 · 결과 · 알림||Records · results · alerts]] | [[이력 · 로그 · 대사, 보고서(CSV · XLSX · PDF), 텔레그램 · 화면 알림||History · logs · reconciliation, reports (CSV · XLSX · PDF), Telegram · on-screen alerts]] | Georu
+⑧ | [[설계 도구||Design tools]] | [[정의서 → 이관 코드 초안, 관계 분석 · 매핑 초안 (운영 환경에서 꺼짐)||Definition → draft migration code, relationship analysis · draft mapping (off in production)]] | Georu
+⑨ | [[업체 이관 코드||Vendor migration code]] | [[업무별 플러그인 · Source SQL · Target SQL · DTO · Processor · 시나리오||Per-area plugins · Source SQL · Target SQL · DTOs · Processors · scenarios]] | [[업체||Vendor]]
+⑩ | [[운영 저장소||Operations store]] | [[Georu 자신의 기록 DB (이력 · 계정 · 설정). H2 파일 또는 MySQL · MariaDB||Georu's own record DB (history · accounts · settings). H2 file or MySQL · MariaDB]] | [[Georu (DB 는 고객)||Georu (DB from client)]]
+- | [[연계 DB||Connected DBs]] | [[소스 DB n대(읽기 전용) · 타겟 DB n대 · 채번 DB(선택)||n source DBs (read-only) · n target DBs · numbering DB (optional)]] | [[고객||Client]]
+- | [[개발 · 배포||Development · deployment]] | [[업체 저장소 → `libs/` Georu 묶음 → Gradle 빌드 · 테스트 → jar · 컨테이너 이미지 → 이관 서버 기동||Vendor repo → Georu bundle in `libs/` → Gradle build · test → jar · container image → start on the migration server]] | [[업체||Vendor]]
+</tbl>
+
+<h3 id="principles">[[1.2 구성 원칙||1.2 Principles]]</h3>
+<div class="cards" style="grid-template-columns:repeat(2,1fr)">
+  <div class="card"><div class="ic">1×1</div><h3>[[앱 하나 · 서버 1대||One app · one server]]</h3><p>[[이관 실행은 시스템 전체에서 한 번에 하나. 이중화하지 않습니다. 동시 실행이 만드는 채번 충돌과 부하 사고를 구조로 없앱니다.||Only one migration runs at a time, system-wide, with no redundancy. Numbering collisions and load accidents from concurrent runs are removed by design.]]</p></div>
+  <div class="card"><div class="ic">SQL</div><h3>[[규칙은 업체 코드||Rules live in vendor code]]</h3><p>[[변환은 Source SQL, Processor 는 검증 · 옮겨 담기. 엔진 내부는 쓰지 않습니다.||Transformations go in Source SQL; Processors validate and copy values. Engine internals are never touched.]]</p></div>
+  <div class="card"><div class="ic">LOG</div><h3>[[기록은 따로||Records kept separately]]</h3><p>[[운영 저장소는 타겟과 다른 DB · 스키마입니다. 타겟을 정리해도 이관 이력은 남습니다.||The operations store is a different DB · schema from the target, so history survives any target cleanup.]]</p></div>
+  <div class="card"><div class="ic">⇄</div><h3>[[어디서든 실행||Runs anywhere]]</h3><p>[[같은 앱을 로컬 · 도커 · 서버에서 돌립니다. 바뀌는 것은 프로파일과 접속 정보뿐입니다.||The same app runs locally, on Docker or on a server; only the profile and connection details change.]]</p></div>
+</div>
+
+<h2 id="context"><span class="no">2</span>[[시스템 연관도||System context]]</h2>
+<p>[[이관 앱은 <b>DB 와만</b> 붙습니다. 외부 업무 시스템(ERP · EAI · IAM · SSO)과의 연계는 없으므로, 보안 검토 범위는 사용자 채널(HTTP) · DB 연결(JDBC) · 선택적 텔레그램 알림(HTTPS) 세 갈래로 좁혀집니다.||The migration app connects <b>only to databases</b>. There is no integration with external business systems (ERP · EAI · IAM · SSO), so the security review narrows to three paths: user channels (HTTP), DB connections (JDBC) and optional Telegram notifications (HTTPS).]]</p>
+
+<h3 id="context-map">[[2.1 연관도||2.1 Context]]</h3>
+<tbl>
+[[출발||From]] | [[도착||To]] | [[방식 · 데이터||Method · data]]
+[[실행 담당 · 관리자 · 고객||Operators · admins · client]] | [[이관 앱 (운영 UI)||Migration app (UI)]] | [[HTTP(S) · 로그인 세션||HTTP(S) · sign-in session]]
+[[업체 스크립트||Vendor scripts]] | [[이관 앱 (운영 API)||Migration app (API)]] | HTTP(S) · HTTP Basic · JSON
+[[감시 도구||Monitoring tools]] | [[이관 앱 (헬스 · 지표)||Migration app (health)]] | `/actuator/health/live` · `/ready`
+[[이관 앱||Migration app]] | [[소스 DB n대||n source DBs]] | [[JDBC · 읽기 전용 연결 · SELECT 만||JDBC · read-only connection · SELECT only]]
+[[이관 앱||Migration app]] | [[타겟 DB n대 · 채번 DB||n target DBs · numbering DB]] | [[JDBC · SELECT · INSERT · UPDATE (삭제 · DDL 금지)||JDBC · SELECT · INSERT · UPDATE (no deletes · no DDL)]]
+[[이관 앱||Migration app]] | [[운영 저장소||Operations store]] | [[JDBC (H2 는 같은 프로세스) · 이력 · 청크 · 계정||JDBC (H2 in-process) · history · chunks · accounts]]
+[[이관 앱||Migration app]] | [[텔레그램 (선택)||Telegram (optional)]] | [[HTTPS · Bot API · 결과 · 차단 · 상태 알림||HTTPS · Bot API · result · block · status alerts]]
+[[업체 저장소 · 빌드||Vendor repo · build]] | [[이관 서버||Migration server]] | [[jar · 컨테이너 이미지 배포||jar · container image deployment]]
+</tbl>
+
+<h3 id="interfaces">[[2.2 인터페이스 목록||2.2 Interfaces]]</h3>
+<tbl>
+ID | [[인터페이스||Interface]] | [[대상||Counterpart]] | [[구분||Dir.]] | [[방식||Method]] | [[시점||When]]
+IF-01 | [[소스 읽기||Source read]] | [[소스 DB||Source DB]] | OUT | [[JDBC SELECT (페이지)||JDBC SELECT (paged)]] | [[실행 · 점검||Run · check]]
+IF-02 | [[타겟 적재||Target load]] | [[타겟 DB||Target DB]] | OUT | [[JDBC 배치 INSERT · UPSERT||JDBC batch INSERT · UPSERT]] | [[실행||Run]]
+IF-03 | [[채번||Numbering]] | [[채번 관리 테이블||Numbering table]] | OUT | JDBC SELECT · UPDATE | [[실행||Run]]
+IF-04 | [[실행 기록||Run records]] | [[운영 저장소||Operations store]] | OUT | JDBC | [[청크 · Job 마다||Per chunk · Job]]
+IF-05 | [[운영 화면||Operation screens]] | [[브라우저||Browser]] | IN | [[HTTP · HTML (서버 렌더)||HTTP · HTML (server-rendered)]] | [[상시||Always]]
+IF-06 | [[운영 API||Operation API]] | [[화면 · 업체 스크립트||Screens · scripts]] | IN | [[REST · JSON (<a href="api.html">API 레퍼런스</a>)||REST · JSON (<a href="api.html">API reference</a>)]] | [[상시||Always]]
+IF-07 | [[헬스 · 지표||Health · metrics]] | [[감시 도구||Monitoring]] | IN | Actuator (health · info · metrics · logfile) | [[상시||Always]]
+IF-08 | [[알림||Notifications]] | [[텔레그램||Telegram]] | OUT | HTTPS Bot API | [[결과 · 차단 · 상태||Result · block · status]]
+IF-09 | [[엑셀 업로드 · 템플릿||Excel upload · template]] | [[브라우저||Browser]] | IN · OUT | [[파일 (xlsx, 50MB)||File (xlsx, 50MB)]] | [[엑셀 이관||Excel migration]]
+IF-10 | [[보고서 내보내기||Report export]] | [[브라우저||Browser]] | OUT | CSV · XLSX · PDF · zip | [[요청 시||On request]]
+IF-11 | [[설계 도구||Design tools]] | [[브라우저||Browser]] | IN · OUT | [[정의서 업로드 → 코드 · 초안 zip (서버에 저장 안 함)||Definition upload → code · draft zip (not stored)]] | [[개발 단계||Development]]
+IF-12 | [[안내서||Guides]] | [[브라우저||Browser]] | OUT | `/api/ui/guides/**` | [[상시||Always]]
+</tbl>
+
+<h3 id="dataflow">[[2.3 데이터 흐름 (테이블 하나)||2.3 Data flow (one table)]]</h3>
+<ol class="chain">
+  <li><b>[[요청 → 실행 게이트||Request → execution gate]]</b><span>[[화면 · API · 스케줄에서 요청이 오면 다른 실행이 없는지 먼저 확인합니다.||A request from a screen, the API or a schedule first confirms that nothing else is running.]]</span></li>
+  <li><b>[[사전 검사 → 실행 전 점검||Pre-run checks → precheck]]</b><span>[[NORMAL 이면 자동 실행 전 점검을 돕니다 — 타겟 메타 · 소스 샘플 SELECT 만, 쓰지 않습니다.||For NORMAL, the automatic precheck runs — target metadata and a source sample SELECT only; nothing is written.]]</span></li>
+  <li><b>[[읽기 → 변환 → 큐 → 적재||Read → transform → queue → load]]</b><span>[[소스에서 페이지를 읽어 변환하고, 큐를 거쳐 적재 스레드가 타겟에 배치 INSERT 합니다.||Pages are read from the source and transformed; load threads take them off the queue and batch-INSERT into the target.]]</span></li>
+  <li><b>[[청크마다 기록||Record per chunk]]</b><span>[[진행 · 건수 · 오류를 운영 저장소에 남깁니다.||Progress, counts and errors go to the operations store.]]</span></li>
+  <li><b>[[건수 판정 → 알림 · 보고서||Count verdict → alerts · reports]]</b><span>[[끝나면 소스 = 타겟 건수를 판정하고 알림 · 보고서를 만듭니다.||At the end, source = target count is verified and alerts · reports are produced.]]</span></li>
+</ol>
+
+<h2 id="framework"><span class="no">3</span>[[프레임워크 기능 구성||Framework features]]</h2>
+<p>[[Georu 는 <b>기반 프레임워크</b>(Spring Boot · Spring Batch) 위에 만든 <b>데이터 이관 프레임워크</b>입니다. Georu 가 직접 만든 기능과, 그 아래에서 쓰는 기반 프레임워크 · 라이브러리를 나눠 봅니다.||Georu is a <b>data migration framework</b> built on <b>base frameworks</b> (Spring Boot · Spring Batch). Below, the features Georu itself provides are separated from the base frameworks · libraries it uses.]]</p>
+
+<figure class="diagram">
+  <div class="dg-col" style="min-width:720px;gap:8px">
+    <div class="box vendor" style="text-align:center"><b>[[업체 이관 코드 — 플러그인 · SQL · Processor · 시나리오||Vendor migration code — plugins · SQL · Processors · scenarios]]</b></div>
+    <div class="zone app" style="padding:12px">
+      <span class="zl">Georu framework</span>
+      <div class="grid-boxes" style="grid-template-columns:repeat(3,1fr)">
+        <div class="box"><b>[[화면||Screens]]</b><small>[[운영 UI 28화면 · DDL 도구 3종||28 UI screens · 3 DDL tools]]</small></div>
+        <div class="box"><b>[[API · 보안||API · security]]</b><small>[[공통 응답 · 메뉴 권한 · 필터||Common response · menu perms · filters]]</small></div>
+        <div class="box fill"><b>[[실행 통제 · 이관 엔진||Execution control · engine]]</b><small>[[테이블 = Job, 흐름은 Georu||Table = Job, Georu owns flow]]</small></div>
+        <div class="box"><b>[[검증 · 안전||Verification · safety]]</b><small>[[테스트 모드 · 점검 · 쓰기 정책||Test modes · precheck · policy]]</small></div>
+        <div class="box"><b>[[데이터 접근||Data access]]</b><small>[[다중 · 정책 DataSource||Multi · policy DataSource]]</small></div>
+        <div class="box"><b>[[개발 지원||Dev support]]</b><small>georu-codegen · georu-test</small></div>
+      </div>
+    </div>
+    <div class="zone" style="padding:12px">
+      <span class="zl">[[기반 프레임워크 · 라이브러리||Base frameworks · libraries]]</span>
+      <div class="flowline" style="margin:0"><span>Spring Boot</span><span>Spring Batch</span><span>Spring Web</span><span>Spring Security</span><span>Spring Retry</span><span>MyBatis</span><span>HikariCP</span><span>Thymeleaf</span><span>springdoc</span><span>Apache POI</span><span>openhtmltopdf</span><span>Actuator</span><span>Spring Boot Admin</span></div>
+    </div>
+    <div class="zone" style="padding:12px">
+      <span class="zl">JDBC</span>
+      <div class="flowline" style="margin:0"><span>Oracle</span><span>MySQL</span><span>SQL Server</span><span>MariaDB</span><span>PostgreSQL</span><span>H2</span></div>
+    </div>
+  </div>
+  <figcaption>[[그림 2. 프레임워크 계층||Figure 2. Framework layers]]</figcaption>
+</figure>
+
+<h3 id="georu-built">[[3.1 Georu 가 만든 것||3.1 What Georu provides]]</h3>
+<tbl>
+[[계층||Layer]] | [[Georu 기능||Georu feature]] | [[적용 내용||Applied as]]
+[[화면||Screens]] | [[운영 UI 화면 28개 · 공통 스크립트(`ui.js` · `ui-panel.js`) · DDL 도구 3종||28 operation UI screens · shared scripts (`ui.js` · `ui-panel.js`) · 3 DDL tools]] | [[별도 프론트 빌드 없이 jar 안에||Inside the jar, no separate frontend build]]
+[[API · 보안||API · security]] | [[운영 API · 공통 응답 · 메뉴 권한 · 로그인 · 보안 필터||Operation API · common response · menu permissions · sign-in · security filters]] | [[세션 · HTTP Basic, 메뉴별 권한||Session · HTTP Basic, per-menu permissions]]
+[[실행 통제 · 이관 엔진||Execution control · engine]] | [[실행 게이트 · 사전 검사 · 큐 분리 · 적재 스레드 · 날짜 분할 · 시나리오 · 재시도 · 빠진 행 채우기||Execution gate · pre-run checks · queue separation · load threads · date split · scenarios · retries · fill missing rows]] | [[테이블 = Job, 흐름은 Georu 가 쥠||Table = Job, Georu owns the flow]]
+[[검증 · 안전||Verification · safety]] | [[테스트 모드 · 실행 전 점검 · DB 쓰기 정책 · 이관 상태||Test modes · precheck · DB write policy · migration status]] | [[적재 전 검증, 소스 · 타겟 보호||Verify before loading, protect source · target]]
+[[데이터 접근||Data access]] | [[다중 DataSource · 정책 DataSource · 운영 저장소||Multiple DataSources · policy DataSource · operations store]] | [[DataSource 마다 SqlSessionFactory||One SqlSessionFactory per DataSource]]
+[[개발 지원||Development support]] | [[설계 도구(georu-codegen) · georu-test(의존 경계 규칙)||Design tools (georu-codegen) · georu-test (dependency boundary rules)]] | [[코드 초안 · 경계 테스트||Draft code · boundary tests]]
+</tbl>
+
+<h3 id="base">[[3.2 Georu 가 쓰는 것||3.2 What Georu builds on]]</h3>
+<tbl>
+[[구분||Category]] | [[이름||Name]] | [[Georu 에서의 쓰임||Use in Georu]]
+[[기반 프레임워크||Base framework]] | Spring Boot · Spring Batch · Spring Web · Spring Security · Spring Retry | [[앱 기동 · Job/Step · API · 인증 · 재시도||Startup · Job/Step · API · authentication · retries]]
+[[라이브러리||Libraries]] | MyBatis · HikariCP · Thymeleaf · springdoc · Apache POI · openhtmltopdf · ArchUnit | [[SQL 매퍼 · 커넥션 풀 · 화면 · API 문서 · 엑셀 · PDF · 경계 테스트||SQL mapper · connection pool · screens · API docs · Excel · PDF · boundary tests]]
+[[진단||Diagnostics]] | Spring Boot Actuator · Spring Boot Admin | [[헬스 · 지표 · 서버 진단||Health · metrics · server diagnostics]]
+[[JDBC 드라이버||JDBC drivers]] | Oracle · MySQL · SQL Server · MariaDB · PostgreSQL · H2 | [[드라이버는 업체가 고름 (H2 만 포함)||The vendor chooses drivers (only H2 is bundled)]]
+</tbl>
+
+<h2 id="modules"><span class="no">3.3</span>[[라이브러리 모듈||Library modules]]</h2>
+<p>[[Georu 는 아래 7개 모듈(jar)로 이뤄진 <b>라이브러리 묶음</b>으로 배포됩니다. 업체 이관 앱은 스타터 하나만 의존하면 나머지가 따라옵니다.||Georu ships as a <b>library bundle</b> of the seven modules (jars) below. A vendor migration app depends on the starter alone and gets the rest transitively.]]</p>
+
+<figure class="diagram">
+  <div class="dg-row" style="align-items:center">
+    <div class="box vendor"><b>[[업체 이관 앱||Vendor migration app]]</b><small>build.gradle</small></div>
+    <div class="arrow"><i></i></div>
+    <div class="box fill"><b>georu-spring-boot-starter</b><small>[[의존성 1줄 + H2||One dependency + H2]]</small></div>
+    <div class="arrow"><i></i></div>
+    <div class="dg-col">
+      <div class="box"><b>georu-spring-boot-autoconfigure</b><small>[[`georu.*` 설정 → 자동 구성||`georu.*` → auto-config]]</small></div>
+      <div class="box"><b>georu-ui</b><small>[[운영 UI · 로그인 · 권한||UI · sign-in · roles]]</small></div>
+    </div>
+    <div class="arrow"><i></i></div>
+    <div class="box"><b>georu-api</b><small>[[운영 API · 보고서 · OpenAPI||API · reports · OpenAPI]]</small></div>
+    <div class="arrow"><i></i></div>
+    <div class="dg-col">
+      <div class="box ac"><b>georu-core</b><small>[[이관 엔진 · 실행 통제 · 저장소||Engine · control · store]]</small></div>
+      <div class="box"><b>georu-codegen</b><small>[[설계 도구||Design tools]]</small></div>
+    </div>
+  </div>
+  <div class="dg-row" style="margin-top:16px;align-items:center">
+    <div class="box vendor"><b>[[업체 테스트||Vendor tests]]</b></div>
+    <div class="arrow"><i></i></div>
+    <div class="box"><b>georu-test</b><small>[[의존 경계 규칙 · 테스트 DataSource||Boundary rules · test DataSource]]</small></div>
+    <div class="arrow"><i></i></div>
+    <div class="box ac"><b>georu-core</b></div>
+  </div>
+  <figcaption>[[그림 3. 모듈 의존 방향 (화살표 = 의존)||Figure 3. Module dependencies (arrow = depends on)]]</figcaption>
+</figure>
+
+<tbl>
+[[모듈||Module]] | [[기능||Features]] | [[업체가 쓰는 것||What the vendor uses]]
+`georu-core` | [[이관 엔진 · 실행 게이트 · 사전 검사 · 실행 전 점검 · DB 쓰기 정책 · 채번 · 날짜 분할 · 시나리오 · 스케줄 · 재시도 · 빠진 행 채우기 · 엑셀 이관 · 알림 · 운영 저장소||Migration engine · execution gate · pre-run checks · precheck · DB write policy · numbering · date split · scenarios · schedules · retries · fill missing rows · Excel migration · notifications · operations store]] | [[플러그인 · 테이블 선언(`TableOptions`) · Processor · 공용 Reader/Writer||Plugins · table declarations (`TableOptions`) · Processors · shared Reader/Writer]]
+`georu-api` | [[운영 API · 보고서(CSV · XLSX · PDF) · OpenAPI · 공통 응답 · 오류 처리||Operation API · reports (CSV · XLSX · PDF) · OpenAPI · common response · error handling]] | [[(호출만)||(Calls only)]]
+`georu-codegen` | [[정의서 → 이관 코드 초안 · 관계 분석 · 매핑 정의서 초안||Definition → draft code · relationship analysis · draft mapping definition]] | [[화면에서 사용||Used from screens]]
+`georu-ui` | [[운영 UI · 로그인 · 사용자 · 권한 · 서버 진단||Operation UI · sign-in · users · roles · diagnostics]] | [[(사용만)||(Use only)]]
+`georu-spring-boot-autoconfigure` | [[`georu.*` 설정으로 자동 구성||Auto-configuration from `georu.*` settings]] | [[설정||Settings]]
+`georu-spring-boot-starter` | [[위 전부 + H2 를 묶은 의존성 하나||A single dependency bundling all of the above + H2]] | [[의존성 1줄||One dependency line]]
+`georu-test` | [[의존 경계 규칙 · 테스트용 DataSource||Dependency boundary rules · DataSource for tests]] | [[테스트||Tests]]
+</tbl>
+<div class="note"><b>[[참고||Note]]</b><p>[[업체 이관 프로젝트의 폴더 구조와 빌드 · 배포 절차는 <a href="application.html#project">애플리케이션 구성 → 프로젝트 구성</a>에 있습니다.||The vendor project layout and build · deployment steps are in <a href="application.html#project">Application design → Project structure</a>.]]</p></div>

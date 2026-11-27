@@ -1,0 +1,413 @@
+<!doctype html>
+<html lang="ko" data-lang="ko" data-title-ko="API 레퍼런스 · MORI SOC" data-title-en="API reference · MORI SOC">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>API 레퍼런스 · MORI SOC</title>
+<meta name="description" content="MORI SOC REST API 레퍼런스: 인증, 분류별 212개 엔드포인트, 증적 인제스트.">
+<meta property="og:title" content="API reference · MORI SOC">
+<meta property="og:description" content="MORI SOC REST API 레퍼런스: 인증, 분류별 212개 엔드포인트, 증적 인제스트.">
+<meta property="og:type" content="website">
+<meta property="og:image" content="https://rm-studio-org.github.io/assets/banner.png">
+<link rel="icon" href="assets/mori-mark.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<link rel="stylesheet" href="assets/mori.css">
+<script>
+(function(){var d=document.documentElement,l=null,t=null;
+try{var q=new URLSearchParams(location.search).get('lang');if(q==='ko'||q==='en')l=q;}catch(e){}
+try{l=l||localStorage.getItem('rm-lang');t=localStorage.getItem('rm-theme');}catch(e){}
+if(!l)l=(navigator.language||'ko').toLowerCase().indexOf('ko')===0?'ko':'en';
+d.setAttribute('data-lang',l);d.lang=l;if(t==='light'||t==='dark')d.setAttribute('data-theme',t);})();
+</script>
+</head>
+<body>
+<header class="g-top">
+  <div class="wrap">
+    <button type="button" class="icon-btn menu-btn" id="menuBtn" aria-label="Menu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
+    <a class="g-brand" href="index.html" aria-label="MORI SOC home"><span class="mk" aria-hidden="true">M</span>MORI SOC<span class="chip">Docs</span></a>
+    <nav class="g-nav" aria-label="MORI SOC"><a href="index.html"><span lang="ko">소개</span><span lang="en">Overview</span></a><a href="architecture.html"><span lang="ko">아키텍처</span><span lang="en">Architecture</span></a><a href="features.html"><span lang="ko">핵심 기능</span><span lang="en">Features</span></a><a href="integrations.html"><span lang="ko">연동 · 배포</span><span lang="en">Integrations</span></a><a href="api.html" aria-current="page"><span lang="ko">API</span><span lang="en">API</span></a></nav>
+    <div class="g-tools">
+      <a class="gh-link" href="https://github.com/saranf/mori-soc" target="_blank" rel="noopener"><svg width="15" height="15" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg><span>GitHub</span></a>
+      <div class="seg" role="group" aria-label="Language"><button type="button" data-set-lang="ko">KO</button><button type="button" data-set-lang="en">EN</button></div>
+      <button type="button" class="icon-btn" id="themeBtn" aria-label="Toggle theme"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg></button>
+    </div>
+  </div>
+</header>
+<div class="docs">
+<aside class="side" aria-label="Documentation">
+<div class="grp"><span lang="ko">시작하기</span><span lang="en">Get started</span></div>
+<a href="index.html"><span lang="ko">MORI 소개</span><span lang="en">Overview</span></a>
+<div class="grp"><span lang="ko">문서</span><span lang="en">Docs</span></div>
+<a href="architecture.html"><span lang="ko">아키텍처</span><span lang="en">Architecture</span></a>
+<a href="features.html"><span lang="ko">핵심 기능</span><span lang="en">Core features</span></a>
+<a href="integrations.html"><span lang="ko">연동 · 배포</span><span lang="en">Integrations · deployment</span></a>
+<div class="grp"><span lang="ko">레퍼런스</span><span lang="en">Reference</span></div>
+<a href="api.html" aria-current="page"><span lang="ko">API 레퍼런스</span><span lang="en">API reference</span></a>
+<div class="sub-links"><a href="#auth"><span lang="ko">인증</span><span lang="en">Authentication</span></a><a href="#ingest"><span lang="ko">증적 보내기</span><span lang="en">Sending evidence</span></a><a href="#endpoints"><span lang="ko">엔드포인트</span><span lang="en">Endpoints</span></a></div>
+<div class="grp"><span lang="ko">링크</span><span lang="en">Links</span></div>
+<a href="https://github.com/saranf/mori-soc" target="_blank" rel="noopener">GitHub ↗</a>
+<a href="https://github.com/saranf/mori-soc/blob/main/CHANGELOG.md" target="_blank" rel="noopener">Changelog ↗</a>
+<a href="https://github.com/saranf/mori-soc/blob/main/README_FULL.md" target="_blank" rel="noopener">README (full) ↗</a>
+<a href="../index.html">RM Studio ↗</a>
+<div class="ver"><span lang="ko">MORI SOC 0.6.0 (alpha) 기준</span><span lang="en">Based on MORI SOC 0.6.0 (alpha)</span></div>
+</aside>
+<main class="content" id="main">
+<div class="crumb"><a href="index.html">MORI SOC</a><span>/</span><span><span lang="ko">레퍼런스</span><span lang="en">Reference</span></span></div>
+<header class="doc-head">
+  <h1><span lang="ko">API 레퍼런스</span><span lang="en">API reference</span></h1>
+  <p class="lede"><span lang="ko">MORI 의 화면이 쓰는 REST API 와, 외부 도구가 증적을 보내는 인제스트 API 입니다. 실행 중인 서버의 <code>/docs</code> 에서 Swagger UI 로도 볼 수 있습니다.</span><span lang="en">The REST API behind the MORI screens, plus the ingest API external tools use to send evidence. A running server also serves Swagger UI at <code>/docs</code>.</span></p>
+  <div class="tags"><span class="tag">FastAPI · JSON</span><span class="tag"><span lang="ko">세션 쿠키 · 인제스트 토큰 · OIDC</span><span lang="en">Session cookie · ingest token · OIDC</span></span><span class="tag"><span lang="ko">19개 분류 · 212개 엔드포인트</span><span lang="en">19 groups · 212 endpoints</span></span><span class="tag"><span lang="ko">MORI SOC 0.6.0 소스 기준</span><span lang="en">From MORI SOC 0.6.0 source</span></span></div>
+</header>
+
+<div class="kv">
+  <div><b>/docs</b><span><span lang="ko">Swagger UI (기능별 그룹)</span><span lang="en">Swagger UI (grouped by feature)</span></span></div>
+  <div><b>:18000</b><span><span lang="ko">기본 API 포트</span><span lang="en">Default API port</span></span></div>
+  <div><b>/ingest/*</b><span><span lang="ko">증적 push 입구</span><span lang="en">Evidence push entry</span></span></div>
+  <div><b>/health/ready</b><span><span lang="ko">레디니스 — 미준비면 503</span><span lang="en">Readiness — 503 when not ready</span></span></div>
+</div>
+
+<h2 id="auth"><span class="no">01</span><span lang="ko">인증</span><span lang="en">Authentication</span></h2>
+<div class="tbl "><table><thead><tr><th><span lang="ko">호출 주체</span><span lang="en">Caller</span></th><th><span lang="ko">방식</span><span lang="en">Method</span></th><th><span lang="ko">비고</span><span lang="en">Notes</span></th></tr></thead><tbody><tr><td><span lang="ko">화면 · 사용자</span><span lang="en">UI · users</span></td><td><span lang="ko"><code>POST /auth/login</code> → 세션 쿠키 <code>mori_session</code></span><span lang="en"><code>POST /auth/login</code> → session cookie <code>mori_session</code></span></td><td><span lang="ko">HttpOnly · SameSite=Lax, 유휴 8시간 · 절대 7일, 반복 실패 시 잠금</span><span lang="en">HttpOnly · SameSite=Lax, 8 h idle · 7 days absolute, lockout on repeated failures</span></td></tr><tr><td><span lang="ko">증적 소스 (push)</span><span lang="en">Evidence sources (push)</span></td><td><span lang="ko"><code>MORI_INGEST_TOKEN</code> 을 <code>Authorization: Bearer</code> 또는 <code>X-MORI-Token</code></span><span lang="en"><code>MORI_INGEST_TOKEN</code> via <code>Authorization: Bearer</code> or <code>X-MORI-Token</code></span></td><td><span lang="ko">빈도 제한, 본문 10MB · findings 20,000 상한(기본)</span><span lang="en">Rate-limited; 10 MB body · 20,000 findings caps (default)</span></td></tr><tr><td><span lang="ko">GitHub Actions 코드 리뷰</span><span lang="en">GitHub Actions code review</span></td><td><span lang="ko">GitHub OIDC JWT 를 <code>X-MORI-OIDC</code> 로 (토큰보다 우선)</span><span lang="en">GitHub OIDC JWT in <code>X-MORI-OIDC</code> (takes precedence)</span></td><td><span lang="ko">issuer · audience · 만료 · 저장소 허용목록 · 재사용 검증, <code>MORI_INGEST_REQUIRE_OIDC</code> 로 강제</span><span lang="en">Checks issuer · audience · expiry · repo allowlist · replay; enforce with <code>MORI_INGEST_REQUIRE_OIDC</code></span></td></tr><tr><td><span lang="ko">감시 도구</span><span lang="en">Monitoring</span></td><td><span lang="ko"><code>/health/live</code> · <code>/health/ready</code> · <code>/metrics</code></span><span lang="en"><code>/health/live</code> · <code>/health/ready</code> · <code>/metrics</code></span></td><td><span lang="ko">Prometheus 텍스트 메트릭</span><span lang="en">Prometheus text metrics</span></td></tr></tbody></table></div>
+<p class="muted"><span lang="ko">엔드포인트마다 역할 권한이 적용됩니다. 위험성 평가 · 통제 · 증적 · 개인정보 · 코드 리뷰 API 는 대부분 admin · security 전용이고, 설정 변경 · 통제 편집 · 증적 승인은 admin 전용입니다(<a href="architecture.html#rbac">역할 표</a>).</span><span lang="en">Role permissions apply per endpoint. Most risk, control, evidence, privacy and code-review APIs are admin · security only; settings, control edits and evidence approval are admin only (<a href="architecture.html#rbac">role table</a>).</span></p>
+
+<h2 id="ingest"><span class="no">02</span><span lang="ko">증적 보내기 — 예</span><span lang="en">Sending evidence — examples</span></h2>
+<h3 id="ex-trivy"><span lang="ko">Trivy 리포트 push</span><span lang="en">Push a Trivy report</span></h3>
+<pre><span class="p">$ </span>trivy image --format json -o report.json nginx:1.25
+<span class="p">$ </span>curl -X POST "https://mori.example.com/ingest/trivy?hostname=web-01" \
+    -H "Authorization: Bearer $MORI_INGEST_TOKEN" \
+    -H "Content-Type: application/json" \
+    --data-binary @report.json</pre>
+<h3 id="ex-health"><span lang="ko">상태 확인</span><span lang="en">Health check</span></h3>
+<pre><span class="p">$ </span>curl -s http://localhost:18000/health/ready
+<span class="p">$ </span>curl -s http://localhost:18000/metrics | head</pre>
+<p class="muted"><span lang="ko">코드 리뷰 · 개인정보 흐름 인제스트는 MORI 가 제공하는 워크플로 템플릿(<code>/controls/code-review/workflow-template</code>)을 쓰는 것을 권장합니다 — OIDC 토큰 발급과 페이로드 형식이 이미 맞춰져 있습니다.</span><span lang="en">For code-review and privacy-flow ingest, use the workflow template MORI serves (<code>/controls/code-review/workflow-template</code>) — OIDC token issuance and payload format are already set up.</span></p>
+
+<h2 id="endpoints"><span class="no">03</span><span lang="ko">엔드포인트</span><span lang="en">Endpoints</span></h2>
+<p><span lang="ko">분류 순서는 소스의 OpenAPI 태그 순서(핵심 통제 · 증적 → 버티컬 → 증적 소스 → 운영)를 따릅니다. 소스에 태그가 없는 18개는 "대시보드 · 자연어 질의"와 "웹훅"으로 묶었습니다.</span><span lang="en">Groups follow the source's OpenAPI tag order (core controls · evidence → verticals → evidence sources → operations). The 18 routes untagged in source are grouped as "Dashboard · NLQ" and "Webhooks".</span></p>
+<div class="api-search">
+  <input id="apiQuery" type="search" placeholder="Filter — e.g. /ingest, evidence, privacy, 증적" aria-label="Filter endpoints">
+  <span class="cnt" id="apiCount"></span>
+</div>
+<div class="api-group" id="api-health">
+<div class="gh"><h3 id="g-health" data-notoc><span lang="ko">헬스 · 상태</span><span lang="en">Health</span></h3><span class="c">4</span></div>
+<p class="gd"><span lang="ko">헬스체크 · 상태 — 라이브니스 / 레디니스 프로브, 메트릭.</span><span lang="en">Health checks — liveness / readiness probes and metrics.</span></p>
+<div class="eps">
+<div class="ep"><span class="m get">GET</span><span class="p">/health</span><span class="d"><span lang="ko">헬스체크</span><span lang="en">Health check</span></span></div>
+<div class="ep"><span class="m get">GET</span><span class="p">/health/live</span><span class="d"><span lang="ko">Liveness — 프로세스 생존 (의존성 무관)</span><span lang="en">Liveness — process is up (no dependencies)</span></span></div>
+<div class="ep"><span class="m get">GET</span><span class="p">/health/ready</span><span class="d"><span lang="ko">Readiness — DB 준비 여부, 미준비 시 503</span><span lang="en">Readiness — DB ready, 503 otherwise</span></span></div>
+<div class="ep"><span class="m get">GET</span><span class="p">/metrics</span><span class="d"><span lang="ko">Prometheus 메트릭 (요청 · 지연 · 오류 · 인제스트)</span><span lang="en">Prometheus metrics (requests · latency · errors · ingest)</span></span></div>
+</div></div>
+<div class="api-group" id="api-auth">
+<div class="gh"><h3 id="g-auth" data-notoc><span lang="ko">인증 · 세션</span><span lang="en">Auth</span></h3><span class="c">7</span></div>
+<p class="gd"><span lang="ko">로그인 / 로그아웃, 가입 승인 요청.</span><span lang="en">Sign-in / sign-out and sign-up approval requests.</span></p>
+<div class="eps">
+<div class="ep"><span class="m post">POST</span><span class="p">/auth/login</span><span class="d"><span lang="ko">로그인 → 세션 쿠키, 반복 실패 시 계정 잠금</span><span lang="en">Sign in → session cookie; locks after repeated failures</span></span></div>
+<div class="ep"><span class="m get">GET</span><span class="p">/auth/me</span><span class="d"><span lang="ko">현재 사용자 정보</span><span lang="en">Current user</span></span></div>
+<div class="ep"><span class="m get">GET</span><span class="p">/auth/profile</span><span class="d"><span lang="ko">내 프로필 조회</span><span lang="en">Get my profile</span></span></div>
+<div class="ep"><span class="m post">POST</span><span class="p">/auth/profile</span><span class="d"><span lang="ko">내 프로필 저장 (표시 이름 · 부서 · 담당 서버)</span><span lang="en">Save my profile (display name · department · assigned servers)</span></span></div>
+<div class="ep"><span class="m post">POST</span><span class="p">/auth/signup-request</span><span class="d"><span lang="ko">가입 요청 제출</span><span lang="en">Submit a sign-up request</span></span></div>
+<div class="ep"><span class="m get">GET</span><span class="p">/auth/signup-requests</span><span class="d"><span lang="ko">가입 요청 목록 (어드민)</span><span lang="en">List sign-up requests (admin)</span></span></div>
+<div class="ep"><span class="m patch">PATCH</span><span class="p">/auth/signup-requests/<em>{req_id}</em></span><span class="d"><span lang="ko">가입 요청 승인 · 거절 (어드민)</span><span lang="en">Approve · reject a sign-up request (admin)</span></span></div>
+</div></div>
+<div class="api-group" id="api-compliance">
+<div class="gh"><h3 id="g-compliance" data-notoc><span lang="ko">통제 점검 · 심사 준비</span><span lang="en">Compliance</span></h3><span class="c">46</span></div>
+<p class="gd"><span lang="ko">PDCA, SoA(적용선언서), 통제 카탈로그 · 증적, 증적 신선도 · 감사 표본 · 전체 증적 ZIP, Gap.</span><span lang="en">PDCA, SoA, control catalog · evidence, freshness · audit sampling · full evidence ZIP, gaps.</span></p>
+<div class="eps">
+<div class="ep"><span class="m get">GET</span><span class="p">/compliance/crosscheck</span><span class="d"><span lang="ko">소스 간 교차 검증</span><span lang="en">Cross-source verification</span></span></div>
+<div class="ep"><span class="m get">GET</span><span class="p">/compliance/log-review</span><span class="d"><span lang="ko">접속기록 보존현황 · 월간 점검 이력</span><span lang="en">Access-log retention · monthly review history</span></span></div>
+<div class="ep"><span class="m post">POST</span><span class="p">/compliance/log-review/run</span><span class="d"><span lang="ko">이번 달 접속기록 점검 → 로그 통제 증적 적립</span><span lang="en">Run this month&#x27;s access-log review → log-control evidence</span></span></div>
+<div class="ep"><span class="m get">GET</span><span class="p">/compliance/pdca</span><span class="d"><span lang="ko">Compliance PDCA 대시보드 요약</span><span lang="en">Compliance PDCA dashboard summary</span></span></div>
+<div class="ep"><span class="m get">GET</span><span class="p">/compliance/pdca/pending.csv</span><span class="d"><span lang="ko">미조치 · 기한 초과 항목 CSV</span><span lang="en">Open · overdue items CSV</span></span></div>
+<div class="ep"><span class="m get">GET</span><span class="p">/compliance/reports</span><span class="d"><span lang="ko">증적 리포트 종류 목록</span><span lang="en">Available evidence report types</span></span></div>
+<div class="ep"><span class="m get">GET</span><span class="p">/compliance/reports/<em>{report_type}</em></span><span class="d"><span lang="ko">증적 리포트 생성 (json · csv · pdf)</span><span lang="en">Generate an evidence report (json · csv · pdf)</span></span></div>
+<div class="ep"><span class="m get">GET</span><span class="p">/compliance/soa</span><span class="d"><span lang="ko">ISO 27001 적용선언서(SoA)</span><span lang="en">ISO 27001 Statement of Applicability (SoA)</span></span></div>
+<div class="ep"><span class="m get">GET</span><span class="p">/compliance/soa.csv</span><span class="d"><span lang="ko">SoA CSV</span><span lang="en">SoA as CSV</span></span></div>
+<div class="ep"><span class="m get">GET</span><span class="p">/compliance/soa.pdf</span><span class="d"><span lang="ko">SoA PDF</span><span lang="en">SoA as PDF</span></span></div>
+<div class="ep"><span class="m post">POST</span><span class="p">/controls</span><span class="d"><span lang="ko">통제 추가 · 수정 (오버레이, admin)</span><span lang="en">Add · edit a control (overlay, admin)</span></span></div>
+<div class="ep"><span class="m post">POST</span><span class="p">/controls/audit-sample</span><span class="d"><span lang="ko">위험 기반 감사 표본 추출 (결정적)</span><span lang="en">Risk-based audit sample (deterministic)</span></span></div>
+<div class="ep"><span class="m post">POST</span><span class="p">/controls/audit-sample.zip</span><span class="d"><span lang="ko">감사 표본 패키지 ZIP</span><span lang="en">Audit sample package ZIP</span></span></div>
+<div class="ep"><span class="m get">GET</span><span class="p">/controls/change-report</span><span class="d"><span lang="ko">월별 evidence change report</span><span lang="en">Monthly evidence change report</span></span></div>
+<div class="ep"><span class="m get">GET</span><span class="p">/controls/claude-key</span><span class="d"><span lang="ko">Claude API 키 설정 상태 (마스킹)</span><span lang="en">Claude API key status (masked)</span></span></div>
+<div class="ep"><span class="m put">PUT</span><span class="p">/controls/claude-key</span><span class="d"><span lang="ko">Claude API 키 저장 · 삭제 (admin)</span><span lang="en">Save · delete the Claude API key (admin)</span></span></div>
+<div class="ep"><span class="m post">POST</span><span class="p">/controls/code-review/backfill-evidence</span><span class="d"><span lang="ko">과거 코드 리뷰 스캔을 2.8 통제 증적으로 소급 승격</span><span lang="en">Backfill past code-review scans into 2.8 control evidence</span></span></div>
+<div class="ep"><span class="m get">GET</span><span class="p">/controls/code-review/findings.csv</span><span class="d"><span lang="ko">코드 리뷰 findings CSV</span><span lang="en">Code-review findings CSV</span></span></div>
+<div class="ep"><span class="m post">POST</span><span class="p">/controls/code-review/scan</span><span class="d"><span lang="ko">고객 GitHub 레포 보안 리뷰 원격 실행</span><span lang="en">Run a remote security review on a GitHub repo</span></span></div>
+<div class="ep"><span class="m get">GET</span><span class="p">/controls/code-review/scan-diff</span><span class="d"><span lang="ko">두 스캔 비교 — 신규 · 제거와 변경 원인</span><span lang="en">Compare two scans — added · removed and why</span></span></div>
+<div class="ep"><span class="m delete">DELETE</span><span class="p">/controls/code-review/scan/<em>{event_id}</em></span><span class="d"><span lang="ko">코드 리뷰 스캔 기록 삭제</span><span lang="en">Delete a code-review scan record</span></span></div>
+<div class="ep"><span class="m get">GET</span><span class="p">/controls/detail/<em>{control_id}</em></span><span class="d"><span lang="ko">통제 증적 상세 (매핑 · 결함 · 소스 · 공백)</span><span lang="en">Control evidence detail (mapping · defects · sources · gaps)</span></span></div>
+<div class="ep"><span class="m get">GET</span><span class="p">/controls/detail/<em>{control_id}</em>/evidence-records</span><span class="d"><span lang="ko">통제의 증적 레코드 목록</span><span lang="en">Evidence records of a control</span></span></div>
+<div class="ep"><span class="m post">POST</span><span class="p">/controls/detail/<em>{control_id}</em>/evidence-records</span><span class="d"><span lang="ko">수기 증적 기록 추가</span><span lang="en">Add a manual evidence record</span></span></div>
+<div class="ep"><span class="m post">POST</span><span class="p">/controls/detail/<em>{control_id}</em>/evidence-records/auto</span><span class="d"><span lang="ko">라이브 집계를 날짜 찍힌 증적으로 스냅샷</span><span lang="en">Snapshot live data as dated evidence</span></span></div>
+<div class="ep"><span class="m delete">DELETE</span><span class="p">/controls/detail/<em>{control_id}</em>/evidence-records/<em>{evidence_id}</em></span><span class="d"><span lang="ko">증적 레코드 삭제</span><span lang="en">Delete an evidence record</span></span></div>
+<div class="ep"><span class="m get">GET</span><span class="p">/controls/detail/<em>{control_id}</em>/evidence.csv</span><span class="d"><span lang="ko">통제 증적 문서 CSV</span><span lang="en">Control evidence document CSV</span></span></div>
+<div class="ep"><span class="m get">GET</span><span class="p">/controls/detail/<em>{control_id}</em>/evidence.pdf</span><span class="d"><span lang="ko">통제 증적 문서 PDF</span><span lang="en">Control evidence document PDF</span></span></div>
+<div class="ep"><span class="m get">GET</span><span class="p">/controls/evidence-bundle.zip</span><span class="d"><span lang="ko">전 통제 증적 ZIP (프레임워크/통제 폴더)</span><span lang="en">All-controls evidence ZIP (framework/control folders)</span></span></div>
+<div class="ep"><span class="m get">GET</span><span class="p">/controls/evidence-freshness</span><span class="d"><span lang="ko">통제별 증적 신선도 · 품질</span><span lang="en">Evidence freshness · quality per control</span></span></div>
+<div class="ep"><span class="m get">GET</span><span class="p">/controls/evidence-snapshot/config</span><span class="d"><span lang="ko">정기 스냅샷 설정 조회</span><span lang="en">Get scheduled snapshot settings</span></span></div>
+<div class="ep"><span class="m post">POST</span><span class="p">/controls/evidence-snapshot/config</span><span class="d"><span lang="ko">정기 스냅샷 설정 (off · daily · weekly · monthly)</span><span lang="en">Set scheduled snapshots (off · daily · weekly · monthly)</span></span></div>
+<div class="ep"><span class="m post">POST</span><span class="p">/controls/evidence-snapshot/run</span><span class="d"><span lang="ko">지금 전 통제 일괄 스냅샷</span><span lang="en">Snapshot all controls now</span></span></div>
+<div class="ep"><span class="m get">GET</span><span class="p">/controls/evidence/<em>{control_id}</em>/approvals</span><span class="d"><span lang="ko">증적 승인 버전 이력 (과거본 불변)</span><span lang="en">Evidence approval history (past versions immutable)</span></span></div>
+<div class="ep"><span class="m post">POST</span><span class="p">/controls/evidence/<em>{control_id}</em>/transition</span><span class="d"><span lang="ko">증적 승인 상태 전이 draft → reviewed → approved → superseded</span><span lang="en">Evidence approval transition draft → reviewed → approved → superseded</span></span></div>
+<div class="ep"><span class="m post">POST</span><span class="p">/controls/import-nlp</span><span class="d"><span lang="ko">법령 · 고시 텍스트 → 통제 초안(draft)</span><span lang="en">Law · regulation text → draft controls</span></span></div>
+<div class="ep"><span class="m get">GET</span><span class="p">/controls/maturity</span><span class="d"><span lang="ko">통제 성숙도 요약 (레벨별 통제 수)</span><span lang="en">Control maturity summary (count per level)</span></span></div>
+<div class="ep"><span class="m put">PUT</span><span class="p">/controls/status/<em>{control_id}</em></span><span class="d"><span lang="ko">통제 이행 상태 편집 (상태 · 담당자 · 예외 · 기한)</span><span lang="en">Edit control status (status · owner · exception · due date)</span></span></div>
+<div class="ep"><span class="m get">GET</span><span class="p">/controls/tree</span><span class="d"><span lang="ko">통제 카탈로그 트리 (ISMS-P × ISO) + 커버리지</span><span lang="en">Control catalog tree (ISMS-P × ISO) + coverage</span></span></div>
+<div class="ep"><span class="m delete">DELETE</span><span class="p">/controls/<em>{control_id}</em></span><span class="d"><span lang="ko">통제 삭제 · 숨김 (admin)</span><span lang="en">Delete · hide a control (admin)</span></span></div>
+<div class="ep"><span class="m get">GET</span><span class="p">/dashboard/evidence-gaps</span><span class="d"><span lang="ko">오늘의 작업 큐 — 증적 미연결 미조치 항목</span><span lang="en">Today&#x27;s work queue — open items without evidence</span></span></div>
+<div class="ep"><span class="m get">GET</span><span class="p">/dashboard/host-remediation/<em>{hostname}</em></span><span class="d"><span lang="ko">내 담당 서버의 미조치 항목 (3버킷)</span><span lang="en">Open items for one of my servers (3 buckets)</span></span></div>
+<div class="ep"><span class="m get">GET</span><span class="p">/gaps</span><span class="d"><span lang="ko">기술 Gap 목록</span><span lang="en">Technical gaps</span></span></div>
+<div class="ep"><span class="m post">POST</span><span class="p">/gaps</span><span class="d"><span lang="ko">Gap 후보 생성 (중복 방지 id)</span><span lang="en">Create a gap candidate (deterministic id)</span></span></div>
+<div class="ep"><span class="m get">GET</span><span class="p">/gaps/deadlines</span><span class="d"><span lang="ko">Gap 조치 기한 · 예외 만료 (자동연장 금지)</span><span lang="en">Gap due dates · exception expiry (no auto-extension)</span></span></div>
+<div class="ep"><span class="m post">POST</span><span class="p">/gaps/<em>{gap_id}</em>/transition</span><span class="d"><span lang="ko">Gap 상태 전이 (후보 → 확정 → 조치 → 재검증)</span><span lang="en">Gap transition (candidate → confirmed → remediated → re-verified)</span></span></div>
+</div></div>
+<div class="api-group" id="api-governance">
+<div class="gh"><h3 id="g-governance" data-notoc><span lang="ko">통제 운영 플랫폼</span><span lang="en">Control governance</span></h3><span class="c">32</span></div>
+<p class="gd"><span lang="ko">Framework · Version(불변) · AssuranceCycle · EvidenceContract, as-of 재현, 이벤트 원장.</span><span lang="en">Framework · version (immutable) · assurance cycle · evidence contract, as-of replay, event ledger.</span></p>
+<div class="eps">
+<div class="ep"><span class="m get">GET</span><span class="p">/governance/assurance-cycles</span><span class="d"><span lang="ko">운영주기 목록</span><span lang="en">List assurance cycles</span></span></div>
+<div class="ep"><span class="m post">POST</span><span class="p">/governance/assurance-cycles</span><span class="d"><span lang="ko">운영주기 생성</span><span lang="en">Create an assurance cycle</span></span></div>
+<div class="ep"><span class="m get">GET</span><span class="p">/governance/assurance-cycles/<em>{cycle_id}</em>/audit-snapshot</span><span class="d"><span lang="ko">감사 기준일의 운영주기 전체 상태 재현</span><span lang="en">Reproduce a cycle&#x27;s full state on an audit date</span></span></div>
+<div class="ep"><span class="m get">GET</span><span class="p">/governance/assurance-cycles/<em>{cycle_id}</em>/controls</span><span class="d"><span lang="ko">주기의 통제 목록</span><span lang="en">Controls in a cycle</span></span></div>
+<div class="ep"><span class="m post">POST</span><span class="p">/governance/assurance-cycles/<em>{cycle_id}</em>/initialize-from/<em>{previous_id}</em></span><span class="d"><span lang="ko">지난 주기 → 새 주기 버전 마이그레이션</span><span lang="en">Migrate a previous cycle into a new one</span></span></div>
+<div class="ep"><span class="m post">POST</span><span class="p">/governance/control-definitions</span><span class="d"><span lang="ko">통제 정의 생성</span><span lang="en">Create a control definition</span></span></div>
+<div class="ep"><span class="m post">POST</span><span class="p">/governance/controls/<em>{control_id}</em>/overlay-view</span><span class="d"><span lang="ko">기준 통제 + 조직 오버레이 뷰 (충돌 표시)</span><span lang="en">Base control + organization overlay view (conflicts flagged)</span></span></div>
+<div class="ep"><span class="m get">GET</span><span class="p">/governance/crosswalk</span><span class="d"><span lang="ko">내부통제 ↔ 외부기준 crosswalk</span><span lang="en">Internal control ↔ external framework crosswalk</span></span></div>
+<div class="ep"><span class="m post">POST</span><span class="p">/governance/cycle-controls</span><span class="d"><span lang="ko">주기 통제 생성</span><span lang="en">Create a cycle control</span></span></div>
+<div class="ep"><span class="m get">GET</span><span class="p">/governance/cycle-controls/<em>{cc_id}</em>/as-of</span><span class="d"><span lang="ko">특정 시점의 통제 상태 재현 (history 재생)</span><span lang="en">Control state as of a date (history replay)</span></span></div>
+<div class="ep"><span class="m post">POST</span><span class="p">/governance/cycle-controls/<em>{cc_id}</em>/update</span><span class="d"><span lang="ko">증적 · 평가 상태 갱신 (분리, append-only)</span><span lang="en">Update evidence · assessment state (separate, append-only)</span></span></div>
+<div class="ep"><span class="m get">GET</span><span class="p">/governance/events</span><span class="d"><span lang="ko">거버넌스 변경 이벤트 (append-only)</span><span lang="en">Governance change events (append-only)</span></span></div>
+<div class="ep"><span class="m get">GET</span><span class="p">/governance/events/verify</span><span class="d"><span lang="ko">이벤트 원장 hash chain 무결성 검증</span><span lang="en">Verify the event ledger hash chain</span></span></div>
+<div class="ep"><span class="m get">GET</span><span class="p">/governance/evidence-contracts</span><span class="d"><span lang="ko">증적 계약 목록</span><span lang="en">List evidence contracts</span></span></div>
+<div class="ep"><span class="m post">POST</span><span class="p">/governance/evidence-contracts</span><span class="d"><span lang="ko">증적 계약 생성</span><span lang="en">Create an evidence contract</span></span></div>
+<div class="ep"><span class="m get">GET</span><span class="p">/governance/evidence-mappings</span><span class="d"><span lang="ko">증적 매핑 목록</span><span lang="en">List evidence mappings</span></span></div>
+<div class="ep"><span class="m post">POST</span><span class="p">/governance/evidence-mappings</span><span class="d"><span lang="ko">증적 매핑 생성</span><span lang="en">Create an evidence mapping</span></span></div>
+<div class="ep"><span class="m post">POST</span><span class="p">/governance/framework-versions</span><span class="d"><span lang="ko">기준 버전 생성</span><span lang="en">Create a framework version</span></span></div>
+<div class="ep"><span class="m post">POST</span><span class="p">/governance/framework-versions/<em>{fv_id}</em>/activate</span><span class="d"><span lang="ko">기준 버전 활성화 (draft → active)</span><span lang="en">Activate a framework version (draft → active)</span></span></div>
+<div class="ep"><span class="m get">GET</span><span class="p">/governance/framework-versions/<em>{fv_id}</em>/compare</span><span class="d"><span lang="ko">기준 버전 간 통제 diff</span><span lang="en">Control diff between framework versions</span></span></div>
+<div class="ep"><span class="m get">GET</span><span class="p">/governance/framework-versions/<em>{fv_id}</em>/controls</span><span class="d"><span lang="ko">기준 버전의 통제 목록</span><span lang="en">Controls of a framework version</span></span></div>
+<div class="ep"><span class="m post">POST</span><span class="p">/governance/framework-versions/<em>{fv_id}</em>/retire</span><span class="d"><span lang="ko">기준 버전 폐기 (active → retired)</span><span lang="en">Retire a framework version (active → retired)</span></span></div>
+<div class="ep"><span class="m get">GET</span><span class="p">/governance/frameworks</span><span class="d"><span lang="ko">기준(Framework) 목록</span><span lang="en">List frameworks</span></span></div>
+<div class="ep"><span class="m post">POST</span><span class="p">/governance/frameworks</span><span class="d"><span lang="ko">기준 생성</span><span lang="en">Create a framework</span></span></div>
+<div class="ep"><span class="m get">GET</span><span class="p">/governance/frameworks/<em>{framework_id}</em>/versions</span><span class="d"><span lang="ko">기준의 버전 목록</span><span lang="en">Versions of a framework</span></span></div>
+<div class="ep"><span class="m post">POST</span><span class="p">/governance/import-catalog</span><span class="d"><span lang="ko">기존 통제 카탈로그를 거버넌스 모델로 가져오기</span><span lang="en">Import the control catalog into the governance model</span></span></div>
+<div class="ep"><span class="m get">GET</span><span class="p">/governance/organization-controls</span><span class="d"><span lang="ko">조직 내부통제 목록</span><span lang="en">List organization controls</span></span></div>
+<div class="ep"><span class="m post">POST</span><span class="p">/governance/organization-controls</span><span class="d"><span lang="ko">조직 내부통제 생성</span><span lang="en">Create an organization control</span></span></div>
+<div class="ep"><span class="m get">GET</span><span class="p">/governance/relationships</span><span class="d"><span lang="ko">통제 관계 목록</span><span lang="en">List control relationships</span></span></div>
+<div class="ep"><span class="m post">POST</span><span class="p">/governance/relationships</span><span class="d"><span lang="ko">통제 관계 생성</span><span lang="en">Create a control relationship</span></span></div>
+<div class="ep"><span class="m get">GET</span><span class="p">/governance/scope-snapshots</span><span class="d"><span lang="ko">인증범위 스냅샷 목록</span><span lang="en">List scope snapshots</span></span></div>
+<div class="ep"><span class="m post">POST</span><span class="p">/governance/scope-snapshots</span><span class="d"><span lang="ko">인증범위 스냅샷 생성</span><span lang="en">Create a scope snapshot</span></span></div>
+</div></div>
+<div class="api-group" id="api-privacy">
+<div class="gh"><h3 id="g-privacy" data-notoc><span lang="ko">개인정보 3.x</span><span lang="en">Privacy (3.x)</span></h3><span class="c">28</span></div>
+<p class="gd"><span lang="ko">처리흐름도(SVG), 처리업무, 외부 수신자 구분, 처리방침 대조, 개인정보 증적 패키지.</span><span lang="en">Data-flow diagram (SVG), processing tasks, external recipients, policy comparison, privacy evidence package.</span></p>
+<div class="eps">
+<div class="ep"><span class="m get">GET</span><span class="p">/privacy/data-file-overview.csv</span><span class="d"><span lang="ko">개인정보 파일 개요 CSV</span><span lang="en">Personal-data file overview CSV</span></span></div>
+<div class="ep"><span class="m get">GET</span><span class="p">/privacy/data-flow</span><span class="d"><span lang="ko">개인정보 처리흐름 조회</span><span lang="en">Get the personal-data flow</span></span></div>
+<div class="ep"><span class="m post">POST</span><span class="p">/privacy/data-flow</span><span class="d"><span lang="ko">처리흐름 행 추가</span><span lang="en">Add a flow row</span></span></div>
+<div class="ep"><span class="m get">GET</span><span class="p">/privacy/data-flow-overview.svg</span><span class="d"><span lang="ko">처리흐름 개요도 SVG</span><span lang="en">Flow overview diagram SVG</span></span></div>
+<div class="ep"><span class="m get">GET</span><span class="p">/privacy/data-flow.csv</span><span class="d"><span lang="ko">처리흐름표 CSV</span><span lang="en">Flow table CSV</span></span></div>
+<div class="ep"><span class="m get">GET</span><span class="p">/privacy/data-flow.pdf</span><span class="d"><span lang="ko">처리흐름표 PDF (감사관용)</span><span lang="en">Flow table PDF (for auditors)</span></span></div>
+<div class="ep"><span class="m get">GET</span><span class="p">/privacy/data-flow.svg</span><span class="d"><span lang="ko">처리흐름도 SVG</span><span lang="en">Flow diagram SVG</span></span></div>
+<div class="ep"><span class="m post">POST</span><span class="p">/privacy/data-flow/promote-evidence</span><span class="d"><span lang="ko">흐름도를 3.x 통제 증적으로 승격</span><span lang="en">Promote the flow to 3.x control evidence</span></span></div>
+<div class="ep"><span class="m post">POST</span><span class="p">/privacy/data-flow/reset</span><span class="d"><span lang="ko">처리흐름 초기화</span><span lang="en">Reset the flow</span></span></div>
+<div class="ep"><span class="m post">POST</span><span class="p">/privacy/data-flow/seed-from-scan</span><span class="d"><span lang="ko">스캔 결과로 처리흐름 초안 생성</span><span lang="en">Seed the flow from scan results</span></span></div>
+<div class="ep"><span class="m put">PUT</span><span class="p">/privacy/data-flow/<em>{flow_id}</em></span><span class="d"><span lang="ko">처리흐름 행 수정</span><span lang="en">Edit a flow row</span></span></div>
+<div class="ep"><span class="m delete">DELETE</span><span class="p">/privacy/data-flow/<em>{flow_id}</em></span><span class="d"><span lang="ko">처리흐름 행 삭제</span><span lang="en">Delete a flow row</span></span></div>
+<div class="ep"><span class="m post">POST</span><span class="p">/privacy/data-flow/<em>{flow_id}</em>/review</span><span class="d"><span lang="ko">흐름 행 담당자 지정 · 확정 · 재검토</span><span lang="en">Assign an owner · confirm · re-review a flow row</span></span></div>
+<div class="ep"><span class="m get">GET</span><span class="p">/privacy/data-tables.csv</span><span class="d"><span lang="ko">개인정보 테이블 CSV</span><span lang="en">Personal-data tables CSV</span></span></div>
+<div class="ep"><span class="m get">GET</span><span class="p">/privacy/external-recipients</span><span class="d"><span lang="ko">외부 수신자 후보 — 위탁 · 제3자 · 국외이전 (법적 확정 아님)</span><span lang="en">External recipient candidates — processor · third party · overseas (not a legal ruling)</span></span></div>
+<div class="ep"><span class="m get">GET</span><span class="p">/privacy/external-recipients.csv</span><span class="d"><span lang="ko">외부 수신자 CSV</span><span lang="en">External recipients CSV</span></span></div>
+<div class="ep"><span class="m get">GET</span><span class="p">/privacy/flow-opts</span><span class="d"><span lang="ko">흐름 스캔 옵션 조회</span><span lang="en">Get flow scan options</span></span></div>
+<div class="ep"><span class="m put">PUT</span><span class="p">/privacy/flow-opts</span><span class="d"><span lang="ko">흐름 스캔 옵션 저장</span><span lang="en">Save flow scan options</span></span></div>
+<div class="ep"><span class="m get">GET</span><span class="p">/privacy/flow-scanner.py</span><span class="d"><span lang="ko">흐름 스캐너 스크립트 제공</span><span lang="en">Serve the flow scanner script</span></span></div>
+<div class="ep"><span class="m get">GET</span><span class="p">/privacy/isms-3x-package</span><span class="d"><span lang="ko">ISMS-P 3.x 증적 매니페스트</span><span lang="en">ISMS-P 3.x evidence manifest</span></span></div>
+<div class="ep"><span class="m get">GET</span><span class="p">/privacy/isms-3x-package.zip</span><span class="d"><span lang="ko">3.x 증적 패키지 ZIP (manifest + CSV + PDF)</span><span lang="en">3.x evidence package ZIP (manifest + CSV + PDF)</span></span></div>
+<div class="ep"><span class="m get">GET</span><span class="p">/privacy/pii-criteria</span><span class="d"><span lang="ko">개인정보 판별 기준(정규식) 조회</span><span lang="en">Get PII criteria (regex)</span></span></div>
+<div class="ep"><span class="m put">PUT</span><span class="p">/privacy/pii-criteria</span><span class="d"><span lang="ko">개인정보 판별 기준 저장</span><span lang="en">Save PII criteria</span></span></div>
+<div class="ep"><span class="m get">GET</span><span class="p">/privacy/pii-rules.yml</span><span class="d"><span lang="ko">고객 CI Semgrep 용 개인정보 룰 (공개)</span><span lang="en">PII rules for customer CI Semgrep (public)</span></span></div>
+<div class="ep"><span class="m get">GET</span><span class="p">/privacy/policy-compare</span><span class="d"><span lang="ko">처리방침 vs 현재 흐름표 비교 (법적 판정 아님)</span><span lang="en">Privacy policy vs current flow comparison (not a legal ruling)</span></span></div>
+<div class="ep"><span class="m put">PUT</span><span class="p">/privacy/policy-compare</span><span class="d"><span lang="ko">처리방침 주장 저장 후 즉시 비교</span><span lang="en">Save policy claims and compare</span></span></div>
+<div class="ep"><span class="m get">GET</span><span class="p">/privacy/processing-tasks</span><span class="d"><span lang="ko">처리업무 자동 그룹화 초안</span><span lang="en">Auto-grouped processing task draft</span></span></div>
+<div class="ep"><span class="m get">GET</span><span class="p">/privacy/processing-tasks.csv</span><span class="d"><span lang="ko">처리업무 CSV</span><span lang="en">Processing tasks CSV</span></span></div>
+</div></div>
+<div class="api-group" id="api-vulns">
+<div class="gh"><h3 id="g-vulns" data-notoc><span lang="ko">취약점 조치</span><span lang="en">Vulnerabilities</span></h3><span class="c">7</span></div>
+<p class="gd"><span lang="ko">CVE 조치 · 예외 · 기한(예외 자동연장 금지), 위험성 평가.</span><span lang="en">CVE remediation · exceptions · due dates (no auto-extension), risk assessment.</span></p>
+<div class="eps">
+<div class="ep"><span class="m get">GET</span><span class="p">/vulnerabilities/risk-summary</span><span class="d"><span lang="ko">위험등급 집계 — 3×3 히트맵 · 등급별 카운트</span><span lang="en">Risk summary — 3×3 heatmap · counts by level</span></span></div>
+<div class="ep"><span class="m get">GET</span><span class="p">/vulnerabilities/<em>{vuln_id}</em>/action</span><span class="d"><span lang="ko">CVE 조치 정보</span><span lang="en">CVE remediation info</span></span></div>
+<div class="ep"><span class="m put">PUT</span><span class="p">/vulnerabilities/<em>{vuln_id}</em>/exception</span><span class="d"><span lang="ko">CVE 예외 등록</span><span lang="en">Set a CVE exception</span></span></div>
+<div class="ep"><span class="m delete">DELETE</span><span class="p">/vulnerabilities/<em>{vuln_id}</em>/exception</span><span class="d"><span lang="ko">CVE 예외 철회</span><span lang="en">Remove a CVE exception</span></span></div>
+<div class="ep"><span class="m put">PUT</span><span class="p">/vulnerabilities/<em>{vuln_id}</em>/plan</span><span class="d"><span lang="ko">CVE 조치 계획 저장</span><span lang="en">Save a CVE remediation plan</span></span></div>
+<div class="ep"><span class="m get">GET</span><span class="p">/vulnerabilities/<em>{vuln_id}</em>/risk</span><span class="d"><span lang="ko">CVE 위험성 평가 조회</span><span lang="en">Get a CVE risk assessment</span></span></div>
+<div class="ep"><span class="m put">PUT</span><span class="p">/vulnerabilities/<em>{vuln_id}</em>/risk</span><span class="d"><span lang="ko">CVE 위험성 평가 저장</span><span lang="en">Save a CVE risk assessment</span></span></div>
+</div></div>
+<div class="api-group" id="api-assets">
+<div class="gh"><h3 id="g-assets" data-notoc><span lang="ko">자산 · 담당자</span><span lang="en">Assets</span></h3><span class="c">12</span></div>
+<p class="gd"><span lang="ko">인벤토리, 담당자 · 중요도, 인증범위 커버리지, 감사로그 무결성.</span><span lang="en">Inventory, owners · importance, certification-scope coverage, audit-log integrity.</span></p>
+<div class="eps">
+<div class="ep"><span class="m get">GET</span><span class="p">/admin/audit-log</span><span class="d"><span lang="ko">자산 담당자 · 카테고리 변경 이력</span><span lang="en">Asset owner · category change log</span></span></div>
+<div class="ep"><span class="m get">GET</span><span class="p">/admin/audit-log/verify</span><span class="d"><span lang="ko">행동 감사로그 hash chain 무결성 검증</span><span lang="en">Verify the action audit-log hash chain</span></span></div>
+<div class="ep"><span class="m get">GET</span><span class="p">/assets</span><span class="d"><span lang="ko">자산 목록 (format=csv 지원)</span><span lang="en">Assets (supports format=csv)</span></span></div>
+<div class="ep"><span class="m get">GET</span><span class="p">/assets/owners</span><span class="d"><span lang="ko">자산 담당자 목록</span><span lang="en">Asset owners</span></span></div>
+<div class="ep"><span class="m post">POST</span><span class="p">/assets/owners</span><span class="d"><span lang="ko">자산 담당자 지정</span><span lang="en">Set an asset owner</span></span></div>
+<div class="ep"><span class="m post">POST</span><span class="p">/assets/owners/import</span><span class="d"><span lang="ko">자산 담당자 CSV 일괄 반영</span><span lang="en">Bulk-import asset owners from CSV</span></span></div>
+<div class="ep"><span class="m get">GET</span><span class="p">/assets/owners/import-template.csv</span><span class="d"><span lang="ko">자산 담당자 가져오기 양식</span><span lang="en">Asset owner import template</span></span></div>
+<div class="ep"><span class="m delete">DELETE</span><span class="p">/assets/owners/<em>{hostname}</em></span><span class="d"><span lang="ko">자산 담당자 해제</span><span lang="en">Remove an asset owner</span></span></div>
+<div class="ep"><span class="m get">GET</span><span class="p">/assets/plans/<em>{host_id}</em></span><span class="d"><span lang="ko">호스트 조치 계획 조회</span><span lang="en">Get a host remediation plan</span></span></div>
+<div class="ep"><span class="m put">PUT</span><span class="p">/assets/plans/<em>{host_id}</em></span><span class="d"><span lang="ko">호스트 조치 계획 저장</span><span lang="en">Save a host remediation plan</span></span></div>
+<div class="ep"><span class="m post">POST</span><span class="p">/assets/refresh</span><span class="d"><span lang="ko">소스 on-demand 수집</span><span lang="en">Collect a source on demand</span></span></div>
+<div class="ep"><span class="m get">GET</span><span class="p">/assets/scope-coverage</span><span class="d"><span lang="ko">인증범위 태그별 커버리지</span><span lang="en">Coverage by certification-scope tag</span></span></div>
+</div></div>
+<div class="api-group" id="api-accounts">
+<div class="gh"><h3 id="g-accounts" data-notoc><span lang="ko">계정 거버넌스</span><span lang="en">Account governance</span></h3><span class="c">15</span></div>
+<p class="gd"><span lang="ko">로컬 계정 × LDAP × 승인대장 대조, 퇴사자 · 미승인 sudo · 휴면 검출.</span><span lang="en">Local accounts × LDAP × approval register; leavers, unapproved sudo, dormant accounts.</span></p>
+<div class="eps">
+<div class="ep"><span class="m get">GET</span><span class="p">/accounts/access-trail</span><span class="d"><span lang="ko">접속 발자취 미리보기 (로그인 · sudo)</span><span lang="en">Access trail preview (sign-ins · sudo)</span></span></div>
+<div class="ep"><span class="m post">POST</span><span class="p">/accounts/approval-requests</span><span class="d"><span lang="ko">sudo · 특권 계정 승인 요청</span><span lang="en">Request approval for a sudo · privileged account</span></span></div>
+<div class="ep"><span class="m get">GET</span><span class="p">/accounts/approvals</span><span class="d"><span lang="ko">승인대장 조회</span><span lang="en">Approval register</span></span></div>
+<div class="ep"><span class="m post">POST</span><span class="p">/accounts/approvals</span><span class="d"><span lang="ko">허용 계정 · sudo 승인 등록</span><span lang="en">Register an approved account · sudo</span></span></div>
+<div class="ep"><span class="m delete">DELETE</span><span class="p">/accounts/approvals/<em>{approval_id}</em></span><span class="d"><span lang="ko">승인 삭제</span><span lang="en">Delete an approval</span></span></div>
+<div class="ep"><span class="m post">POST</span><span class="p">/accounts/approvals/<em>{approval_id}</em>/approve</span><span class="d"><span lang="ko">대기 요청 승인</span><span lang="en">Approve a pending request</span></span></div>
+<div class="ep"><span class="m post">POST</span><span class="p">/accounts/approvals/<em>{approval_id}</em>/reject</span><span class="d"><span lang="ko">대기 요청 거절</span><span lang="en">Reject a pending request</span></span></div>
+<div class="ep"><span class="m get">GET</span><span class="p">/accounts/collection</span><span class="d"><span lang="ko">계정 수집 설정 조회</span><span lang="en">Get account collection settings</span></span></div>
+<div class="ep"><span class="m post">POST</span><span class="p">/accounts/collection</span><span class="d"><span lang="ko">계정 수집 설정 (fleet · script)</span><span lang="en">Set account collection (fleet · script)</span></span></div>
+<div class="ep"><span class="m get">GET</span><span class="p">/accounts/host/<em>{host_key}</em></span><span class="d"><span lang="ko">호스트의 계정 목록</span><span lang="en">Accounts on a host</span></span></div>
+<div class="ep"><span class="m get">GET</span><span class="p">/accounts/host/<em>{host_key}</em>/privileged</span><span class="d"><span lang="ko">호스트의 특권 · sudo 계정과 승인 상태</span><span lang="en">Privileged · sudo accounts on a host with approval state</span></span></div>
+<div class="ep"><span class="m get">GET</span><span class="p">/accounts/overview</span><span class="d"><span lang="ko">접근권한 거버넌스 — findings · 통합 계정 · IP 리스트</span><span lang="en">Access governance — findings · unified accounts · IP list</span></span></div>
+<div class="ep"><span class="m get">GET</span><span class="p">/accounts/overview.csv</span><span class="d"><span lang="ko">접근권한 거버넌스 CSV</span><span lang="en">Access governance CSV</span></span></div>
+<div class="ep"><span class="m get">GET</span><span class="p">/accounts/view-roles</span><span class="d"><span lang="ko">계정 거버넌스 열람 역할 조회</span><span lang="en">Get roles allowed to view account governance</span></span></div>
+<div class="ep"><span class="m post">POST</span><span class="p">/accounts/view-roles</span><span class="d"><span lang="ko">계정 거버넌스 열람 역할 설정</span><span lang="en">Set roles allowed to view account governance</span></span></div>
+</div></div>
+<div class="api-group" id="api-incidents">
+<div class="gh"><h3 id="g-incidents" data-notoc><span lang="ko">인시던트</span><span lang="en">Incidents</span></h3><span class="c">4</span></div>
+<p class="gd"><span lang="ko">확정 경보의 인시던트 승격 · 타임라인.</span><span lang="en">Promote confirmed alerts to incidents · timeline.</span></p>
+<div class="eps">
+<div class="ep"><span class="m get">GET</span><span class="p">/incidents</span><span class="d"><span lang="ko">인시던트 목록</span><span lang="en">List incidents</span></span></div>
+<div class="ep"><span class="m post">POST</span><span class="p">/incidents</span><span class="d"><span lang="ko">인시던트 생성</span><span lang="en">Create an incident</span></span></div>
+<div class="ep"><span class="m patch">PATCH</span><span class="p">/incidents/<em>{incident_id}</em></span><span class="d"><span lang="ko">인시던트 수정</span><span lang="en">Update an incident</span></span></div>
+<div class="ep"><span class="m post">POST</span><span class="p">/incidents/<em>{incident_id}</em>/notes</span><span class="d"><span lang="ko">인시던트 노트 추가</span><span lang="en">Add an incident note</span></span></div>
+</div></div>
+<div class="api-group" id="api-alerts">
+<div class="gh"><h3 id="g-alerts" data-notoc><span lang="ko">경보 트리아지</span><span lang="en">Alert triage</span></h3><span class="c">4</span></div>
+<p class="gd"><span lang="ko">확정 / 예외 / 담당자, 옵트인 Zabbix write-back.</span><span lang="en">Confirm / exception / owner, opt-in Zabbix write-back.</span></p>
+<div class="eps">
+<div class="ep"><span class="m get">GET</span><span class="p">/alerts</span><span class="d"><span lang="ko">운영 경보 목록 (코드 리뷰 제외)</span><span lang="en">Operational alerts (code review excluded)</span></span></div>
+<div class="ep"><span class="m patch">PATCH</span><span class="p">/alerts/<em>{alert_id}</em>/triage</span><span class="d"><span lang="ko">경보 트리아지 (확정 · 예외 · 담당자)</span><span lang="en">Triage an alert (confirm · exception · owner)</span></span></div>
+<div class="ep"><span class="m post">POST</span><span class="p">/alerts/<em>{alert_id}</em>/zabbix/suppress</span><span class="d"><span lang="ko">Zabbix 이벤트 억제 — 옵트인 write-back</span><span lang="en">Suppress a Zabbix event — opt-in write-back</span></span></div>
+<div class="ep"><span class="m post">POST</span><span class="p">/alerts/<em>{alert_id}</em>/zabbix/unsuppress</span><span class="d"><span lang="ko">Zabbix 이벤트 억제 해제</span><span lang="en">Unsuppress a Zabbix event</span></span></div>
+</div></div>
+<div class="api-group" id="api-sources">
+<div class="gh"><h3 id="g-sources" data-notoc><span lang="ko">증적 소스 수집 (ingest)</span><span lang="en">Evidence sources (ingest)</span></h3><span class="c">11</span></div>
+<p class="gd"><span lang="ko">Trivy · Wazuh · code-review · privacy-flow · evidence push, OIDC 검증, 스캐너 배포.</span><span lang="en">Trivy · Wazuh · code-review · privacy-flow · evidence push, OIDC verification, scanner distribution.</span></p>
+<div class="eps">
+<div class="ep"><span class="m get">GET</span><span class="p">/admin/schema-migrations</span><span class="d"><span lang="ko">스키마 마이그레이션 기록</span><span lang="en">Schema migration history</span></span></div>
+<div class="ep"><span class="m get">GET</span><span class="p">/code-review/fullscan.py</span><span class="d"><span lang="ko">(유료) fullscan 스캐너 제공</span><span lang="en">Serve the (paid) fullscan scanner</span></span></div>
+<div class="ep"><span class="m get">GET</span><span class="p">/code-review/scanners/manifest.json</span><span class="d"><span lang="ko">스캐너 버전 · SHA256 매니페스트</span><span lang="en">Scanner version · SHA256 manifest</span></span></div>
+<div class="ep"><span class="m get">GET</span><span class="p">/controls/code-review/workflow-template</span><span class="d"><span lang="ko">고객 레포용 워크플로 템플릿</span><span lang="en">Workflow template for customer repos</span></span></div>
+<div class="ep"><span class="m get">GET</span><span class="p">/evidence</span><span class="d"><span lang="ko">적재된 증적 이벤트 조회</span><span lang="en">Ingested evidence events</span></span></div>
+<div class="ep"><span class="m post">POST</span><span class="p">/ingest/accounts</span><span class="d"><span lang="ko">osquery 로컬 계정 인벤토리 push</span><span lang="en">Push osquery local account inventory</span></span></div>
+<div class="ep"><span class="m post">POST</span><span class="p">/ingest/code-review</span><span class="d"><span lang="ko">코드 보안 리뷰 findings push (OIDC 검증)</span><span lang="en">Push code security review findings (OIDC-verified)</span></span></div>
+<div class="ep"><span class="m post">POST</span><span class="p">/ingest/evidence</span><span class="d"><span lang="ko">조치 전/후 diff 증적 push</span><span lang="en">Push before/after remediation diff evidence</span></span></div>
+<div class="ep"><span class="m post">POST</span><span class="p">/ingest/privacy-flow</span><span class="d"><span lang="ko">구조화된 개인정보 라이프사이클 push</span><span lang="en">Push a structured personal-data lifecycle</span></span></div>
+<div class="ep"><span class="m post">POST</span><span class="p">/ingest/trivy</span><span class="d"><span lang="ko">Trivy JSON 리포트 push</span><span lang="en">Push a Trivy JSON report</span></span></div>
+<div class="ep"><span class="m post">POST</span><span class="p">/ingest/wazuh</span><span class="d"><span lang="ko">Wazuh 경보 push</span><span lang="en">Push Wazuh alerts</span></span></div>
+</div></div>
+<div class="api-group" id="api-zabbix">
+<div class="gh"><h3 id="g-zabbix" data-notoc><span lang="ko">증적 소스: Zabbix</span><span lang="en">Source: Zabbix</span></h3><span class="c">1</span></div>
+<p class="gd"><span lang="ko">모니터링 호스트 (read-only).</span><span lang="en">Monitored hosts (read-only).</span></p>
+<div class="eps">
+<div class="ep"><span class="m get">GET</span><span class="p">/zabbix/hosts</span><span class="d"><span lang="ko">Zabbix 서버 자산 목록</span><span lang="en">Zabbix server assets</span></span></div>
+</div></div>
+<div class="api-group" id="api-trivy">
+<div class="gh"><h3 id="g-trivy" data-notoc><span lang="ko">증적 소스: Trivy</span><span lang="en">Source: Trivy</span></h3><span class="c">1</span></div>
+<p class="gd"><span lang="ko">컨테이너 · 이미지 취약점 스캔 결과.</span><span lang="en">Container · image vulnerability scan results.</span></p>
+<div class="eps">
+<div class="ep"><span class="m get">GET</span><span class="p">/trivy/vulnerabilities</span><span class="d"><span lang="ko">Trivy 취약점 목록 (severity 필터)</span><span lang="en">Trivy vulnerabilities (severity filter)</span></span></div>
+</div></div>
+<div class="api-group" id="api-fleet">
+<div class="gh"><h3 id="g-fleet" data-notoc><span lang="ko">증적 소스: Fleet</span><span lang="en">Source: Fleet</span></h3><span class="c">1</span></div>
+<p class="gd"><span lang="ko">Fleet / osquery 엔드포인트 인벤토리.</span><span lang="en">Fleet / osquery endpoint inventory.</span></p>
+<div class="eps">
+<div class="ep"><span class="m get">GET</span><span class="p">/fleet/hosts</span><span class="d"><span lang="ko">Fleet PC 자산 목록</span><span lang="en">Fleet PC assets</span></span></div>
+</div></div>
+<div class="api-group" id="api-admin">
+<div class="gh"><h3 id="g-admin" data-notoc><span lang="ko">관리자</span><span lang="en">Admin</span></h3><span class="c">18</span></div>
+<p class="gd"><span lang="ko">콘솔 운영, 사용자 · 권한 · LDAP · 감사로그.</span><span lang="en">Console operations, users · permissions · LDAP · audit logs.</span></p>
+<div class="eps">
+<div class="ep"><span class="m get">GET</span><span class="p">/admin/action-audit-log</span><span class="d"><span lang="ko">사용자 행동 감사로그 조회</span><span lang="en">User action audit log</span></span></div>
+<div class="ep"><span class="m post">POST</span><span class="p">/admin/action-audit-log</span><span class="d"><span lang="ko">사용자 행동 기록</span><span lang="en">Record a user action</span></span></div>
+<div class="ep"><span class="m get">GET</span><span class="p">/admin/dashboard/preferences</span><span class="d"><span lang="ko">전체 기본 대시보드 설정 조회</span><span lang="en">Get default dashboard settings</span></span></div>
+<div class="ep"><span class="m post">POST</span><span class="p">/admin/dashboard/preferences</span><span class="d"><span lang="ko">전체 기본 대시보드 설정 변경</span><span lang="en">Set default dashboard settings</span></span></div>
+<div class="ep"><span class="m get">GET</span><span class="p">/admin/dashboard/user-preferences</span><span class="d"><span lang="ko">사용자별 대시보드 설정 목록</span><span lang="en">Per-user dashboard settings</span></span></div>
+<div class="ep"><span class="m delete">DELETE</span><span class="p">/admin/dashboard/user-preferences/<em>{username}</em></span><span class="d"><span lang="ko">사용자 대시보드 설정 초기화</span><span lang="en">Reset a user&#x27;s dashboard settings</span></span></div>
+<div class="ep"><span class="m get">GET</span><span class="p">/admin/ldap/status</span><span class="d"><span lang="ko">LDAP 상태 요약</span><span lang="en">LDAP status</span></span></div>
+<div class="ep"><span class="m get">GET</span><span class="p">/admin/ldap/users</span><span class="d"><span lang="ko">LDAP 사용자 목록 + MORI 역할</span><span lang="en">LDAP users + MORI roles</span></span></div>
+<div class="ep"><span class="m post">POST</span><span class="p">/admin/ldap/users</span><span class="d"><span lang="ko">LDAP 사용자 추가</span><span lang="en">Add an LDAP user</span></span></div>
+<div class="ep"><span class="m delete">DELETE</span><span class="p">/admin/ldap/users/<em>{uid}</em></span><span class="d"><span lang="ko">LDAP 사용자 삭제</span><span lang="en">Delete an LDAP user</span></span></div>
+<div class="ep"><span class="m post">POST</span><span class="p">/admin/ldap/users/<em>{uid}</em>/password</span><span class="d"><span lang="ko">LDAP 비밀번호 재설정</span><span lang="en">Reset an LDAP password</span></span></div>
+<div class="ep"><span class="m post">POST</span><span class="p">/admin/ldap/users/<em>{uid}</em>/role</span><span class="d"><span lang="ko">LDAP 사용자 MORI 역할 변경</span><span lang="en">Change an LDAP user&#x27;s MORI role</span></span></div>
+<div class="ep"><span class="m get">GET</span><span class="p">/admin/logs</span><span class="d"><span lang="ko">모든 이력 · 감사 소스 통합 피드</span><span lang="en">Unified feed of all history · audit sources</span></span></div>
+<div class="ep"><span class="m get">GET</span><span class="p">/admin/role-permissions</span><span class="d"><span lang="ko">역할별 탭 권한 조회</span><span lang="en">Tab permissions per role</span></span></div>
+<div class="ep"><span class="m post">POST</span><span class="p">/admin/role-permissions</span><span class="d"><span lang="ko">역할별 탭 권한 변경</span><span lang="en">Update tab permissions per role</span></span></div>
+<div class="ep"><span class="m get">GET</span><span class="p">/admin/user-tab-permissions</span><span class="d"><span lang="ko">사용자별 탭 권한 오버라이드</span><span lang="en">Per-user tab permission overrides</span></span></div>
+<div class="ep"><span class="m post">POST</span><span class="p">/admin/user-tab-permissions/<em>{username}</em></span><span class="d"><span lang="ko">사용자 탭 권한 개별 설정</span><span lang="en">Set a user&#x27;s tab permissions</span></span></div>
+<div class="ep"><span class="m delete">DELETE</span><span class="p">/admin/user-tab-permissions/<em>{username}</em></span><span class="d"><span lang="ko">사용자 탭 권한 초기화</span><span lang="en">Reset a user&#x27;s tab permissions</span></span></div>
+</div></div>
+<div class="api-group" id="api-settings">
+<div class="gh"><h3 id="g-settings" data-notoc><span lang="ko">설정</span><span lang="en">Settings</span></h3><span class="c">2</span></div>
+<p class="gd"><span lang="ko">위험 DoA 기준.</span><span lang="en">Risk DoA criteria.</span></p>
+<div class="eps">
+<div class="ep"><span class="m get">GET</span><span class="p">/settings/risk</span><span class="d"><span lang="ko">위험 DoA 기준 조회</span><span lang="en">Get risk DoA criteria</span></span></div>
+<div class="ep"><span class="m put">PUT</span><span class="p">/settings/risk</span><span class="d"><span lang="ko">위험 DoA 기준 저장 (admin)</span><span lang="en">Save risk DoA criteria (admin)</span></span></div>
+</div></div>
+<div class="api-group" id="api-onboarding">
+<div class="gh"><h3 id="g-onboarding" data-notoc><span lang="ko">온보딩</span><span lang="en">Onboarding</span></h3><span class="c">6</span></div>
+<p class="gd"><span lang="ko">첫 실행 체크리스트, 커넥터 상태 · 연결 테스트, 스캔 설정, 데모 → 실전 전환.</span><span lang="en">First-run checklist, connector status · tests, scan setup, demo → production.</span></p>
+<div class="eps">
+<div class="ep"><span class="m get">GET</span><span class="p">/onboarding/connectors</span><span class="d"><span lang="ko">커넥터 성숙도 · 연결 상태</span><span lang="en">Connector maturity · connection state</span></span></div>
+<div class="ep"><span class="m post">POST</span><span class="p">/onboarding/connectors/<em>{source}</em>/test</span><span class="d"><span lang="ko">Zabbix · Fleet 라이브 연결 테스트</span><span lang="en">Live connection test for Zabbix · Fleet</span></span></div>
+<div class="ep"><span class="m get">GET</span><span class="p">/onboarding/control-todo</span><span class="d"><span lang="ko">오늘 채울 통제 top-N + 진행률</span><span lang="en">Top-N controls to fill today + progress</span></span></div>
+<div class="ep"><span class="m get">GET</span><span class="p">/onboarding/go-live</span><span class="d"><span lang="ko">데모 → 실전 전환 준비 상태</span><span lang="en">Demo → production readiness</span></span></div>
+<div class="ep"><span class="m get">GET</span><span class="p">/onboarding/scan-setup</span><span class="d"><span lang="ko">코드 스캔 붙이기 안내 + 워크플로</span><span lang="en">Code scan setup handoff + workflow</span></span></div>
+<div class="ep"><span class="m get">GET</span><span class="p">/onboarding/status</span><span class="d"><span lang="ko">첫 실행 체크리스트 + 커넥터 요약 + 보안 태세</span><span lang="en">First-run checklist + connectors + security posture</span></span></div>
+</div></div>
+<div class="api-group" id="api-dashboard">
+<div class="gh"><h3 id="g-dashboard" data-notoc><span lang="ko">대시보드 · 자연어 질의</span><span lang="en">Dashboard · NLQ</span></h3><span class="c">9</span></div>
+<p class="gd"><span lang="ko">대시보드 요약 · 개인 설정, 자연어 질의, 안내서. (소스에 태그 없음)</span><span lang="en">Dashboard summary · preferences, natural-language query, guides. (untagged in source)</span></p>
+<div class="eps">
+<div class="ep"><span class="m get">GET</span><span class="p">/catalog</span><span class="d"><span lang="ko">질의 카탈로그</span><span lang="en">Query catalog</span></span></div>
+<div class="ep"><span class="m get">GET</span><span class="p">/dashboard/preferences</span><span class="d"><span lang="ko">내 대시보드 설정 조회</span><span lang="en">Get my dashboard settings</span></span></div>
+<div class="ep"><span class="m post">POST</span><span class="p">/dashboard/preferences</span><span class="d"><span lang="ko">내 대시보드 설정 저장</span><span lang="en">Save my dashboard settings</span></span></div>
+<div class="ep"><span class="m get">GET</span><span class="p">/dashboard/summary</span><span class="d"><span lang="ko">대시보드 요약</span><span lang="en">Dashboard summary</span></span></div>
+<div class="ep"><span class="m get">GET</span><span class="p">/guides</span><span class="d"><span lang="ko">안내서 목록</span><span lang="en">Guides</span></span></div>
+<div class="ep"><span class="m get">GET</span><span class="p">/guides/<em>{guide_id}</em></span><span class="d"><span lang="ko">안내서 조회</span><span lang="en">Get a guide</span></span></div>
+<div class="ep"><span class="m put">PUT</span><span class="p">/guides/<em>{guide_id}</em></span><span class="d"><span lang="ko">안내서 수정</span><span lang="en">Edit a guide</span></span></div>
+<div class="ep"><span class="m post">POST</span><span class="p">/interpret</span><span class="d"><span lang="ko">자연어 질의 해석 (인텐트 매칭)</span><span lang="en">Interpret a natural-language query (intent match)</span></span></div>
+<div class="ep"><span class="m post">POST</span><span class="p">/query</span><span class="d"><span lang="ko">자연어 질의 실행</span><span lang="en">Run a natural-language query</span></span></div>
+</div></div>
+<div class="api-group" id="api-webhooks">
+<div class="gh"><h3 id="g-webhooks" data-notoc><span lang="ko">웹훅</span><span lang="en">Webhooks</span></h3><span class="c">4</span></div>
+<p class="gd"><span lang="ko">알림 웹훅 등록 · 테스트. (소스에 태그 없음)</span><span lang="en">Notification webhook registration · test. (untagged in source)</span></p>
+<div class="eps">
+<div class="ep"><span class="m get">GET</span><span class="p">/webhooks</span><span class="d"><span lang="ko">웹훅 목록</span><span lang="en">List webhooks</span></span></div>
+<div class="ep"><span class="m post">POST</span><span class="p">/webhooks</span><span class="d"><span lang="ko">웹훅 등록</span><span lang="en">Register a webhook</span></span></div>
+<div class="ep"><span class="m delete">DELETE</span><span class="p">/webhooks/<em>{webhook_id}</em></span><span class="d"><span lang="ko">웹훅 삭제</span><span lang="en">Delete a webhook</span></span></div>
+<div class="ep"><span class="m post">POST</span><span class="p">/webhooks/<em>{webhook_id}</em>/test</span><span class="d"><span lang="ko">웹훅 테스트 전송</span><span lang="en">Send a webhook test</span></span></div>
+</div></div>
+
+
+<nav class="pager" aria-label="Pages"><a class="prev" href="integrations.html"><small><span lang="ko">이전</span><span lang="en">Previous</span></small><b>← <span lang="ko">연동 · 배포</span><span lang="en">Integrations · deployment</span></b></a></nav>
+</main>
+<nav class="toc" id="toc" aria-label="On this page"><div class="t"><span lang="ko">이 페이지</span><span lang="en">On this page</span></div><div class="list"></div></nav>
+</div>
+<footer class="g-foot"><div class="wrap">
+  <span>© 2026 RM Studio · MORI SOC is licensed under the Apache License 2.0</span>
+  <span><a href="https://github.com/saranf/mori-soc" target="_blank" rel="noopener">GitHub</a> · <a href="../index.html">rm-studio-org.github.io</a></span>
+</div></footer>
+<script src="assets/mori.js"></script>
+</body>
+</html>

@@ -1,0 +1,138 @@
+<header class="doc-head">
+  <h1>[[아키텍처||Architecture]]</h1>
+  <p class="lede">[[MORI 는 기존 보안 · 모니터링 도구와 Grafana / Loki 사이에 놓이는 <b>증적 층</b>입니다. 이 페이지는 MORI 가 어디에 놓이고, 무엇으로 이뤄져 있으며, 데이터가 어떻게 흐르고, 증적의 무결성을 어떻게 지키는지 설명합니다.||MORI is an <b>evidence layer</b> that sits between your existing security · monitoring tools and Grafana / Loki. This page explains where it sits, what it is made of, how data flows, and how evidence integrity is protected.]]</p>
+  <div class="tags"><span class="tag">MORI SOC 0.6.0</span><span class="tag">FastAPI · PostgreSQL 16</span><span class="tag">[[단일 테넌트 · 셀프호스트||Single-tenant · self-hosted]]</span></div>
+</header>
+
+<h2 id="position"><span class="no">1</span>[[MORI 의 위치||Where MORI sits]]</h2>
+<p>[[MORI 는 아무것도 대체하지 않습니다. 소스 도구는 신호를 만들고, Grafana / Loki 는 시계열과 로그를 보여 줍니다. MORI 는 그 사이에서 <b>판단 · 기록 · 증명</b> — 트리아지 → 조치 → 통제 매핑 → 증적 PDF → 감사 로그 — 을 맡습니다.||MORI replaces nothing. Source tools produce signals and Grafana / Loki show time series and logs. MORI handles <b>judgement · records · proof</b> in between — triage → action → control mapping → evidence PDF → audit log.]]</p>
+<figure class="diagram">
+  <div class="sysmap-v">
+    <div class="grid-boxes" style="grid-template-columns:repeat(5,1fr)">
+      <div class="box ext"><b>Zabbix</b><small>[[서버 경보 · pull||Server alerts · pull]]</small></div>
+      <div class="box ext"><b>Fleet / osquery</b><small>[[PC 자산 · pull||PC assets · pull]]</small></div>
+      <div class="box ext"><b>Trivy</b><small>[[취약점 · push||Vulnerabilities · push]]</small></div>
+      <div class="box ext"><b>Wazuh</b><small>[[경보 · push||Alerts · push]]</small></div>
+      <div class="box ext"><b>GitHub Actions</b><small>[[코드 리뷰 · OIDC 서명||Code review · OIDC-signed]]</small></div>
+    </div>
+    <div class="vflow"><div class="arrow down"><i></i></div><span>[[pollers (pull) · /ingest/* (push)||pollers (pull) · /ingest/* (push)]]</span></div>
+    <div class="zone app">
+      <span class="zl">[[MORI — 읽기 전용 증적 층||MORI — read-only evidence layer]]</span>
+      <div class="grid-boxes" style="grid-template-columns:repeat(3,1fr)">
+        <div class="box"><b>mori-worker</b><small>[[소스별 폴러 · 리더 선출(advisory lock)||Per-source pollers · leader election (advisory lock)]]</small></div>
+        <div class="box fill"><b>PostgreSQL 16</b><small>[[정규화 원천 · 운영 상태 · 통제 · 증적||Normalized data · UI state · controls · evidence]]</small></div>
+        <div class="box"><b>mori-api (FastAPI)</b><small>[[/ui · /admin · REST · /docs||/ui · /admin · REST · /docs]]</small></div>
+      </div>
+      <div class="flowline" style="margin:12px 0 0;justify-content:center"><span>[[트리아지||Triage]]</span><i>→</i><span>[[위험성 · 통제 이행상태||Risk · control status]]</span><i>→</i><span>[[증적 승인||Evidence approval]]</span><i>→</i><span class="hl">[[증적 PDF · CSV · ZIP + 감사로그||Evidence PDF · CSV · ZIP + audit log]]</span></div>
+    </div>
+    <div class="vflow"><div class="arrow down"><i></i></div><span>[[딥링크 · 옵트인 write-back||deep links · opt-in write-back]]</span></div>
+    <div class="grid-boxes" style="grid-template-columns:repeat(2,1fr)">
+      <div class="box ext"><b>Grafana / Loki</b><small>[[보는 층 — MORI 는 딥링크만||Viewing layer — MORI links out]]</small></div>
+      <div class="box vendor"><b>[[Zabbix write-back (옵트인)||Zabbix write-back (opt-in)]]</b><small>[[트리아지 코멘트 · ack · suppress, 모두 감사 기록||Triage comment · ack · suppress, all audited]]</small></div>
+    </div>
+  </div>
+  <figcaption>[[그림 1. 시스템 구성 — 점선 회색은 고객이 이미 운영하는 도구||Figure 1. System context — dashed grey: tools you already run]]</figcaption>
+</figure>
+
+<h3 id="readonly">[[읽기 전용 원칙||Read-only principle]]</h3>
+<p>[[MORI 는 명시적으로 켜지 않는 한 소스 시스템에 쓰지 않습니다. 유일한 예외는 <b>옵트인 · 감사되는 Zabbix write-back</b> 이며, `MORI_ZABBIX_WRITEBACK_ENABLED=true` 일 때만 동작합니다.||MORI never writes to source systems unless you explicitly enable it. The only exception is the <b>opt-in, audited Zabbix write-back</b>, active only with `MORI_ZABBIX_WRITEBACK_ENABLED=true`.]]</p>
+<div class="cards">
+  <div class="card"><div class="ic">RO</div><h3>[[read-only 토큰 권장||Read-only tokens]]</h3><p>[[소스 연결에는 읽기 전용 토큰을 권장하고, 기존 시스템 설정은 바꾸지 않습니다.||Read-only tokens are recommended, and existing system settings are never changed.]]</p></div>
+  <div class="card"><div class="ic">⛑</div><h3>[[소스 장애 격리||Source failure isolation]]</h3><p>[[한 소스가 실패해도 나머지는 계속 돕니다. 마지막 수집 시각과 실패 사유를 저장하고 신선도를 표시합니다.||One failing source doesn't stop the rest. Last collection time and failure reason are stored and freshness is shown.]]</p></div>
+  <div class="card"><div class="ic">AI</div><h3>[[AI 금지선||AI guardrails]]</h3><p>[[자동 패치 · 자동 예외 승인 · 자동 인시던트 종결은 하지 않습니다. LLM 결과는 항상 초안 / 사람 검토 필요로 표시됩니다.||No auto-patching, auto-approved exceptions or auto-closed incidents. LLM output is always marked draft / needs human review.]]</p></div>
+</div>
+
+<h2 id="services"><span class="no">2</span>[[서비스 구성||Services]]</h2>
+<p>[[기본 `docker compose up -d` 로 뜨는 것은 <b>코어 3개</b>뿐입니다. 나머지는 모두 compose 프로필 뒤에 있어 필요한 것만 켭니다.||A plain `docker compose up -d` starts only <b>three core services</b>. Everything else sits behind compose profiles, so you enable only what you need.]]</p>
+<tbl>
+[[서비스||Service]] | [[프로필||Profile]] | [[역할||Role]] | [[포트 (기본)||Port (default)]]
+`soc-postgres` | [[코어||core]] | [[PostgreSQL 16 — 모든 상태 · 증적||PostgreSQL 16 — all state · evidence]] | [[내부 전용||internal only]]
+`mori-api` | [[코어||core]] | [[FastAPI — UI · REST · 인제스트||FastAPI — UI · REST · ingest]] | `18000` → 8000
+`mori-worker` | [[코어||core]] | [[소스 폴러 · 정기 작업||Source pollers · scheduled jobs]] | —
+`mori-caddy` | `https` | [[TLS 종단||TLS termination]] | `18443`
+grafana · loki · fluent-bit | `observability` | [[보는 층 · 로그 수집||Viewing layer · log shipping]] | [[Grafana `13000`||Grafana `13000`]]
+openldap · phpldapadmin | `identity` | [[통합 인증 디렉터리||Shared identity directory]] | `18089`
+[[Zabbix · Fleet · Wazuh 번들||Bundled Zabbix · Fleet · Wazuh]] | `bundled` [[(또는 개별 `zabbix` · `fleet` · `wazuh`)||(or `zabbix` · `fleet` · `wazuh`)]] | [[자체 소스 스택 — 실 API 검증용, 무거움||Own source stack — for real-API testing, heavy]] | [[각 서비스 포트||per service]]
+mori-poller-* | `pollers` | [[폴러를 별도 컨테이너로||Pollers as separate containers]] | —
+trivy | `scanner` | [[이미지 스캔 실행||Run image scans]] | —
+</tbl>
+<p class="muted">[[`demo` 프로필은 관측 · 인증 · 포털을 켜며 번들 Zabbix / Fleet / Wazuh 는 포함하지 않습니다. 컨테이너는 비루트(uid 10001)로 실행되고, PDF 한글 폰트(NanumGothic)가 이미지에 들어 있습니다.||The `demo` profile adds observability · identity · portal, not the bundled Zabbix / Fleet / Wazuh. Containers run as non-root (uid 10001), and a Korean PDF font (NanumGothic) ships in the image.]]</p>
+
+<h2 id="dataflow"><span class="no">3</span>[[데이터 흐름||Data flow]]</h2>
+<h3 id="pull">[[3.1 수집 — pull 폴러||3.1 Collection — pull pollers]]</h3>
+<p>[[`mori-worker` 가 소스별 주기로 가져옵니다. 여러 워커가 떠도 PostgreSQL advisory lock 으로 하나만 리더가 됩니다. `POST /assets/refresh` 로 즉시 수집할 수도 있습니다.||`mori-worker` pulls each source on its own interval; with several workers, a PostgreSQL advisory lock elects a single leader. `POST /assets/refresh` triggers collection on demand.]]</p>
+<tbl>
+[[폴러||Poller]] | [[주기 / stale 기준 (기본)||Interval / stale after (default)]] | [[상태||Status]]
+Zabbix | [[30초 / 5분 (`problem.get` · `host.get`)||30 s / 5 min (`problem.get` · `host.get`)]] | <span class="chip ok">[[실 API 검증||real-API verified]]</span>
+Fleet | [[24시간 / 10일 (호스트 · 소프트웨어 취약점)||24 h / 10 days (hosts · software vulnerabilities)]] | <span class="chip ok">[[자산 검증||assets verified]]</span> <span class="chip warn">[[CVE 미검증||CVE not verified]]</span>
+[[Trivy (로컬 리포트)||Trivy (local reports)]] | [[24시간 / 7일||24 h / 7 days]] | <span class="chip warn">[[부분||partial]]</span>
+LDAP sync | [[1시간 / 8시간||1 h / 8 h]] | <span class="chip mut">[[옵션||optional]]</span>
+[[Wazuh (REST)||Wazuh (REST)]] | — | <span class="chip mut">[[스캐폴드 — 다음 단계||scaffold — next]]</span>
+</tbl>
+<p class="muted">[[주기는 `MORI_{SOURCE}_INTERVAL_SECONDS` · `_STALE_SECONDS` · `_MAX_RETRIES` · `_RETRY_BACKOFF_SECONDS` 로 소스마다 조정합니다.||Tune per source with `MORI_{SOURCE}_INTERVAL_SECONDS` · `_STALE_SECONDS` · `_MAX_RETRIES` · `_RETRY_BACKOFF_SECONDS`.]]</p>
+
+<h3 id="push">[[3.2 수집 — push 인제스트||3.2 Collection — push ingest]]</h3>
+<tbl>
+[[엔드포인트||Endpoint]] | [[보내는 쪽||Sender]] | [[내용||Content]]
+`POST /ingest/trivy` | [[원격 호스트 · CI||Remote host · CI]] | [[Trivy JSON 리포트||Trivy JSON report]]
+`POST /ingest/wazuh` | [[Wazuh integrator||Wazuh integrator]] | [[Wazuh 경보 → Alert Triage||Wazuh alerts → triage]]
+`POST /ingest/evidence` | [[CSOP · 에이전트||CSOP · agents]] | [[조치 전/후 diff (new · fixed · reopened)||Before/after diff (new · fixed · reopened)]]
+`POST /ingest/accounts` | osquery (Fleet) | [[호스트 로컬 계정 인벤토리||Host local account inventory]]
+`POST /ingest/code-review` | GitHub Actions | [[코드 보안 리뷰 findings (OIDC 검증)||Code security review findings (OIDC-verified)]]
+`POST /ingest/privacy-flow` | [[고객 CI||Customer CI]] | [[구조화된 개인정보 라이프사이클||Structured personal-data lifecycle]]
+</tbl>
+<p>[[인제스트는 `MORI_INGEST_TOKEN` 을 `Authorization: Bearer` 또는 `X-MORI-Token` 으로 받고, 코드 리뷰는 GitHub OIDC 토큰(`X-MORI-OIDC`)을 우선합니다. 요청 빈도 제한과 본문 크기(기본 10MB) · findings 수(기본 20,000) 상한이 있습니다.||Ingest accepts `MORI_INGEST_TOKEN` via `Authorization: Bearer` or `X-MORI-Token`; code review prefers a GitHub OIDC token (`X-MORI-OIDC`). Rate limits and caps on body size (10 MB default) and findings (20,000 default) apply.]]</p>
+
+<h3 id="read-path">[[3.3 읽기 · 쓰기 경로||3.3 Read · write path]]</h3>
+<p>[[`MORI_QUERY_BACKEND=postgres` 이면 요청마다 PostgreSQL 에서 스냅샷을 만들어 워커가 넣은 데이터가 API 재시작 없이 바로 보입니다. UI 운영 상태는 PostgreSQL 에 write-through 되어 재시작 후에도 유지됩니다. 요청마다 전체를 읽는 구조라 대규모 성능은 아직 벤치마크하지 않았고, 옵트인 `MORI_QUERY_CACHE_TTL` 로 완화할 수 있습니다.||With `MORI_QUERY_BACKEND=postgres`, each request materializes a PostgreSQL snapshot, so worker data appears without restarting the API. UI operational state writes through to PostgreSQL and survives restarts. Because each request reads the full snapshot, large-scale performance is not yet benchmarked; the opt-in `MORI_QUERY_CACHE_TTL` mitigates it.]]</p>
+
+<h2 id="data-model"><span class="no">4</span>[[데이터 모델||Data model]]</h2>
+<p>[[스키마는 `schema/001 ~ 023` 으로 관리되고 부팅마다 멱등하게 적용됩니다(이력 · checksum 은 `schema_migrations`). 운영자의 판단 층(B · C)은 하드 FK 대신 업무 키로 원천 데이터와 연결되어, <b>재수집해도 사람의 판단이 지워지지 않습니다</b>.||The schema is managed as `schema/001–023` and applied idempotently on every boot (history and checksums in `schema_migrations`). Operator-judgement layers (B · C) link to source data by business key rather than hard FKs, so <b>re-collection never erases human decisions</b>.]]</p>
+<div class="cards" style="grid-template-columns:repeat(2,1fr)">
+  <div class="card"><div class="ic">A</div><h3>[[정규화 원천||Normalized source of truth]]</h3><p>`hosts` · `host_aliases` · `alerts` · `vulnerabilities` · `host_observations` · `source_syncs` · `directory_accounts` · `privilege_bindings` · `host_accounts` · `account_approvals`</p></div>
+  <div class="card"><div class="ic">B</div><h3>[[UI 운영 상태||UI operational state]]</h3><p>`ui_triage_state` · `ui_vuln_actions` · `ui_risk_register` · `ui_asset_owners` · `ui_incidents` · `ui_evidence_events` · `ui_settings` · `ui_sessions`</p></div>
+  <div class="card"><div class="ic">C</div><h3>[[통제 카탈로그 · 증적||Control catalog · evidence]]</h3><p>`controls` · `control_mappings` · `control_defects` · `control_status` · `catalog_controls` · `control_evidence` · `ui_evidence_approvals` · `ui_gaps` · `personal_data_flow`</p></div>
+  <div class="card"><div class="ic">G</div><h3>[[통제 거버넌스||Control governance]]</h3><p>`gov_frameworks` · `gov_framework_versions` · `gov_control_definitions` · `gov_organization_controls` · `gov_assurance_cycles` · `gov_cycle_controls` · `gov_evidence_contracts` · `ui_control_governance_events`</p></div>
+</div>
+
+<h2 id="rbac"><span class="no">5</span>[[인증 · 권한||Authentication · roles]]</h2>
+<p>[[세션 쿠키(`mori_session`, HttpOnly · SameSite=Lax)로 로그인하며, 유휴 8시간 · 절대 7일 뒤 만료됩니다. LDAP 이 켜져 있으면 LDAP 을 먼저, 그다음 로컬 계정을 확인합니다. 반복 실패 시 계정이 잠깁니다(기본 5회 · 15분).||Sign-in uses a session cookie (`mori_session`, HttpOnly · SameSite=Lax) that expires after 8 h idle or 7 days absolute. With LDAP enabled, LDAP is tried before local accounts. Repeated failures lock the account (5 attempts · 15 min by default).]]</p>
+<tbl>
+[[역할||Role]] | [[기본으로 보이는 화면||Default screens]] | [[비고||Notes]]
+`admin` | [[대시보드 · 트리아지 · 인시던트 · 자산 · Compliance · 가이드 + /admin||Dashboard · triage · incidents · assets · compliance · guides + /admin]] | [[증적 승인 · 철회, 통제 편집, 권한 조정||Approve · revoke evidence, edit controls, manage permissions]]
+`security` | [[대시보드 · 트리아지 · 인시던트 · 자산 · Compliance · 가이드||Dashboard · triage · incidents · assets · compliance · guides]] | [[증적 검토, 위험성 평가 · 개인정보 · 코드 리뷰||Review evidence, risk · privacy · code review]]
+`monitor` | [[대시보드 · 트리아지 · 자산 · Compliance · 가이드||Dashboard · triage · assets · compliance · guides]] | [[인프라 담당||Infrastructure]]
+`auditor` | [[대시보드 · Compliance · 가이드||Dashboard · compliance · guides]] | [[감사 열람||Audit read]]
+`helpdesk` · `user` | [[대시보드 · 자산 · 가이드||Dashboard · assets · guides]] | [[내 담당 서버 조치율 중심||Focus on my servers]]
+</tbl>
+<p class="muted">[[위험성 평가 · 통제 · 증적 · 개인정보 · 코드 리뷰 findings 는 admin · security 전용입니다. admin 은 역할별 · 사용자별로 탭 권한을 조정할 수 있고, 계정 거버넌스 열람 역할도 넓힐 수 있습니다.||Risk assessment, controls, evidence, privacy and code-review findings are admin · security only. Admins can adjust tab permissions per role and per user, and can widen who sees account governance.]]</p>
+
+<h2 id="integrity"><span class="no">6</span>[[증적 무결성||Evidence integrity]]</h2>
+<p>[[감사 증적은 나중에 바뀌지 않았다는 걸 보여 줄 수 있어야 합니다. MORI 는 다음 장치를 겹쳐 씁니다. 다만 이것은 <b>변조를 드러내는(tamper-evident)</b> 장치이며, 저장소 수준의 WORM 불변성은 아닙니다.||Audit evidence must show it hasn't changed after the fact. MORI layers the mechanisms below. They are <b>tamper-evident</b>, not storage-level WORM immutability.]]</p>
+<ol class="chain">
+  <li><b>[[감사로그 hash chain||Audit-log hash chain]]</b><span>[[행동 감사로그는 append-only 이고 각 행이 앞 행의 해시를 담습니다. 수정 · 삭제 API 가 없고, `GET /admin/audit-log/verify` 로 검증합니다.||The action audit log is append-only with each row carrying the previous hash. There is no edit · delete API; verify with `GET /admin/audit-log/verify`.]]</span></li>
+  <li><b>[[거버넌스 이벤트 원장||Governance event ledger]]</b><span>[[통제 운영 변경도 hash chain 원장에 쌓이며 `GET /governance/events/verify` 로 변조 · 삭제 · 재배열을 감지합니다.||Governance changes go to a hash-chained ledger; `GET /governance/events/verify` detects tampering, deletion or reordering.]]</span></li>
+  <li><b>[[content hash · PDF SHA-256||Content hash · PDF SHA-256]]</b><span>[[승격된 증적마다 SHA-256 content hash 와 버전이 붙고, 승인 시 증적 집합의 해시와 PDF SHA-256 이 불변 스냅샷으로 고정됩니다.||Each promoted record carries a SHA-256 content hash and version; on approval, the set hash and the PDF SHA-256 are frozen in an immutable snapshot.]]</span></li>
+  <li><b>[[OIDC provenance||OIDC provenance]]</b><span>[[GitHub Actions OIDC 토큰의 repository · sha · run_id 를 RS256 으로 검증해 자기신고 값을 덮어씁니다. issuer · audience · 만료 · 저장소 허용목록 · 재사용(jti)을 확인합니다.||Verifies repository · sha · run_id from the GitHub Actions OIDC token (RS256) and overrides self-reported values. Checks issuer · audience · expiry · repo allowlist · replay (jti).]]</span></li>
+  <li><b>[[서명된 증적 번들||Signed evidence bundle]]</b><span>[[ZIP 에 파일별 SHA-256 과 번들 해시를 담은 `MANIFEST.json` 이 들어가고, `MORI_EVIDENCE_SIGNING_KEY` 가 있으면 HMAC-SHA256 으로 서명됩니다.||ZIPs include a `MANIFEST.json` with per-file SHA-256 and a bundle hash, HMAC-SHA256 signed when `MORI_EVIDENCE_SIGNING_KEY` is set.]]</span></li>
+  <li><b>[[기준일 재현 (as-of)||As-of replay]]</b><span>[[append-only 이력을 재생해 감사 기준일의 통제 · 운영주기 상태를 그대로 복원합니다.||Replays append-only history to restore control and cycle state as of an audit date.]]</span></li>
+</ol>
+
+<h2 id="scale"><span class="no">7</span>[[확장성 · 기술 스택||Scale · stack]]</h2>
+<p>[[현재는 <b>단일 인스턴스 · 단일 테넌트</b>가 전제입니다. 다중 인스턴스는 단계적으로 설계되어 있습니다.||The current design assumes a <b>single instance and single tenant</b>. Multi-instance support is designed in phases.]]</p>
+<tbl>
+[[단계||Phase]] | [[내용||Scope]] | [[상태||Status]]
+A | [[세션을 PostgreSQL 에 영속 (`MORI_SESSION_BACKEND=postgres`)||Persist sessions in PostgreSQL (`MORI_SESSION_BACKEND=postgres`)]] | <span class="chip ok">[[구현 · 옵트인||implemented · opt-in]]</span>
+B | [[OIDC 재사용 · 로그인 실패 · 빈도 제한 카운터 공유||Share OIDC replay · login-failure · rate-limit counters]] | <span class="chip mut">[[설계||designed]]</span>
+C | [[로드밸런서 뒤 2대 이상, `/health/ready` 로 롤링||2+ replicas behind a load balancer, rolling via `/health/ready`]] | <span class="chip mut">[[설계||designed]]</span>
+</tbl>
+<tbl>
+[[영역||Area]] | [[기술||Technology]]
+[[런타임 · API||Runtime · API]] | Python 3.12 · FastAPI 0.139 · Starlette · Uvicorn
+[[데이터||Data]] | PostgreSQL 16 · psycopg 3
+[[연동||Integrations]] | httpx · ldap3
+[[문서 출력||Documents]] | [[reportlab (PDF, 한글 NanumGothic)||reportlab (PDF, Korean NanumGothic)]]
+[[관측||Observability]] | `/health/live` · `/health/ready` · `/metrics` (Prometheus)
+CI | [[ruff · mypy · PostgreSQL 통합 · DB E2E · Docker 빌드 · Trivy 이미지 스캔||ruff · mypy · PostgreSQL integration · DB E2E · Docker build · Trivy image scan]]
+[[라이선스||License]] | Apache License 2.0
+</tbl>

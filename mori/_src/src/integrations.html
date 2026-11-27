@@ -1,0 +1,112 @@
+<header class="doc-head">
+  <h1>[[연동 · 배포||Integrations · deployment]]</h1>
+  <p class="lede">[[MORI 를 기존 도구에 연결하고 띄우는 방법입니다. 커넥터마다 방향(pull · push · write-back)과 <b>실제로 검증된 범위</b>를 정직하게 적었습니다.||How to connect MORI to your tools and run it. For each connector we state the direction (pull · push · write-back) and <b>what has actually been verified</b>.]]</p>
+  <div class="tags"><span class="tag">MORI SOC 0.6.0</span><span class="tag">Docker Compose v2</span><span class="tag">[[브라운필드 우선||Brownfield first]]</span></div>
+</header>
+
+<h2 id="connectors"><span class="no">1</span>[[커넥터||Connectors]]</h2>
+<tbl wr>
+[[커넥터||Connector]] | [[방향||Direction]] | [[인증||Auth]] | [[검증 상태||Verification]]
+Zabbix | [[pull (30초) + 옵트인 write-back||pull (30 s) + opt-in write-back]] | [[API 토큰 (권장) 또는 사용자/비밀번호||API token (recommended) or user/password]] | <span class="chip ok">[[실 API 검증||real API]]</span> [[경보 → 트리아지 → 인시던트 → 증적 → 해소 전 구간, write-back L1 ~ L3||alert → triage → incident → evidence → resolve end-to-end, write-back L1–L3]]
+Fleet / osquery | [[pull (24시간)||pull (24 h)]] | [[API 전용 사용자 토큰||API-only user token]] | <span class="chip ok">[[자산 검증||assets]]</span> <span class="chip warn">[[CVE 미검증||CVE not verified]]</span>
+Trivy / CSOP | [[push `/ingest/trivy` · `/ingest/evidence` (로컬 폴링도 가능)||push `/ingest/trivy` · `/ingest/evidence` (local polling too)]] | `MORI_INGEST_TOKEN` | <span class="chip warn">[[부분||partial]]</span> [[수신형||ingest-based]]
+Wazuh | [[push `/ingest/wazuh`||push `/ingest/wazuh`]] | `MORI_INGEST_TOKEN` | <span class="chip mut">[[스캐폴드||scaffold]]</span> [[라이브 폴러는 다음 단계||live poller is next]]
+[[GitHub Actions 코드 리뷰||GitHub Actions code review]] | [[push `/ingest/code-review`, MORI → `workflow_dispatch`||push `/ingest/code-review`, MORI → `workflow_dispatch`]] | [[GitHub OIDC (권장) 또는 토큰||GitHub OIDC (recommended) or token]] | <span class="chip warn">[[부분||partial]]</span> [[OIDC 검증 · 무료 Semgrep 실 런 검증||OIDC verified · free Semgrep real runs verified]]
+Grafana / Loki | [[딥링크, Loki LogQL 로 접속기록 보존 증적||Deep links; Loki LogQL for access-log retention evidence]] | — | <span class="chip ok">[[딥링크||links]]</span> <span class="chip warn">[[Loki 라이브 조회 미검증||Loki live query not verified]]</span>
+LDAP / AD | [[인증 + 계정 생성 + 디렉터리 sync (1시간)||auth + account creation + directory sync (1 h)]] | [[bind DN / 비밀번호||bind DN / password]] | <span class="chip mut">[[코드 준비 · 운영 sync 다음||code ready · ops sync next]]</span>
+</tbl>
+<p class="muted">[[자격증명은 서버 환경변수로만 설정합니다(화면에서 시크릿을 입력받는 연결 마법사는 보류). 각 콘솔로 가는 딥링크는 `MORI_ZABBIX_UI_URL` · `MORI_FLEET_UI_URL` · `MORI_WAZUH_UI_URL` · `MORI_GRAFANA_URL` 로 지정하며, 비워 두면 링크가 숨겨집니다.||Credentials are set only as server environment variables (an in-UI connection wizard is on hold). Deep links to each console come from `MORI_ZABBIX_UI_URL` · `MORI_FLEET_UI_URL` · `MORI_WAZUH_UI_URL` · `MORI_GRAFANA_URL`; empty values hide the link.]]</p>
+
+<h3 id="zabbix">Zabbix</h3>
+<tbl>
+[[변수||Variable]] | [[뜻||Meaning]]
+`MORI_ENABLE_ZABBIX` · `MORI_ZABBIX_API_URL` · `MORI_ZABBIX_API_TOKEN` | [[켜기 · JSON-RPC 주소 · 토큰 (Zabbix 5.0+, 토큰은 5.4+)||Enable · JSON-RPC URL · token (Zabbix 5.0+, tokens 5.4+)]]
+`MORI_ZABBIX_HOST_LIMIT` · `MORI_ZABBIX_PROBLEM_LIMIT` | [[한 번에 가져올 호스트 · 문제 수 (기본 500)||Hosts · problems per poll (default 500)]]
+`MORI_ZABBIX_WRITEBACK_ENABLED` | [[write-back 켜기 — <b>이 값이 true 여야만</b> Zabbix 에 씀||Enables write-back — MORI writes to Zabbix <b>only when true</b>]]
+`MORI_ZABBIX_WRITEBACK_MODE` | [[`comment_only`(L1, 기본) · `ack_comment`(L2) · `suppress`(L3)||`comment_only` (L1, default) · `ack_comment` (L2) · `suppress` (L3)]]
+`MORI_ZABBIX_WRITEBACK_DRYRUN` · `_PREFIX` | [[시험 실행 · 코멘트 접두어(기본 `[MORI]`)||Dry run · comment prefix (default `[MORI]`)]]
+</tbl>
+<p class="muted">[[suppress 는 전용 엔드포인트(admin · security)로만 동작하고, 심각도 변경 · 수동 종결은 지원하지 않습니다. 모든 쓰기 시도는 기록됩니다.||Suppress works only through dedicated endpoints (admin · security); severity changes and manual close are not supported. Every write attempt is recorded.]]</p>
+
+<h3 id="fleet">Fleet / osquery</h3>
+<p>[[`MORI_ENABLE_FLEET` · `MORI_FLEET_API_URL` · `MORI_FLEET_API_TOKEN` 으로 연결하며, 자산은 `pc-<hostname>` 으로 등록됩니다. 실제 단말을 enroll 하려면 Fleet 이 HTTPS 로 떠 있어야 합니다.||Connect with `MORI_ENABLE_FLEET` · `MORI_FLEET_API_URL` · `MORI_FLEET_API_TOKEN`; assets register as `pc-<hostname>`. Enrolling real devices requires Fleet served over HTTPS.]]</p>
+
+<h3 id="ci">[[코드 리뷰 (GitHub Actions)||Code review (GitHub Actions)]]</h3>
+<tbl>
+[[위치||Where]] | [[설정||Settings]]
+[[MORI 서버||MORI server]] | [[`MORI_OIDC_AUDIENCE`(기본 `mori-ingest`) · `MORI_OIDC_ALLOWED_REPOS` · `MORI_OIDC_ALLOWED_OWNER` · `MORI_INGEST_REQUIRE_OIDC`||`MORI_OIDC_AUDIENCE` (default `mori-ingest`) · `MORI_OIDC_ALLOWED_REPOS` · `MORI_OIDC_ALLOWED_OWNER` · `MORI_INGEST_REQUIRE_OIDC`]]
+[[고객 저장소 시크릿||Customer repo secrets]] | [[`MORI_INGEST_URL` (유료 모드는 `ANTHROPIC_API_KEY` 추가)||`MORI_INGEST_URL` (paid mode adds `ANTHROPIC_API_KEY`)]]
+[[워크플로||Workflows]] | [[`code-review-semgrep.yml` (무료) · `code-review-fullscan.yml` (유료). 템플릿은 MORI 가 제공(`/controls/code-review/workflow-template`)||`code-review-semgrep.yml` (free) · `code-review-fullscan.yml` (paid). MORI serves the templates (`/controls/code-review/workflow-template`)]]
+</tbl>
+<div class="note"><b>[[스캐너 신뢰 모델||Scanner trust model]]</b><p>[[CI 는 MORI 에서 스캐너를 받아 실행합니다. SHA-256 매니페스트로 변경은 감지되지만, MORI 서버 자체가 침해되면 막지 못합니다. 서명된 스캐너 릴리스는 다음 과제입니다.||CI fetches scanners from MORI and runs them. A SHA-256 manifest detects changes, but cannot protect against a compromised MORI server. Signed scanner releases are on the backlog.]]</p></div>
+
+<h2 id="quickstart"><span class="no">2</span>[[시작하기||Getting started]]</h2>
+<p>[[Docker Engine 24 이상과 Compose v2 가 필요합니다. 전체 데모 스택은 <b>4 vCPU · 8GB RAM</b> 을 권장합니다(Wazuh 인덱서를 쓰면 `vm.max_map_count=262144`).||Requires Docker Engine 24+ and Compose v2. The full demo stack recommends <b>4 vCPU · 8 GB RAM</b> (`vm.max_map_count=262144` if you run the Wazuh indexer).]]</p>
+<h3 id="demo">[[데모 (샘플 데이터)||Demo (sample data)]]</h3>
+<pre><span class="p">$ </span>git clone https://github.com/saranf/mori-soc.git &amp;&amp; cd mori-soc
+<span class="p">$ </span>./scripts/mori-start-demo.sh        <span class="c"># .env → start → schema / seed → worker</span>
+<span class="c"># → http://localhost:18000/ui   (admin / 1234, demo only)</span>
+<span class="p">$ </span>./scripts/mori-stop-demo.sh [--keep | --purge]</pre>
+
+<h3 id="brownfield">[[브라운필드 — 기존 스택 위에 얹기||Brownfield — on top of your stack]]</h3>
+<ol class="chain">
+  <li><b>[[환경 파일 준비||Prepare the env file]]</b><span>[[`cp .env.example .env` (필수 값만 있는 `.env.minimal` 도 있음)||`cp .env.example .env` (or the shorter `.env.minimal`)]]</span></li>
+  <li><b>[[소스 연결 정보 입력||Fill in sources]]</b><span>[[예: `MORI_ZABBIX_API_URL=https://zabbix.your-corp.com/api_jsonrpc.php`, `MORI_ZABBIX_API_TOKEN=<token>`||e.g. `MORI_ZABBIX_API_URL=https://zabbix.your-corp.com/api_jsonrpc.php`, `MORI_ZABBIX_API_TOKEN=<token>`]]</span></li>
+  <li><b>[[코어 기동||Start the core]]</b><span>[[`docker compose up -d` — postgres · api · worker 3개만 뜹니다. 설정을 바꾸면 `docker compose up -d mori-worker` 로 재적용합니다.||`docker compose up -d` starts only postgres · api · worker. After changing settings, re-apply with `docker compose up -d mori-worker`.]]</span></li>
+  <li><b>[[push 소스 토큰||Token for push sources]]</b><span>[[`MORI_INGEST_TOKEN` 을 `openssl rand -hex 32` 로 만들어 소스 쪽에도 넣습니다.||Generate `MORI_INGEST_TOKEN` with `openssl rand -hex 32` and configure it on the sending side.]]</span></li>
+  <li><b>[[연결 테스트||Test connections]]</b><span>[[`/admin` 온보딩 카드의 [연결 테스트]로 Zabbix · Fleet 연결을 확인합니다.||Use [Test connection] on the `/admin` onboarding card for Zabbix · Fleet.]]</span></li>
+</ol>
+
+<h3 id="profiles">[[compose 프로필||Compose profiles]]</h3>
+<tbl>
+[[프로필||Profile]] | [[켜지는 것||Adds]]
+[[(기본)||(default)]] | [[코어 — soc-postgres · mori-api · mori-worker||Core — soc-postgres · mori-api · mori-worker]]
+`observability` | grafana · loki · fluent-bit
+`identity` | openldap · phpldapadmin
+`demo` | [[observability + identity + 문서 포털||observability + identity + docs portal]]
+`bundled` · `zabbix` · `fleet` · `wazuh` | [[자체 Zabbix / Fleet / Wazuh — 무거움, 실 API 검증용||Own Zabbix / Fleet / Wazuh — heavy, for real-API testing]]
+`pollers` · `scanner` · `https` | [[분리된 폴러 컨테이너 · Trivy 스캐너 · Caddy TLS||Separate poller containers · Trivy scanner · Caddy TLS]]
+</tbl>
+<div class="note"><b>Wazuh</b><p>[[인증서는 `generate-indexer-certs` 서비스가 자동으로 만듭니다. 인증서를 <b>파일 단위로 bind-mount 하지 마세요</b> — 파일이 없으면 Docker 가 같은 이름의 빈 디렉터리를 만들어 서비스가 `is a directory` 오류로 죽습니다. 디렉터리 단위로 마운트하세요.||Certificates are generated by the `generate-indexer-certs` service. <b>Don't bind-mount certificates as individual files</b> — if a file is missing, Docker creates an empty directory with that name and the service dies with `is a directory`. Mount directories instead.]]</p></div>
+
+<h2 id="production"><span class="no">3</span>[[운영 전환||Going to production]]</h2>
+<p>[[운영 모드는 <b>fail-closed</b> 입니다. 인증이 꺼져 있거나, admin 비밀번호가 약하거나, 예시 값(`change_this_…`)이 남아 있으면 부팅을 거부합니다.||Production mode is <b>fail-closed</b>: it refuses to boot if auth is off, the admin password is weak, or placeholder values (`change_this_…`) remain.]]</p>
+<tbl>
+[[항목||Item]] | [[설정||Setting]]
+[[인증 · 데모 끄기||Auth on · demo off]] | `MORI_AUTH_ENABLED=true` · `MORI_DEMO_MODE=false` · `MORI_DEMO_SEED=0`
+[[계정||Accounts]] | [[강한 `MORI_ADMIN_PASSWORD`||A strong `MORI_ADMIN_PASSWORD`]]
+[[공개 주소 · 쿠키||Public URL · cookies]] | [[`MORI_PUBLIC_URL=https://…` (Secure 쿠키 · CSRF Origin), `MORI_ALLOWED_ORIGINS`||`MORI_PUBLIC_URL=https://…` (Secure cookies · CSRF origin), `MORI_ALLOWED_ORIGINS`]]
+[[프로필||Profile]] | [[`MORI_PROFILE=production` — HTTPS 가 없으면 부팅 거부, TLS 프록시 뒤면 `MORI_BEHIND_TLS_PROXY`||`MORI_PROFILE=production` — refuses to boot without HTTPS; behind a TLS proxy set `MORI_BEHIND_TLS_PROXY`]]
+[[세션 · 시크릿||Sessions · secrets]] | [[`MORI_SESSION_BACKEND=postgres`, 시크릿은 `<NAME>_FILE` 로 파일 주입 가능||`MORI_SESSION_BACKEND=postgres`; secrets can be injected via `<NAME>_FILE`]]
+[[증적 서명||Evidence signing]] | [[`MORI_EVIDENCE_SIGNING_KEY` — 증적 번들 HMAC 서명||`MORI_EVIDENCE_SIGNING_KEY` — HMAC-signs evidence bundles]]
+HTTPS | [[`docker compose --profile https up -d mori-caddy` — 18443 에서 TLS 종단||`docker compose --profile https up -d mori-caddy` — TLS on 18443]]
+</tbl>
+
+<h2 id="backup"><span class="no">4</span>[[백업 · 복구 · 업그레이드||Backup · restore · upgrade]]</h2>
+<p>[[<b>PostgreSQL 덤프 하나가 곧 전체 백업</b>입니다. `.env` 는 백업에 들어가지 않으니 따로 안전하게 보관하세요.||<b>One PostgreSQL dump is the full backup.</b> `.env` is not included — keep it safe separately.]]</p>
+<pre><span class="c"># [[백업||backup]] → backups/mori-soc-YYYYMMDD-HHMMSS.dump</span>
+<span class="p">$ </span>./scripts/mori-backup.sh
+
+<span class="c"># [[복구||restore]]</span>
+<span class="p">$ </span>docker compose up -d soc-postgres
+<span class="p">$ </span>./scripts/mori-restore.sh backups/mori-soc-&lt;timestamp&gt;.dump
+<span class="p">$ </span>docker compose up -d --build mori-api mori-worker
+<span class="p">$ </span>curl -s http://localhost:18000/health</pre>
+<ol class="chain">
+  <li><b>[[업그레이드 전 백업||Back up first]]</b><span>[[덤프를 받고 현재 이미지 태그를 기록합니다.||Take a dump and note the current image tag.]]</span></li>
+  <li><b>[[새 판 기동||Start the new version]]</b><span>`git pull` → `docker compose up -d --build`</span></li>
+  <li><b>[[확인||Verify]]</b><span>[[`/health` 와 `/admin/schema-migrations` 를 확인합니다.||Check `/health` and `/admin/schema-migrations`.]]</span></li>
+</ol>
+<p class="muted">[[스키마는 전진만 하며 자동 다운그레이드는 없습니다. 롤백은 이전 태그로 되돌리고 필요하면 덤프로 복구합니다.||Schema migrations are forward-only with no automatic downgrade. To roll back, return to the previous tag and restore the dump if needed.]]</p>
+
+<h2 id="status"><span class="no">5</span>[[지금 되는 것 · 다음||Status]]</h2>
+<tbl wr>
+[[지금 되는 것||Works now]] | [[부분||Partial]] | [[다음||Next]]
+[[Zabbix 라이브 폴링 + 옵트인 write-back||Zabbix live polling + opt-in write-back]] | [[Trivy 로컬 폴링||Trivy local polling]] | [[Fleet 취약점 실 CVE 검증||Fleet vulnerabilities on real CVEs]]
+[[Fleet 라이브 폴러 → PC 자산||Fleet live poller → PC assets]] | [[소스 신선도 · 워커 주기||Source freshness · worker cycle]] | [[Wazuh 라이브 폴러||Wazuh live poller]]
+[[Trivy / CSOP push 인제스트||Trivy / CSOP push ingest]] | [[Wazuh push (샘플 payload)||Wazuh push (sample payloads)]] | [[재사용 워크플로 · 다중 저장소 대시보드||Reusable workflow · multi-repo dashboard]]
+[[코드 리뷰 인제스트 + OIDC provenance||Code-review ingest + OIDC provenance]] | [[유료 Claude fullscan 실 런||Paid Claude fullscan real runs]] | [[LDAP / AD 운영 sync||LDAP / AD operational sync]]
+[[트리아지 · 인시던트 · 위험성 · 통제 · 증적 승인 · Gap · 개인정보 3.x · 계정 거버넌스 · SoA||Triage · incidents · risk · controls · approvals · gaps · privacy 3.x · account governance · SoA]] | [[통제 커버리지 (58 / 194 검토완료)||Control coverage (58 / 194 reviewed)]] | [[Slack · 이메일 알림||Slack · email alerts]]
+[[로그인 · RBAC · PostgreSQL 영속 · CSV / PDF / ZIP · hash chain 감사로그||Sign-in · RBAC · PostgreSQL persistence · CSV / PDF / ZIP · hash-chained audit log]] | [[다중 인스턴스 (세션만)||Multi-instance (sessions only)]] | [[다중 인스턴스 B / C 단계, 서명된 스캐너 릴리스||Multi-instance phases B / C, signed scanner releases]]
+</tbl>
+<p class="muted">[[대규모 환경의 성능은 아직 검증하지 않았으며, 단일 테넌트 셀프호스트 전용입니다. 보안 취약점은 GitHub 저장소의 Security 탭에서 비공개로 제보해 주세요.||Large-scale performance is not yet verified, and MORI is single-tenant and self-hosted only. Please report security issues privately through the repository's GitHub Security tab.]]</p>

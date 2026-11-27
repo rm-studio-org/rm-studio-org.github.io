@@ -58,7 +58,7 @@ PAGES = [
     dict(id="api", file="api.html", group="ref",
          ko="API 레퍼런스", en="API reference",
          tko="API 레퍼런스 · Georu", ten="API reference · Georu",
-         dko="Georu 운영 REST API 레퍼런스: 인증, 공통 응답, 오류 코드, 18개 분류 123개 엔드포인트, 호출 예.",
+         dko="Georu 운영 REST API 레퍼런스: 인증, 공통 응답, 오류 코드, 18개 분류 124개 엔드포인트, 호출 예.",
          secs=[("basics", "공통 규칙", "Conventions"),
                ("auth", "인증 · 권한", "Auth · permissions"),
                ("errors", "오류 코드", "Error codes"),
@@ -119,7 +119,7 @@ def header(page, landing):
     return f'''<header class="g-top{' on-dark' if landing else ''}"{' data-hero' if landing else ''}>
   <div class="wrap">
     {menu}
-    <a class="g-brand" href="index.html" aria-label="Georu home"><img class="lt-only{'' if not landing else ''}" src="../assets/georu-mark-light.svg" alt="" data-lm><img class="dk-only" src="../assets/georu-mark-dark.svg" alt="">Georu<span class="chip">{'v0.8 beta' if landing else 'Docs'}</span></a>
+    <a class="g-brand" href="index.html" aria-label="Georu home"><img class="lt-only{'' if not landing else ''}" src="../assets/georu-mark-light.svg" alt="" data-lm><img class="dk-only" src="../assets/georu-mark-dark.svg" alt="">Georu<span class="chip">{'v0.0.1 beta' if landing else 'Docs'}</span></a>
     <nav class="g-nav" aria-label="Georu">{links}</nav>
     <div class="g-tools">
       <a class="gh-link" href="{REPO}" target="_blank" rel="noopener">{GH_SVG}<span>GitHub</span></a>
@@ -148,7 +148,7 @@ def sidebar(page):
     out.append(f'<a href="{REPO}" target="_blank" rel="noopener">GitHub ↗</a>')
     out.append(f'<a href="{REPO}/blob/main/CHANGELOG.md" target="_blank" rel="noopener">Changelog ↗</a>')
     out.append(f'<a href="../index.html">RM Studio ↗</a>')
-    out.append(f'<div class="ver">{bi("Georu 0.8.8 기준 · 아키텍처 정의서 v1.4", "Based on Georu 0.8.8 · Architecture definition v1.4")}</div>')
+    out.append(f'<div class="ver">{bi("Georu 0.0.1 기준 · 공개 저장소 소스", "Based on Georu 0.0.1 · public repository source")}</div>')
     out.append("</aside>")
     return "\n".join(out)
 

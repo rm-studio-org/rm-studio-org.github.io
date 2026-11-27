@@ -8,4 +8,5 @@ python3 georu/_src/build.py georu
 ```
 
 Fragment shorthand: `[[한국어||English]]`, `<tbl>` blocks (header line, cells split by ` | `), and `` `code` ``.
-Content source: Georu architecture definition v1.4 (`manual-task/content/06-architecture.md`, `content_eng/`).
+Content is checked against the public repository https://github.com/dvmoomoodv/georu-data-migration (0.0.1).
+The endpoint list comes from an OpenAPI snapshot plus `EXTRA` in gen_api.py; keep it in sync with the controllers.

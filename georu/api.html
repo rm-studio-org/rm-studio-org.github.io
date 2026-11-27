@@ -4,9 +4,9 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>API 레퍼런스 · Georu</title>
-<meta name="description" content="Georu 운영 REST API 레퍼런스: 인증, 공통 응답, 오류 코드, 18개 분류 123개 엔드포인트, 호출 예.">
+<meta name="description" content="Georu 운영 REST API 레퍼런스: 인증, 공통 응답, 오류 코드, 18개 분류 124개 엔드포인트, 호출 예.">
 <meta property="og:title" content="API reference · Georu">
-<meta property="og:description" content="Georu 운영 REST API 레퍼런스: 인증, 공통 응답, 오류 코드, 18개 분류 123개 엔드포인트, 호출 예.">
+<meta property="og:description" content="Georu 운영 REST API 레퍼런스: 인증, 공통 응답, 오류 코드, 18개 분류 124개 엔드포인트, 호출 예.">
 <meta property="og:type" content="website">
 <meta property="og:image" content="https://rm-studio-org.github.io/assets/banner.png">
 <link rel="icon" href="../assets/georu-mark-light.svg" type="image/svg+xml">
@@ -51,14 +51,14 @@ d.setAttribute('data-lang',l);d.lang=l;if(t==='light'||t==='dark')d.setAttribute
 <a href="https://github.com/dvmoomoodv/georu-data-migration" target="_blank" rel="noopener">GitHub ↗</a>
 <a href="https://github.com/dvmoomoodv/georu-data-migration/blob/main/CHANGELOG.md" target="_blank" rel="noopener">Changelog ↗</a>
 <a href="../index.html">RM Studio ↗</a>
-<div class="ver"><span lang="ko">Georu 0.8.8 기준 · 아키텍처 정의서 v1.4</span><span lang="en">Based on Georu 0.8.8 · Architecture definition v1.4</span></div>
+<div class="ver"><span lang="ko">Georu 0.0.1 기준 · 공개 저장소 소스</span><span lang="en">Based on Georu 0.0.1 · public repository source</span></div>
 </aside>
 <main class="content" id="main">
 <div class="crumb"><a href="index.html">Georu</a><span>/</span><span><span lang="ko">레퍼런스</span><span lang="en">Reference</span></span></div>
 <header class="doc-head">
   <h1><span lang="ko">API 레퍼런스</span><span lang="en">API reference</span></h1>
   <p class="lede"><span lang="ko">운영 UI 없이 JSON 으로 실행 · 테스트 · 조회할 때 쓰는 REST API 입니다. 화면도 이 API 를 부르므로 결과 · 기록 · 권한 판단이 화면과 같습니다.</span><span lang="en">The REST API for running, testing and querying with JSON instead of the operation UI. The screens call the same API, so results, records and permission checks are identical.</span></p>
-  <div class="tags"><span class="tag">REST · JSON</span><span class="tag">HTTP Basic</span><span class="tag"><span lang="ko">18개 분류 · 123개 엔드포인트</span><span lang="en">18 groups · 123 endpoints</span></span><span class="tag"><span lang="ko">OpenAPI 0.7.0 스냅숏 기준</span><span lang="en">From the OpenAPI 0.7.0 snapshot</span></span></div>
+  <div class="tags"><span class="tag">REST · JSON</span><span class="tag">HTTP Basic</span><span class="tag"><span lang="ko">18개 분류 · 124개 엔드포인트</span><span lang="en">18 groups · 124 endpoints</span></span><span class="tag"><span lang="ko">Georu 0.0.1 소스 기준</span><span lang="en">From Georu 0.0.1 source</span></span></div>
 </header>
 
 <div class="kv">
@@ -111,7 +111,7 @@ d.setAttribute('data-lang',l);d.lang=l;if(t==='light'||t==='dark')d.setAttribute
 <div class="note"><b><span lang="ko">더 이상 쓰지 않음</span><span lang="en">Deprecated</span></b><p><span lang="ko"><code>truncateTarget</code> 은 true 면 요청을 거부합니다 (제품은 데이터를 지우지 않음). <code>upsertMode</code> 는 무시됩니다 (적재 방식은 Mapper 쿼리로 결정).</span><span lang="en"><code>truncateTarget: true</code> is rejected (the product never deletes data). <code>upsertMode</code> is ignored (the load style is decided by the mapper query).</span></p></div>
 
 <h2 id="endpoints"><span class="no">05</span><span lang="ko">엔드포인트</span><span lang="en">Endpoints</span></h2>
-<p><span lang="ko">분류별 전체 목록입니다. 경로 · 설명으로 찾을 수 있습니다. 요청 필드와 스키마 전체는 앱 안 Swagger 또는 저장소의 OpenAPI 명세를 보세요.</span><span lang="en">The full list, grouped. Filter by path or description. For every request field and schema, see the in-app Swagger or the OpenAPI spec in the repository.</span></p>
+<p><span lang="ko">분류별 전체 목록입니다. 경로 · 설명으로 찾을 수 있습니다. 요청 필드와 스키마 전체는 앱 안 Swagger(<code>/swagger-ui/index.html</code>)를 보세요.</span><span lang="en">The full list, grouped. Filter by path or description. For every request field and schema, see the in-app Swagger (<code>/swagger-ui/index.html</code>).</span></p>
 <div class="api-search">
   <input id="apiQuery" type="search" placeholder="Filter — e.g. /api/report, fill-missing, schedule, 시나리오" aria-label="Filter endpoints">
   <span class="cnt" id="apiCount"></span>
@@ -189,7 +189,7 @@ d.setAttribute('data-lang',l);d.lang=l;if(t==='light'||t==='dark')d.setAttribute
 <div class="ep"><span class="m get">GET</span><span class="p">/api/ui/notifications</span><span class="d"><span lang="ko">UI 알림 목록</span><span lang="en">UI notifications</span></span></div>
 </div></div>
 <div class="api-group" id="api-report">
-<div class="gh"><h3 id="g-report" data-notoc><span lang="ko">보고서</span><span lang="en">Reports</span></h3><span class="c">10</span></div>
+<div class="gh"><h3 id="g-report" data-notoc><span lang="ko">보고서</span><span lang="en">Reports</span></h3><span class="c">11</span></div>
 <p class="gd"><span lang="ko">이관 결과 보고서 / CSV·XLSX·PDF 내보내기</span><span lang="en">Migration result reports and CSV · XLSX · PDF exports.</span></p>
 <div class="eps">
 <div class="ep"><span class="m get">GET</span><span class="p">/api/report/exports</span><span class="d"><span lang="ko">내보내기 목록</span><span lang="en">List exports</span></span></div>
@@ -198,6 +198,7 @@ d.setAttribute('data-lang',l);d.lang=l;if(t==='light'||t==='dark')d.setAttribute
 <div class="ep"><span class="m delete">DELETE</span><span class="p">/api/report/exports/<em>{exportId}</em></span><span class="d"><span lang="ko">내보내기 삭제</span><span lang="en">Delete an export</span></span></div>
 <div class="ep"><span class="m get">GET</span><span class="p">/api/report/exports/<em>{exportId}</em>/download</span><span class="d"><span lang="ko">내보내기 zip 다운로드</span><span lang="en">Download export zip</span></span></div>
 <div class="ep"><span class="m get">GET</span><span class="p">/api/report/jobs</span><span class="d"><span lang="ko">Job 목록 (json/csv/xlsx)</span><span lang="en">Job list (json/csv/xlsx)</span></span></div>
+<div class="ep"><span class="m get">GET</span><span class="p">/api/report/jobs/page</span><span class="d"><span lang="ko">Job 목록 한 쪽 (이력 화면 서버 페이징)</span><span lang="en">Job list page (server paging for the history screen)</span></span></div>
 <div class="ep"><span class="m get">GET</span><span class="p">/api/report/jobs/<em>{migrationId}</em></span><span class="d"><span lang="ko">Job 1건 결과 보고서 (json/pdf/xlsx)</span><span lang="en">Single Job report (json/pdf/xlsx)</span></span></div>
 <div class="ep"><span class="m get">GET</span><span class="p">/api/report/jobs/<em>{migrationId}</em>/chunks</span><span class="d"><span lang="ko">Job 청크 상태 (json/csv)</span><span lang="en">Job chunk status (json/csv)</span></span></div>
 <div class="ep"><span class="m get">GET</span><span class="p">/api/report/jobs/<em>{migrationId}</em>/logs</span><span class="d"><span lang="ko">Job 로그 (json/csv)</span><span lang="en">Job logs (json/csv)</span></span></div>

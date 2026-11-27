@@ -1,7 +1,7 @@
 <header class="doc-head">
   <h1>[[API 레퍼런스||API reference]]</h1>
   <p class="lede">[[운영 UI 없이 JSON 으로 실행 · 테스트 · 조회할 때 쓰는 REST API 입니다. 화면도 이 API 를 부르므로 결과 · 기록 · 권한 판단이 화면과 같습니다.||The REST API for running, testing and querying with JSON instead of the operation UI. The screens call the same API, so results, records and permission checks are identical.]]</p>
-  <div class="tags"><span class="tag">REST · JSON</span><span class="tag">HTTP Basic</span><span class="tag">[[18개 분류 · 123개 엔드포인트||18 groups · 123 endpoints]]</span><span class="tag">[[OpenAPI 0.7.0 스냅숏 기준||From the OpenAPI 0.7.0 snapshot]]</span></div>
+  <div class="tags"><span class="tag">REST · JSON</span><span class="tag">HTTP Basic</span><span class="tag">[[18개 분류 · 124개 엔드포인트||18 groups · 124 endpoints]]</span><span class="tag">[[Georu 0.0.1 소스 기준||From Georu 0.0.1 source]]</span></div>
 </header>
 
 <div class="kv">
@@ -88,7 +88,7 @@ HTTP | errorCode | [[뜻||Meaning]] | [[나는 곳||Raised by]]
 <div class="note"><b>[[더 이상 쓰지 않음||Deprecated]]</b><p>[[`truncateTarget` 은 true 면 요청을 거부합니다 (제품은 데이터를 지우지 않음). `upsertMode` 는 무시됩니다 (적재 방식은 Mapper 쿼리로 결정).||`truncateTarget: true` is rejected (the product never deletes data). `upsertMode` is ignored (the load style is decided by the mapper query).]]</p></div>
 
 <h2 id="endpoints"><span class="no">05</span>[[엔드포인트||Endpoints]]</h2>
-<p>[[분류별 전체 목록입니다. 경로 · 설명으로 찾을 수 있습니다. 요청 필드와 스키마 전체는 앱 안 Swagger 또는 저장소의 OpenAPI 명세를 보세요.||The full list, grouped. Filter by path or description. For every request field and schema, see the in-app Swagger or the OpenAPI spec in the repository.]]</p>
+<p>[[분류별 전체 목록입니다. 경로 · 설명으로 찾을 수 있습니다. 요청 필드와 스키마 전체는 앱 안 Swagger(`/swagger-ui/index.html`)를 보세요.||The full list, grouped. Filter by path or description. For every request field and schema, see the in-app Swagger (`/swagger-ui/index.html`).]]</p>
 <div class="api-search">
   <input id="apiQuery" type="search" placeholder="Filter — e.g. /api/report, fill-missing, schedule, 시나리오" aria-label="Filter endpoints">
   <span class="cnt" id="apiCount"></span>

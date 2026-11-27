@@ -71,7 +71,7 @@
 <div class="ep"><span class="m get">GET</span><span class="p">/api/ui/notifications</span><span class="d">[[UI 알림 목록||UI notifications]]</span></div>
 </div></div>
 <div class="api-group" id="api-report">
-<div class="gh"><h3 id="g-report" data-notoc>[[보고서||Reports]]</h3><span class="c">10</span></div>
+<div class="gh"><h3 id="g-report" data-notoc>[[보고서||Reports]]</h3><span class="c">11</span></div>
 <p class="gd">[[이관 결과 보고서 / CSV·XLSX·PDF 내보내기||Migration result reports and CSV · XLSX · PDF exports.]]</p>
 <div class="eps">
 <div class="ep"><span class="m get">GET</span><span class="p">/api/report/exports</span><span class="d">[[내보내기 목록||List exports]]</span></div>
@@ -80,6 +80,7 @@
 <div class="ep"><span class="m delete">DELETE</span><span class="p">/api/report/exports/<em>{exportId}</em></span><span class="d">[[내보내기 삭제||Delete an export]]</span></div>
 <div class="ep"><span class="m get">GET</span><span class="p">/api/report/exports/<em>{exportId}</em>/download</span><span class="d">[[내보내기 zip 다운로드||Download export zip]]</span></div>
 <div class="ep"><span class="m get">GET</span><span class="p">/api/report/jobs</span><span class="d">[[Job 목록 (json/csv/xlsx)||Job list (json/csv/xlsx)]]</span></div>
+<div class="ep"><span class="m get">GET</span><span class="p">/api/report/jobs/page</span><span class="d">[[Job 목록 한 쪽 (이력 화면 서버 페이징)||Job list page (server paging for the history screen)]]</span></div>
 <div class="ep"><span class="m get">GET</span><span class="p">/api/report/jobs/<em>{migrationId}</em></span><span class="d">[[Job 1건 결과 보고서 (json/pdf/xlsx)||Single Job report (json/pdf/xlsx)]]</span></div>
 <div class="ep"><span class="m get">GET</span><span class="p">/api/report/jobs/<em>{migrationId}</em>/chunks</span><span class="d">[[Job 청크 상태 (json/csv)||Job chunk status (json/csv)]]</span></div>
 <div class="ep"><span class="m get">GET</span><span class="p">/api/report/jobs/<em>{migrationId}</em>/logs</span><span class="d">[[Job 로그 (json/csv)||Job logs (json/csv)]]</span></div>

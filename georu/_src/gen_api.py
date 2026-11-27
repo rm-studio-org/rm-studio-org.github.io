@@ -153,6 +153,9 @@ EN = {
  "화면 공통 정보 (환경 · 프로파일)": "Common UI info (environment · profile)",
 }
 
+# Present in georu-data-migration 0.0.1 source (ReportController) but missing from the OpenAPI snapshot
+EXTRA = [("Report", "/api/report/jobs/page", "get", "Job 목록 한 쪽 (이력 화면 서버 페이징)", "Job list page (server paging for the history screen)")]
+
 ORDER = {"get": 0, "post": 1, "put": 2, "delete": 3, "patch": 4}
 by_tag = {}
 missing = []
@@ -166,6 +169,8 @@ for path, ops in spec["paths"].items():
         if en is None:
             missing.append(ko); en = ko
         by_tag.setdefault(tag, []).append((path, m, ko, en))
+for tag, path, m, ko, en in EXTRA:
+    by_tag.setdefault(tag, []).append((path, m, ko, en))
 if missing:
     sys.exit("missing EN: %r" % missing)
 

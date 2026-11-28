@@ -122,11 +122,12 @@ html[data-lang="en"] [lang="ko"]:not(html){display:none!important}
 .lane .bar i{position:absolute;inset:0 auto 0 0;border-radius:3px;background:linear-gradient(90deg,#1f6feb,#54aeff)}
 .lane .n{text-align:right;color:#e6edf3}
 .chunks{display:flex;gap:5px;margin:18px 0 8px;flex-wrap:wrap}
-.chunks i{width:20px;height:20px;border-radius:4px;background:#1f6feb;opacity:.25;animation:ship 3.2s infinite}
-.chunks i:nth-child(3n+2){background:#54aeff}.chunks i:nth-child(3n){background:#b6e3ff}
-@keyframes ship{0%,20%{opacity:.18;transform:translateY(0)}40%,70%{opacity:1;transform:translateY(-3px)}100%{opacity:.18;transform:translateY(0)}}
-.chunks i:nth-child(1){animation-delay:0s}.chunks i:nth-child(2){animation-delay:.2s}.chunks i:nth-child(3){animation-delay:.4s}.chunks i:nth-child(4){animation-delay:.6s}.chunks i:nth-child(5){animation-delay:.8s}.chunks i:nth-child(6){animation-delay:1s}.chunks i:nth-child(7){animation-delay:1.2s}.chunks i:nth-child(8){animation-delay:1.4s}.chunks i:nth-child(9){animation-delay:1.6s}.chunks i:nth-child(10){animation-delay:1.8s}.chunks i:nth-child(11){animation-delay:2s}.chunks i:nth-child(12){animation-delay:2.2s}
-@media (prefers-reduced-motion:reduce){.chunks i{animation:none;opacity:.8}}
+.chunks i{width:20px;height:20px;border-radius:4px;background:#ffffff0d;box-shadow:inset 0 0 0 1px #ffffff26}
+.chunks i.d{background:#1f6feb;box-shadow:none}
+.chunks i.now{background:#79c0ff;box-shadow:0 0 0 3px #79c0ff33;animation:ship 1.4s ease-in-out infinite}
+@keyframes ship{50%{opacity:.45}}
+@media (prefers-reduced-motion:reduce){.chunks i.now{animation:none}}
+@media (max-width:480px){.chunks{gap:4px;flex-wrap:nowrap}.chunks i{width:16px;height:16px}}
 .flow-card .log{border-top:1px dashed #ffffff1f;margin-top:14px;padding-top:12px;line-height:1.9}
 .flow-card .ok{color:#3fb950}.flow-card .ac{color:#79c0ff}.flow-card .mut{color:#6e7681}
 
@@ -241,7 +242,7 @@ h2:hover .anchor,h3:hover .anchor{opacity:1}
 .note{border:1px solid var(--line);border-left:3px solid var(--accent);background:var(--bg-2);border-radius:8px;padding:14px 18px;margin:18px 0;font-size:14.5px}
 .note.warn{border-left-color:var(--warn)}
 .note.ok{border-left-color:var(--ok)}
-.note b:first-child{display:block;font-size:12.5px;letter-spacing:.04em;text-transform:uppercase;color:var(--ink-2);margin-bottom:2px}
+.note>b:first-child{display:block;font-size:12.5px;letter-spacing:.04em;text-transform:uppercase;color:var(--ink-2);margin-bottom:2px}
 .note p:last-child{margin-bottom:0}
 
 /* key/value grid */
@@ -426,3 +427,5 @@ h2:hover .anchor,h3:hover .anchor{opacity:1}
   .cta{padding:32px 24px}
 }
 @media (max-width:400px){.g-brand .chip{display:none}}
+html[data-lang="ko"] .kicker{font-family:var(--sans);letter-spacing:.01em;text-transform:none;font-weight:700;font-size:13px}
+.note code{white-space:nowrap}

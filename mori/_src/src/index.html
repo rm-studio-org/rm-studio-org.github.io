@@ -74,10 +74,10 @@
     <p class="kicker">[[화면||Screens]]</p>
     <h2>[[한 화면에서 운영하고, 기록은 자동으로||Operate in one place; records happen on their own]]</h2>
     <p class="sub">[[대시보드 · Alert Triage · 인시던트 · 자산/취약점 · Compliance PDCA 를 <code>/ui</code> 한 곳에서. 아래는 데모 데이터 화면입니다.||Dashboard · alert triage · incidents · assets/vulnerabilities · compliance PDCA in one place at <code>/ui</code>. Screens below use demo data.]]</p>
-    <div class="shot"><img src="assets/img/demo-dashboard.jpg" alt="MORI dashboard with host KPIs and latest host status (demo data)" loading="lazy" width="1600" height="812"></div>
+    <div class="shot fade"><img src="assets/img/demo-dashboard.jpg" alt="MORI dashboard with host KPIs and latest host status (demo data)" loading="lazy" width="1600" height="812"></div>
     <p class="shot-cap">[[통합 대시보드 — 호스트 · 경보 · 취약점 KPI 와 조치가 필요한 호스트 우선 표시||Unified dashboard — host · alert · vulnerability KPIs, hosts needing action first]]</p>
     <div class="split" style="margin-top:28px">
-      <div><div class="shot"><img src="assets/img/demo-trivy.jpg" alt="Trivy vulnerabilities per host with remediation plans and exceptions (demo data)" loading="lazy" width="1600" height="800"></div><p class="shot-cap">[[취약점(Trivy) — CVE 별 조치 계획 · 예외 · 만료일과 변경 이력||Vulnerabilities (Trivy) — per-CVE plans · exceptions · expiry and history]]</p></div>
+      <div><a class="shot zoom" href="assets/img/demo-trivy.jpg" target="_blank" rel="noopener"><img src="assets/img/demo-trivy-table.jpg" alt="Trivy vulnerabilities per host with remediation plans and exceptions (demo data)" loading="lazy" width="856" height="257"></a><p class="shot-cap">[[취약점(Trivy) — 호스트별 심각도 집계와 최근 CVE. 누르면 조치 계획 · 예외까지 전체 화면을 볼 수 있습니다||Vulnerabilities (Trivy) — severity counts and latest CVE per host. Click for the full screen with plans and exceptions]]</p></div>
       <div><div class="shot"><img src="assets/img/demo-nlq.jpg" alt="Natural-language query results (demo data)" loading="lazy" width="1228" height="772"></div><p class="shot-cap">[[자연어 질의 — "오프라인 호스트 보여줘" → 인텐트 매칭 → 결과 · 요약 · CSV||Natural-language query — "show offline hosts" → intent → results · summary · CSV]]</p></div>
     </div>
   </div>
@@ -88,7 +88,7 @@
     <p class="kicker">[[문서||Documentation]]</p>
     <h2>[[구조부터 API 까지||From structure to API]]</h2>
     <p class="sub">[[공개 저장소 <a href="https://github.com/saranf/mori-soc" target="_blank" rel="noopener">saranf/mori-soc</a>(0.6.0 alpha)를 기준으로 정리했습니다.||Based on the public <a href="https://github.com/saranf/mori-soc" target="_blank" rel="noopener">saranf/mori-soc</a> repository (0.6.0 alpha).]]</p>
-    <div class="cards">
+    <div class="cards c4">
       <a class="card" href="architecture.html"><div class="ic">01</div><h3>[[아키텍처||Architecture]]</h3><p>[[증적 층의 위치, 서비스 구성, 데이터 흐름, 데이터 모델, 권한, 무결성 장치||Where the evidence layer sits, services, data flow, data model, roles, integrity]]</p><span class="more">[[읽기||Read]] →</span></a>
       <a class="card" href="features.html"><div class="ic">02</div><h3>[[핵심 기능||Core features]]</h3><p>[[통제 카탈로그 · 통제 운영, 증적 신뢰 층, 감사 실사용, 개인정보 · 코드 리뷰 · 계정 · 취약점||Control catalog · governance, evidence trust, audit tooling, privacy · code review · accounts · vulnerabilities]]</p><span class="more">[[읽기||Read]] →</span></a>
       <a class="card" href="integrations.html"><div class="ic">03</div><h3>[[연동 · 배포||Integrations · deployment]]</h3><p>[[커넥터와 검증 상태, 데모 · 브라운필드 시작, compose 프로필, 운영 · 백업||Connectors and verification status, demo · brownfield start, compose profiles, ops · backup]]</p><span class="more">[[읽기||Read]] →</span></a>

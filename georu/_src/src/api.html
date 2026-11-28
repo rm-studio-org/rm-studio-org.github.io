@@ -11,7 +11,7 @@
   <div><b>/swagger-ui</b><span>[[앱 안 Swagger (운영 프로파일에서 꺼짐)||In-app Swagger (off in production)]]</span></div>
 </div>
 
-<h2 id="basics"><span class="no">01</span>[[공통 규칙||Conventions]]</h2>
+<h2 id="basics"><span class="no">1</span>[[공통 규칙||Conventions]]</h2>
 <tbl>
 [[항목||Item]] | [[내용||Content]]
 [[기본 주소||Base URL]] | [[`http://<서버>:<포트>` (예제 앱 Docker 8083, 생성 앱 기본 8081)||`http://<server>:<port>` (example app on Docker 8083, generated app default 8081)]]
@@ -44,7 +44,7 @@
 }</pre>
 </div>
 
-<h2 id="auth"><span class="no">02</span>[[인증 · 권한||Authentication · permissions]]</h2>
+<h2 id="auth"><span class="no">2</span>[[인증 · 권한||Authentication · permissions]]</h2>
 <p>[[화면과 같은 계정으로 <b>HTTP Basic</b> 을 보냅니다. HTTP Basic 호출에는 CSRF 토큰이 필요 없습니다. 권한은 화면의 메뉴 권한과 같습니다 — 실행은 <b>실행</b>, 조회는 <b>조회</b> 단계가 필요하고, 권한표에 없는 API 는 관리자만 부를 수 있습니다.||Send <b>HTTP Basic</b> with the same account used on the screens; HTTP Basic calls need no CSRF token. Permissions mirror the UI menu permissions — runs need the <b>Execute</b> level, queries need <b>View</b>, and APIs not in the permission table are admin-only.]]</p>
 <pre><span class="c"># [[아래 예는 셸 변수를 씁니다||The examples below use shell variables]]</span>
 <span class="p">$ </span>B=http://&lt;server&gt;:&lt;port&gt;
@@ -53,7 +53,7 @@
 <div class="note warn"><b>[[첫 로그인 전||Before first sign-in]]</b><p>[[관리자가 만든 계정은 비밀번호를 바꾸기 전에는 `POST /api/account/password` 만 됩니다. 나머지는 `403 PASSWORD_CHANGE_REQUIRED`.||Accounts created by an administrator can only call `POST /api/account/password` until the password is changed; everything else returns `403 PASSWORD_CHANGE_REQUIRED`.]]</p></div>
 <p>[[요청이 거치는 순서는 <a href="application.html#security">보안 필터 체인</a>을 참고하세요.||See the <a href="application.html#security">security filter chain</a> for the order a request goes through.]]</p>
 
-<h2 id="errors"><span class="no">03</span>[[오류 코드||Error codes]]</h2>
+<h2 id="errors"><span class="no">3</span>[[오류 코드||Error codes]]</h2>
 <tbl>
 HTTP | errorCode | [[뜻||Meaning]] | [[나는 곳||Raised by]]
 401 | `UNAUTHORIZED` | [[로그인 · HTTP Basic 이 없거나 틀림||Missing or wrong sign-in · HTTP Basic]] | [[보안||Security]]
@@ -67,7 +67,7 @@ HTTP | errorCode | [[뜻||Meaning]] | [[나는 곳||Raised by]]
 </tbl>
 <p class="muted">[[사전 검사에서 막히면 실행 기록에 `BLOCKED_*` 코드와 이유가 남습니다 (<a href="engine.html#prechecks">사전 검사 순서</a>).||When pre-run checks block a run, a `BLOCKED_*` code and the reason are kept in the run history (<a href="engine.html#prechecks">order of pre-run checks</a>).]]</p>
 
-<h2 id="run-request"><span class="no">04</span>[[실행 요청 — `POST /api/migrate/table`||Run request — `POST /api/migrate/table`]]</h2>
+<h2 id="run-request"><span class="no">4</span>[[실행 요청 — `POST /api/migrate/table`||Run request — `POST /api/migrate/table`]]</h2>
 <p>[[가장 많이 쓰는 API 입니다. 실행은 백그라운드로 돌고, 응답 `data.migrationId` 로 결과를 봅니다. 날짜 분할이면 `data.groupId` 로 묶음을 봅니다.||The most used API. The run proceeds in the background; follow it with `data.migrationId` from the response, or `data.groupId` for a date split.]]</p>
 <tbl>
 [[필드||Field]] | [[필수||Req.]] | [[뜻||Meaning]]
@@ -87,7 +87,7 @@ HTTP | errorCode | [[뜻||Meaning]] | [[나는 곳||Raised by]]
 </tbl>
 <div class="note"><b>[[더 이상 쓰지 않음||Deprecated]]</b><p>[[`truncateTarget` 은 true 면 요청을 거부합니다 (제품은 데이터를 지우지 않음). `upsertMode` 는 무시됩니다 (적재 방식은 Mapper 쿼리로 결정).||`truncateTarget: true` is rejected (the product never deletes data). `upsertMode` is ignored (the load style is decided by the mapper query).]]</p></div>
 
-<h2 id="endpoints"><span class="no">05</span>[[엔드포인트||Endpoints]]</h2>
+<h2 id="endpoints"><span class="no">5</span>[[엔드포인트||Endpoints]]</h2>
 <p>[[분류별 전체 목록입니다. 경로 · 설명으로 찾을 수 있습니다. 요청 필드와 스키마 전체는 앱 안 Swagger(`/swagger-ui/index.html`)를 보세요.||The full list, grouped. Filter by path or description. For every request field and schema, see the in-app Swagger (`/swagger-ui/index.html`).]]</p>
 <div class="api-search">
   <input id="apiQuery" type="search" placeholder="Filter — e.g. /api/report, fill-missing, schedule, 시나리오" aria-label="Filter endpoints">
@@ -95,7 +95,7 @@ HTTP | errorCode | [[뜻||Meaning]] | [[나는 곳||Raised by]]
 </div>
 <!--include:_endpoints.html-->
 
-<h2 id="examples"><span class="no">06</span>[[호출 예||Examples]]</h2>
+<h2 id="examples"><span class="no">6</span>[[호출 예||Examples]]</h2>
 <h3 id="ex-reader">[[① 테이블 하나 — READER_TEST (적재 없음)||① One table — READER_TEST (no writes)]]</h3>
 <pre><span class="p">$ </span>curl -u $U -X POST $B/api/migrate/table -H 'Content-Type: application/json' -d '{
   <span class="n">"pluginName"</span>: <span class="s">"acme.member"</span>, <span class="n">"tableName"</span>: <span class="s">"tb_member"</span>,

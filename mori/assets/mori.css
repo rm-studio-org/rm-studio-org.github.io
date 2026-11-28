@@ -241,7 +241,7 @@ h2:hover .anchor,h3:hover .anchor{opacity:1}
 .note{border:1px solid var(--line);border-left:3px solid var(--accent);background:var(--bg-2);border-radius:8px;padding:14px 18px;margin:18px 0;font-size:14.5px}
 .note.warn{border-left-color:var(--warn)}
 .note.ok{border-left-color:var(--ok)}
-.note b:first-child{display:block;font-size:12.5px;letter-spacing:.04em;text-transform:uppercase;color:var(--ink-2);margin-bottom:2px}
+.note>b:first-child{display:block;font-size:12.5px;letter-spacing:.04em;text-transform:uppercase;color:var(--ink-2);margin-bottom:2px}
 .note p:last-child{margin-bottom:0}
 
 /* key/value grid */
@@ -483,3 +483,12 @@ a.card:hover{border-color:transparent;box-shadow:0 2px 4px #0000000d,0 12px 28px
 }
 @media (max-width:400px){.g-brand .chip{display:none}}
 .ev-step small{font-size:13px}
+html[data-lang="ko"] .kicker{font-family:var(--sans);letter-spacing:.01em;text-transform:none;font-weight:700;font-size:13px}
+.note code{white-space:nowrap}
+.cards.c4{grid-template-columns:repeat(4,1fr)}
+@media (max-width:1100px){.cards.c4{grid-template-columns:repeat(2,1fr)}}
+@media (max-width:620px){.cards.c4{grid-template-columns:1fr}}
+.shot{position:relative;display:block}
+.shot.fade::after{content:"";position:absolute;left:0;right:0;bottom:0;height:26%;background:linear-gradient(180deg,transparent,#0f1520 92%);pointer-events:none}
+.shot.zoom::after{content:"↗";position:absolute;top:10px;right:10px;width:30px;height:30px;border-radius:8px;display:grid;place-items:center;background:#ffffff1f;color:#fff;font-size:14px;opacity:0;transition:opacity .15s}
+.shot.zoom:hover::after,.shot.zoom:focus-visible::after{opacity:1}

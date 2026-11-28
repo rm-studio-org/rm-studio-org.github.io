@@ -40,3 +40,13 @@
 @keyframes ship{50%{opacity:.45}}
 @media (prefers-reduced-motion:reduce){.chunks i.now{animation:none}}
 @media (max-width:480px){.chunks{gap:4px;flex-wrap:nowrap}.chunks i{width:16px;height:16px}}
+
+/* illustrations — line art */
+.art *,.cta-art *{fill:none;stroke:var(--ink);stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
+.art .a{stroke:var(--accent)}
+.art .t{fill:var(--accent-bg)}
+.art .af{fill:var(--accent);stroke:none}
+.cta-art *{stroke:#c9d1d9}
+.cta-art .a{stroke:#79c0ff}
+.cta-art .t{fill:#79c0ff40}
+.cta-art .af{fill:#79c0ff;stroke:none}

@@ -95,3 +95,18 @@ a.card:hover{border-color:transparent;box-shadow:0 2px 4px #0000000d,0 12px 28px
 .shot.fade::after{content:"";position:absolute;left:0;right:0;bottom:0;height:26%;background:linear-gradient(180deg,transparent,#0f1520 92%);pointer-events:none}
 .shot.zoom::after{content:"↗";position:absolute;top:10px;right:10px;width:30px;height:30px;border-radius:8px;display:grid;place-items:center;background:#ffffff1f;color:#fff;font-size:14px;opacity:0;transition:opacity .15s}
 .shot.zoom:hover::after,.shot.zoom:focus-visible::after{opacity:1}
+
+/* illustrations — duotone */
+.art *,.cta-art *{stroke:none}
+.art .l{fill:color-mix(in srgb,var(--accent) 20%,var(--card))}
+.art .m{fill:color-mix(in srgb,var(--accent) 48%,var(--card))}
+.art .p{fill:var(--accent)}
+.art .w{fill:var(--card)}
+.art .k{fill:none;stroke:var(--accent);stroke-width:2.6;stroke-linecap:round;stroke-linejoin:round}
+.art .kw,.cta-art .kw{fill:none;stroke:#fff;stroke-width:2.6;stroke-linecap:round;stroke-linejoin:round}
+.cta-art .l{fill:#ffffff3d}
+.cta-art .w{fill:#fff}
+.cta-art .pl{fill:var(--accent)}
+.cta-art .ml{fill:var(--accent-bg)}
+.cta-art .lc{fill:#ffffff66}
+:root[data-theme="dark"] .cta-art .ml{fill:#3182f633}

@@ -1,7 +1,7 @@
 /* Georu site — brand styles (shared by all /georu pages) */
 :root{
   --bg:#ffffff; --bg-2:#f6f8fa; --bg-3:#eef2f6; --card:#ffffff;
-  --ink:#1f2328; --ink-2:#59636e; --ink-3:#818b98;
+  --ink:#1f2328; --ink-2:#59636e; --ink-3:#6e7781;
   --line:#d1d9e0; --line-2:#e6ebf0;
   --accent:#0969da; --accent-2:#54aeff; --accent-3:#b6e3ff; --accent-bg:#ddf4ff;
   --ok:#1a7f37; --ok-bg:#dafbe1; --warn:#9a6700; --warn-bg:#fff8c5; --bad:#cf222e; --bad-bg:#ffebe9;
@@ -15,7 +15,7 @@
 @media (prefers-color-scheme: dark){
   :root:not([data-theme="light"]){
     --bg:#0d1117; --bg-2:#151b23; --bg-3:#1c232d; --card:#151b23;
-    --ink:#e6edf3; --ink-2:#9198a1; --ink-3:#6e7681;
+    --ink:#e6edf3; --ink-2:#9198a1; --ink-3:#8b949e;
     --line:#30363d; --line-2:#252c35;
     --accent:#4493f8; --accent-2:#1f6feb; --accent-3:#0d419d; --accent-bg:#0c2d6b55;
     --ok:#3fb950; --ok-bg:#2ea04326; --warn:#d29922; --warn-bg:#bb800926; --bad:#f85149; --bad-bg:#f8514926;
@@ -25,7 +25,7 @@
 }
 :root[data-theme="dark"]{
   --bg:#0d1117; --bg-2:#151b23; --bg-3:#1c232d; --card:#151b23;
-  --ink:#e6edf3; --ink-2:#9198a1; --ink-3:#6e7681;
+  --ink:#e6edf3; --ink-2:#9198a1; --ink-3:#8b949e;
   --line:#30363d; --line-2:#252c35;
   --accent:#4493f8; --accent-2:#1f6feb; --accent-3:#0d419d; --accent-bg:#0c2d6b55;
   --ok:#3fb950; --ok-bg:#2ea04326; --warn:#d29922; --warn-bg:#bb800926; --bad:#f85149; --bad-bg:#f8514926;
@@ -402,3 +402,27 @@ h2:hover .anchor,h3:hover .anchor{opacity:1}
 .content .card h3,.content .panel h3{margin:0 0 6px}
 .content .api-group h3{margin:0}
 .content .policy h4{margin:0 0 12px}
+
+/* readability · mobile · RM Studio byline */
+.g-brand{white-space:nowrap;flex:none}
+.g-by{font-size:12.5px;font-weight:500;color:var(--ink-3);white-space:nowrap;padding-left:14px;margin-left:-10px;border-left:1px solid var(--line)}
+.g-by:hover{color:var(--ink);text-decoration:none}
+.on-dark .g-by{color:#9198a1;border-left-color:#ffffff24}
+.on-dark .g-by:hover{color:#fff}
+@media (min-width:981px) and (max-width:1120px){.g-by{display:none}}
+.hero .wrap>*{min-width:0}
+.card p{font-size:14.5px}
+.panel .cap{font-size:13.5px}
+.stats span{font-size:14px}
+.box small{font-size:12.5px}
+.arrow span{font-size:11.5px}
+.pipe .stage p{font-size:13.5px}
+@media (max-width:560px){
+  .g-by{display:none}
+  .g-top .wrap{gap:12px}
+  .g-tools .icon-btn,.g-tools .seg button{min-height:36px}
+  .g-tools .icon-btn{width:36px}
+  .hero .btns .btn{flex:1 1 auto;justify-content:center}
+  .cta{padding:32px 24px}
+}
+@media (max-width:400px){.g-brand .chip{display:none}}

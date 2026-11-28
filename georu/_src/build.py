@@ -120,6 +120,7 @@ def header(page, landing):
   <div class="wrap">
     {menu}
     <a class="g-brand" href="index.html" aria-label="Georu home"><img class="lt-only{'' if not landing else ''}" src="../assets/georu-mark-light.svg" alt="" data-lm><img class="dk-only" src="../assets/georu-mark-dark.svg" alt="">Georu<span class="chip">{'v0.0.1 beta' if landing else 'Docs'}</span></a>
+    <a class="g-by" href="../index.html">by RM Studio</a>
     <nav class="g-nav" aria-label="Georu">{links}</nav>
     <div class="g-tools">
       <a class="gh-link" href="{REPO}" target="_blank" rel="noopener">{GH_SVG}<span>GitHub</span></a>

@@ -1,7 +1,7 @@
 /* MORI SOC site — brand styles (palette from the MORI UI) */
 :root{
   --bg:#ffffff; --bg-2:#f2f4f6; --bg-3:#f2f4f6; --card:#ffffff;
-  --ink:#191f28; --ink-2:#4e5968; --ink-3:#8b95a1;
+  --ink:#191f28; --ink-2:#4e5968; --ink-3:#6b7684;
   --line:#e5e8eb; --line-2:#eef0f2;
   --accent:#3182f6; --accent-2:#64a8ff; --accent-3:#c9e2ff; --accent-bg:#e8f3ff;
   --ok:#0e9f62; --ok-bg:#e3f8ee; --warn:#c77d00; --warn-bg:#fff4dc; --bad:#f04452; --bad-bg:#ffebee;
@@ -15,7 +15,7 @@
 @media (prefers-color-scheme: dark){
   :root:not([data-theme="light"]){
     --bg:#101217; --bg-2:#17191f; --bg-3:#1f222a; --card:#17191f;
-    --ink:#f2f4f6; --ink-2:#b0b8c1; --ink-3:#6b7684;
+    --ink:#f2f4f6; --ink-2:#b0b8c1; --ink-3:#8b95a1;
     --line:#2c3038; --line-2:#22262d;
     --accent:#4c94f8; --accent-2:#3182f6; --accent-3:#1b4f9c; --accent-bg:#3182f62b;
     --ok:#2fd18f; --ok-bg:#15c47e26; --warn:#f5b545; --warn-bg:#f5a62326; --bad:#ff6b77; --bad-bg:#f0445226;
@@ -25,7 +25,7 @@
 }
 :root[data-theme="dark"]{
   --bg:#101217; --bg-2:#17191f; --bg-3:#1f222a; --card:#17191f;
-  --ink:#f2f4f6; --ink-2:#b0b8c1; --ink-3:#6b7684;
+  --ink:#f2f4f6; --ink-2:#b0b8c1; --ink-3:#8b95a1;
   --line:#2c3038; --line-2:#22262d;
   --accent:#4c94f8; --accent-2:#3182f6; --accent-3:#1b4f9c; --accent-bg:#3182f62b;
   --ok:#2fd18f; --ok-bg:#15c47e26; --warn:#f5b545; --warn-bg:#f5a62326; --bad:#ff6b77; --bad-bg:#f0445226;
@@ -458,3 +458,28 @@ a.card:hover{border-color:transparent;box-shadow:0 2px 4px #0000000d,0 12px 28px
 .m.delete{background:#ffebee;color:#e42939}
 .tbl.wr td{white-space:normal}
 .content .card h3{font-size:16.5px}
+
+/* readability · mobile · RM Studio byline */
+.g-brand{white-space:nowrap;flex:none}
+.g-by{font-size:12.5px;font-weight:500;color:var(--ink-3);white-space:nowrap;padding-left:14px;margin-left:-10px;border-left:1px solid var(--line)}
+.g-by:hover{color:var(--ink);text-decoration:none}
+.on-dark .g-by{color:#9198a1;border-left-color:#ffffff24}
+.on-dark .g-by:hover{color:#fff}
+@media (min-width:981px) and (max-width:1120px){.g-by{display:none}}
+.hero .wrap>*{min-width:0}
+.card p{font-size:14.5px}
+.panel .cap{font-size:13.5px}
+.stats span{font-size:14px}
+.box small{font-size:12.5px}
+.arrow span{font-size:11.5px}
+.pipe .stage p{font-size:13.5px}
+@media (max-width:560px){
+  .g-by{display:none}
+  .g-top .wrap{gap:12px}
+  .g-tools .icon-btn,.g-tools .seg button{min-height:36px}
+  .g-tools .icon-btn{width:36px}
+  .hero .btns .btn{flex:1 1 auto;justify-content:center}
+  .cta{padding:32px 24px}
+}
+@media (max-width:400px){.g-brand .chip{display:none}}
+.ev-step small{font-size:13px}

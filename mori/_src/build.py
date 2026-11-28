@@ -94,6 +94,7 @@ def header(page, landing):
   <div class="wrap">
     {menu}
     <a class="g-brand" href="index.html" aria-label="MORI SOC home"><span class="mk" aria-hidden="true">M</span>MORI SOC<span class="chip">{'v0.6 alpha' if landing else 'Docs'}</span></a>
+    <a class="g-by" href="../index.html">by RM Studio</a>
     <nav class="g-nav" aria-label="MORI SOC">{links}</nav>
     <div class="g-tools">
       <a class="gh-link" href="{REPO}" target="_blank" rel="noopener">{GH_SVG}<span>GitHub</span></a>

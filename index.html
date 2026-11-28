@@ -116,15 +116,38 @@ h2{font-size:clamp(28px,4vw,42px);line-height:1.2;letter-spacing:-.03em;margin:0
 .about-grid b{display:block;font-size:15px;margin-bottom:6px}
 .about-grid span{color:var(--ink-2);font-size:14px}
 @media (max-width:760px){.about-grid{grid-template-columns:1fr}}
+.journey{list-style:none;margin-top:8px;margin-bottom:48px;padding:0;display:grid;grid-template-columns:repeat(5,1fr)}
+.journey li{position:relative;display:flex;flex-direction:column;align-items:center;gap:12px;text-align:center}
+.journey li::before{content:"";position:absolute;top:36px;left:-50%;right:50%;border-top:1.5px dashed var(--line);z-index:0}
+.journey li:first-child::before{display:none}
+.journey .jc{position:relative;z-index:1;width:72px;height:72px;border-radius:50%;border:1px solid var(--line);background:var(--card);display:grid;place-items:center;color:var(--ink)}
+.journey svg{width:38px;height:38px}
+.journey svg *{fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.journey svg .a{stroke:var(--accent)}
+.journey svg .t{fill:color-mix(in srgb,var(--accent) 12%,transparent)}
+.journey li.on .jc{border-color:var(--ink);background:var(--ink);color:var(--bg)}
+.journey li.on svg .a{stroke:var(--accent-2)}
+.journey b{font-size:14px;font-weight:600}
+@media (max-width:640px){.journey{margin-bottom:28px}.journey li{gap:8px}.journey li::before{top:25px}.journey .jc{width:50px;height:50px}.journey svg{width:27px;height:27px}.journey b{font-size:12.5px}}
 
 /* services */
 .services{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line);border:1px solid var(--line)}
 .svc{background:var(--bg);padding:32px 28px 36px;min-height:200px}
 .svc .n{font-family:var(--mono);font-size:12px;color:var(--ink-3)}
-.svc h3{margin:28px 0 10px;font-size:19px;letter-spacing:-.02em}
+.svc-top{display:flex;justify-content:space-between;align-items:flex-start}
+.ill{width:76px;height:76px;color:var(--ink);flex:none}
+.ill *{fill:none;stroke:currentColor;stroke-width:1.4;stroke-linecap:round;stroke-linejoin:round}
+.ill .a{stroke:var(--accent)}
+.ill .af{fill:var(--accent);stroke:none}
+.ill .bg{fill:var(--bg)}
+.ill .t{fill:color-mix(in srgb,var(--accent) 12%,transparent)}
+.svc .ill{transition:transform .25s}
+.svc:hover .ill{transform:translateY(-3px)}
+@media (prefers-reduced-motion:reduce){.svc .ill{transition:none}.svc:hover .ill{transform:none}}
+.svc h3{margin:20px 0 10px;font-size:19px;letter-spacing:-.02em}
 .svc p{margin:0;color:var(--ink-2);font-size:14.5px}
 @media (max-width:900px){.services{grid-template-columns:repeat(2,1fr)}}
-@media (max-width:560px){.services{grid-template-columns:1fr}.svc{min-height:0;padding:22px 20px 24px;display:grid;grid-template-columns:28px 1fr;column-gap:12px}.svc .n{padding-top:4px;grid-row:span 2}.svc h3{margin:0 0 6px;font-size:17px}}
+@media (max-width:560px){.services{grid-template-columns:1fr}.svc{min-height:0;padding:22px 20px 24px}.svc .ill{width:46px;height:46px}.svc h3{margin:10px 0 6px;font-size:17px}}
 
 /* projects */
 .projects{border-top:1px solid var(--ink)}
@@ -189,6 +212,14 @@ h2{font-size:clamp(28px,4vw,42px);line-height:1.2;letter-spacing:-.03em;margin:0
 #contact{border-bottom:0}
 .contact{display:grid;grid-template-columns:1fr auto;gap:40px;align-items:end}
 .contact h2{font-size:clamp(32px,5vw,56px)}
+.contact-side{display:flex;flex-direction:column;align-items:flex-start;gap:20px}
+.contact-ill{width:300px;max-width:100%;height:auto;color:var(--ink)}
+.contact-ill *{fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.contact-ill .a{stroke:var(--accent)}
+.contact-ill .t{fill:color-mix(in srgb,var(--accent) 12%,transparent)}
+.contact-ill .af{fill:var(--accent);stroke:none}
+.contact-ill .trail{stroke:var(--ink-3);stroke-dasharray:4 6}
+@media (max-width:760px){.contact-ill{width:220px}}
 .contact a.mail{font-size:clamp(18px,2.4vw,24px);font-weight:600;text-decoration:none;border-bottom:2px solid var(--ink);padding-bottom:2px}
 @media (max-width:760px){.contact{grid-template-columns:1fr}}
 
@@ -280,6 +311,7 @@ footer a{color:var(--ink-2)}
         </p>
       </div>
     </div>
+    <ol class="journey indent" aria-label="Delivery"><li><span class="jc"><svg viewBox="0 0 48 48" aria-hidden="true"><circle class="t" cx="21" cy="21" r="10"/><path d="m28.5 28.5 9 9"/><path class="a" d="M16.5 23.5l3-4 3 2.5 3-4.5"/></svg></span><b><span lang="ko">분석</span><span lang="en">Analysis</span></b></li><li><span class="jc"><svg viewBox="0 0 48 48" aria-hidden="true"><rect x="9" y="9" width="30" height="30" rx="2"/><path d="M9 19h30M19 9v30" opacity=".35"/><path class="a t" d="M24 24h10v10H24z"/></svg></span><b><span lang="ko">설계</span><span lang="en">Design</span></b></li><li><span class="jc"><svg viewBox="0 0 48 48" aria-hidden="true"><path d="m17 16-8 8 8 8M31 16l8 8-8 8"/><path class="a" d="m27 13-6 22"/></svg></span><b><span lang="ko">개발</span><span lang="en">Build</span></b></li><li><span class="jc"><svg viewBox="0 0 48 48" aria-hidden="true"><rect x="7" y="14" width="12" height="20" rx="2" stroke-dasharray="3 3"/><rect class="t" x="29" y="14" width="12" height="20" rx="2"/><path class="a" d="M21 24h6M24.5 21l3 3-3 3"/></svg></span><b><span lang="ko">이행</span><span lang="en">Cut-over</span></b></li><li class="on"><span class="jc"><svg viewBox="0 0 48 48" aria-hidden="true"><path d="M24 8l13 5v10c0 9-5.5 14.5-13 17.5C16.5 37.5 11 32 11 23V13z"/><path class="a" d="m18.5 24 4 4 7.5-8"/></svg></span><b><span lang="ko">안정화</span><span lang="en">Stabilize</span></b></li></ol>
     <div class="about-grid indent">
       <div><b><span lang="ko">현장 검증</span><span lang="en">Field-proven</span></b><span lang="ko">실제 엔터프라이즈 이관 · 구축 프로젝트에서 쌓은 방법론</span><span lang="en">Methods built on real enterprise migration and delivery projects</span></div>
       <div><b><span lang="ko">끝까지 책임</span><span lang="en">End-to-end</span></b><span lang="ko">AA/SA 설계, 개발, 이행, 운영 안정화까지 한 팀으로</span><span lang="en">AA/SA design, build, cut-over and stabilization by one team</span></div>
@@ -298,15 +330,15 @@ footer a{color:var(--ink-2)}
       </div>
     </div>
     <div class="services">
-      <div class="svc"><div class="n">01</div><h3>Cloud &amp; Architecture</h3><p><span lang="ko">레거시 IDC → 클라우드 이관, AA/SA 아키텍처 컨설팅</span><span lang="en">Legacy IDC → cloud migration, AA/SA architecture consulting</span></p></div>
-      <div class="svc"><div class="n">02</div><h3>Middleware Modernization</h3><p><span lang="ko">WebLogic/OHS → Tomcat/Nginx 런타임 전환</span><span lang="en">Runtime transition from WebLogic/OHS to Tomcat/Nginx</span></p></div>
-      <div class="svc"><div class="n">03</div><h3>Data Migration</h3><p><span lang="ko">Oracle · MSSQL → MySQL 이기종 이관, 쿼리 튜닝</span><span lang="en">Heterogeneous Oracle · MSSQL → MySQL migration, query tuning</span></p></div>
-      <div class="svc"><div class="n">04</div><h3>ERP &amp; Groupware</h3><p><span lang="ko">ERP · 그룹웨어 · 전자결재 구축 및 고도화</span><span lang="en">Building and enhancing ERP, groupware and e-approval systems</span></p></div>
-      <div class="svc"><div class="n">05</div><h3>Web Platform</h3><p><span lang="ko">웹 서비스 기획 · 개발 · 퍼블리싱, 반응형 웹 · SEO</span><span lang="en">Web service planning, development and publishing, responsive web · SEO</span></p></div>
-      <div class="svc"><div class="n">06</div><h3>Project Management</h3><p><span lang="ko">PM · PL · 기술 컨설팅, Agile 수행</span><span lang="en">PM · PL · technical consulting, Agile delivery</span></p></div>
-      <div class="svc"><div class="n">07</div><h3>Security &amp; Compliance</h3><p><span lang="ko">ISMS-P / ISO 27001 증적 자동화, 통제 매핑 · 증적 승인 · 감사 패키지 준비</span><span lang="en">ISMS-P / ISO 27001 evidence automation, control mapping, evidence approval and audit packages</span></p></div>
-      <div class="svc"><div class="n">08</div><h3>Security Operations</h3><p><span lang="ko">Zabbix · Wazuh · Fleet · Trivy · Grafana/Loki 기반 보안 운영 환경 연동</span><span lang="en">Security operations built on Zabbix · Wazuh · Fleet · Trivy · Grafana/Loki</span></p></div>
-      <div class="svc"><div class="n">09</div><h3>Open Source Products</h3><p><span lang="ko">Georu · MORI SOC 도입, 맞춤 확장, 기술 지원</span><span lang="en">Adoption, customization and technical support for Georu · MORI SOC</span></p></div>
+      <div class="svc"><div class="svc-top"><div class="n">01</div><svg class="ill" viewBox="0 0 64 64" aria-hidden="true"><path class="t" d="M19 30H45A8 8 0 0 0 46 14A12 12 0 0 0 24 12A9 9 0 0 0 19 30Z"/><rect x="22" y="42" width="20" height="14" rx="2"/><path d="M26 47h6M26 51h4"/><circle cx="37" cy="49" r="1.2" class="af"/><path class="a" d="M32 40V33M28.5 36.5 32 33l3.5 3.5"/></svg></div><h3>Cloud &amp; Architecture</h3><p><span lang="ko">레거시 IDC → 클라우드 이관, AA/SA 아키텍처 컨설팅</span><span lang="en">Legacy IDC → cloud migration, AA/SA architecture consulting</span></p></div>
+      <div class="svc"><div class="svc-top"><div class="n">02</div><svg class="ill" viewBox="0 0 64 64" aria-hidden="true"><rect x="7" y="18" width="18" height="28" rx="2" stroke-dasharray="3 3"/><path d="M11 25h10M11 30h7"/><rect class="t" x="39" y="18" width="18" height="28" rx="2"/><path class="a" d="M39 23h18"/><path d="M43 29h10M43 34h7M43 39h9"/><path class="a" d="M28 32h8M33 28.5 36.5 32 33 35.5"/></svg></div><h3>Middleware Modernization</h3><p><span lang="ko">WebLogic/OHS → Tomcat/Nginx 런타임 전환</span><span lang="en">Runtime transition from WebLogic/OHS to Tomcat/Nginx</span></p></div>
+      <div class="svc"><div class="svc-top"><div class="n">03</div><svg class="ill" viewBox="0 0 64 64" aria-hidden="true"><ellipse cx="15" cy="17" rx="9" ry="3.5"/><path d="M6 17v28c0 2 4 3.5 9 3.5s9-1.5 9-3.5V17"/><path d="M6 31c0 2 4 3.5 9 3.5s9-1.5 9-3.5"/><path class="t" d="M40 17v28c0 2 4 3.5 9 3.5s9-1.5 9-3.5V17z"/><ellipse cx="49" cy="17" rx="9" ry="3.5"/><path d="M40 17v28c0 2 4 3.5 9 3.5s9-1.5 9-3.5V17"/><path d="M40 31c0 2 4 3.5 9 3.5s9-1.5 9-3.5"/><rect class="af" x="27" y="30" width="3.5" height="3.5" rx=".6"/><rect class="af" x="32.5" y="30" width="3.5" height="3.5" rx=".6" opacity=".6"/><path d="M27 39h10M34 36l3 3-3 3"/></svg></div><h3>Data Migration</h3><p><span lang="ko">Oracle · MSSQL → MySQL 이기종 이관, 쿼리 튜닝</span><span lang="en">Heterogeneous Oracle · MSSQL → MySQL migration, query tuning</span></p></div>
+      <div class="svc"><div class="svc-top"><div class="n">04</div><svg class="ill" viewBox="0 0 64 64" aria-hidden="true"><rect x="13" y="8" width="30" height="42" rx="2"/><path d="M19 17h18M19 23h18M19 29h12"/><path d="M19 38h6"/><circle class="a t" cx="43" cy="44" r="10"/><path class="a" d="m38.5 44 3 3 6-6"/></svg></div><h3>ERP &amp; Groupware</h3><p><span lang="ko">ERP · 그룹웨어 · 전자결재 구축 및 고도화</span><span lang="en">Building and enhancing ERP, groupware and e-approval systems</span></p></div>
+      <div class="svc"><div class="svc-top"><div class="n">05</div><svg class="ill" viewBox="0 0 64 64" aria-hidden="true"><rect x="6" y="12" width="42" height="32" rx="3"/><path d="M6 20h42"/><circle cx="11" cy="16" r=".9" class="af"/><circle cx="15" cy="16" r=".9"/><rect class="a t" x="12" y="25" width="16" height="12" rx="1.5"/><path d="M32 26h10M32 31h10M32 36h6"/><rect class="bg" x="42" y="28" width="16" height="26" rx="3"/><path d="M47 50h6"/></svg></div><h3>Web Platform</h3><p><span lang="ko">웹 서비스 기획 · 개발 · 퍼블리싱, 반응형 웹 · SEO</span><span lang="en">Web service planning, development and publishing, responsive web · SEO</span></p></div>
+      <div class="svc"><div class="svc-top"><div class="n">06</div><svg class="ill" viewBox="0 0 64 64" aria-hidden="true"><rect class="t" x="7" y="10" width="50" height="44" rx="3"/><path d="M7 18h50M20 18v36" opacity=".5"/><rect class="af" x="24" y="23" width="14" height="4" rx="1"/><rect x="30" y="31" width="16" height="4" rx="1"/><rect x="36" y="39" width="14" height="4" rx="1"/><path d="M12 25h4M12 33h4M12 41h4"/><path class="a" d="M51 21v26" stroke-dasharray="2 3"/></svg></div><h3>Project Management</h3><p><span lang="ko">PM · PL · 기술 컨설팅, Agile 수행</span><span lang="en">PM · PL · technical consulting, Agile delivery</span></p></div>
+      <div class="svc"><div class="svc-top"><div class="n">07</div><svg class="ill" viewBox="0 0 64 64" aria-hidden="true"><path class="t" d="M32 7l19 7v14c0 12.5-8 21-19 26-11-5-19-13.5-19-26V14z"/><path d="M32 13v35" opacity=".25"/><path class="a" d="m23.5 30.5 6 6 11-12"/></svg></div><h3>Security &amp; Compliance</h3><p><span lang="ko">ISMS-P / ISO 27001 증적 자동화, 통제 매핑 · 증적 승인 · 감사 패키지 준비</span><span lang="en">ISMS-P / ISO 27001 evidence automation, control mapping, evidence approval and audit packages</span></p></div>
+      <div class="svc"><div class="svc-top"><div class="n">08</div><svg class="ill" viewBox="0 0 64 64" aria-hidden="true"><rect class="t" x="6" y="11" width="46" height="31" rx="3"/><path d="M29 42v8M20 50h18"/><path class="a" d="M10 28h8l3-7 5 14 4-10 3 3h15"/><circle class="af" cx="53" cy="13" r="5"/><circle cx="53" cy="13" r="8.5" opacity=".35"/></svg></div><h3>Security Operations</h3><p><span lang="ko">Zabbix · Wazuh · Fleet · Trivy · Grafana/Loki 기반 보안 운영 환경 연동</span><span lang="en">Security operations built on Zabbix · Wazuh · Fleet · Trivy · Grafana/Loki</span></p></div>
+      <div class="svc"><div class="svc-top"><div class="n">09</div><svg class="ill" viewBox="0 0 64 64" aria-hidden="true"><path class="t" d="M13 18.5 32 9l19 9.5L32 28z"/><path d="M32 9 51 18.5v21L32 49 13 39.5v-21z"/><path d="M13 18.5 32 28l19-9.5M32 28v21"/><path class="a" d="M22.5 13.8 41.5 23.3v7"/></svg></div><h3>Open Source Products</h3><p><span lang="ko">Georu · MORI SOC 도입, 맞춤 확장, 기술 지원</span><span lang="en">Adoption, customization and technical support for Georu · MORI SOC</span></p></div>
     </div>
   </div>
 </section>
@@ -498,7 +530,18 @@ footer a{color:var(--ink-2)}
       <div>
         <h2><span lang="ko">프로젝트 문의와<br>협업 제안을 기다립니다.</span><span lang="en">Let's build<br>something together.</span></h2>
       </div>
-      <a class="mail" href="mailto:dvmoomoodv@gmail.com">dvmoomoodv@gmail.com →</a>
+      <div class="contact-side">
+        <svg class="contact-ill" viewBox="0 0 300 200" aria-hidden="true">
+          <rect class="t" x="18" y="112" width="96" height="64" rx="6"/>
+          <path d="m18 118 48 34 48-34"/>
+          <path d="M26 170l30-22M106 170 76 148" opacity=".4"/>
+          <path class="trail" d="M120 132c40-6 58-34 40-52-14-14-36 2-22 18 16 18 56 0 82-26"/>
+          <path class="a t" d="M226 60 286 30l-26 62-18-20z"/>
+          <path class="a" d="m242 72 44-42M242 72l-4 22 12-12"/>
+          <circle class="af" cx="58" cy="38" r="4"/><circle cx="92" cy="22" r="2.5" opacity=".5"/><circle cx="196" cy="160" r="3" opacity=".5"/>
+        </svg>
+        <a class="mail" href="mailto:dvmoomoodv@gmail.com">dvmoomoodv@gmail.com →</a>
+      </div>
     </div>
   </div>
 </section>
